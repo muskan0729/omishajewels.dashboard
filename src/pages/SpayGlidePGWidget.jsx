@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ReviewPaymentModal from "../components/GlideModal/ReviewPaymentModal";
-import logo from "../images/logo.jpg";
+import logo from "../images/logo.png";
 import paymentGatewayBg from "../images/login-background.jpg";
 import { PaymentProvider } from "../contexts/PaymentContext";
 import { useGlidePay } from '@paywithglide/glide-react';

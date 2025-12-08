@@ -112,7 +112,7 @@ const PayoutStatement = () => {
 
   return (
     <div className="p-4 space-y-4">
-      <div className="bg-gradient-to-t from-sky-500 to-indigo-500 rounded-lg flex justify-between items-center p-4 shadow-md">
+      <div className="bg-gradient-to-t from-[#b58351] to-[#b6916d]  rounded-lg flex justify-between items-center p-4 shadow-md">
         <h4 className="font-bold text-white text-xl">Payout Statement</h4>
       </div>
 

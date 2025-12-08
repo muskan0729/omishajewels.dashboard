@@ -321,7 +321,7 @@ const handleSubmit = async (e) => {
 
   return (
     <>
-      <div className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center mb-3 p-2.5">
+      <div className="bg-gradient-to-t from-[#b58351] to-[#b6916d]  flex justify-between items-center mb-3 p-2.5">
         <h4 className="font-bold text-white text-lg py-2">
           Add New Merchant Details
         </h4>

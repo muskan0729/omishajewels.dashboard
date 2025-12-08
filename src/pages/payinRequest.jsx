@@ -113,7 +113,7 @@ export const PayinRequest = () => {
   return (
     <div className="p-6 space-y-6"> 
       {/* Header */}
-      <div className="bg-gradient-to-t from-sky-500 to-indigo-500 rounded-lg p-4 shadow-md">
+      <div className="bg-gradient-to-t from-[#b58351] to-[#b6916d]  rounded-lg p-4 shadow-md">
         <h4 className="text-white font-bold text-xl">Load Wallet</h4>
       </div>
 
