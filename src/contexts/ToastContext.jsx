@@ -24,7 +24,7 @@ export const ToastProvider = ({ children }) => {
           className={`fixed top-4 right-4 px-4 py-3 rounded-lg shadow-md text-white font-medium z-[9999]
             ${toast.type === "success" ? "bg-green-600" : ""}
             ${toast.type === "error" ? "bg-red-600" : ""}
-            ${toast.type === "info" ? "bg-blue-600" : ""}
+            ${toast.type === "info" ? "bg-[#615141]" : ""}
           `}
         >
           {toast.message}

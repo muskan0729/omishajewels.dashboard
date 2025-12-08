@@ -46,7 +46,7 @@ const PayinSettlement = () => {
           setSelectedUser(row);
           setShowModal(true);
         }}
-        className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all"
+        className="bg-[#615141] hover:bg-blue-700 text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all"
       >
         Payin Settlement
       </Button>
@@ -102,8 +102,8 @@ const PayinSettlement = () => {
           showStatusFilter={false}
           className="shadow-lg rounded-lg overflow-hidden border border-gray-200"
           paginationClassName="flex justify-end gap-2 mt-4"
-          previousClassName="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
-          nextClassName="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
+          previousClassName="bg-[#b58351] hover:bg-[#615141] text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
+          nextClassName="bg-[#b58351] hover:bg-[#615141] text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
         />
       )}
 
@@ -162,7 +162,7 @@ const PayinSettlement = () => {
               <Button
                 type="submit"
                 onClick={handleSubmit}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-lg shadow-md transition"
+                className="w-full bg-[#615141] hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-lg shadow-md transition"
               >
                 Submit
               </Button>

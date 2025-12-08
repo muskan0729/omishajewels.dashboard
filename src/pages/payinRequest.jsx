@@ -228,7 +228,7 @@ export const PayinRequest = () => {
           <div className="flex justify-center mt-4">
             <Button
               onClick={handlePayinSubmit}
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-6 py-2 shadow-md"
+              className="bg-[#615141] hover:bg-blue-700 text-white rounded-lg px-6 py-2 shadow-md"
             >
               {loading ? "Submitting..." : "Submit"}
             </Button>
@@ -242,7 +242,7 @@ export const PayinRequest = () => {
           <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center border border-gray-200">
             <h3 className="text-gray-800 font-semibold text-lg mb-4">Scan to Pay</h3>
             <img src={qrUrl} alt="UPI QR Code" className="w-64 h-64 mb-4" />
-            <Button onClick={() => setQrUrl("")} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+            <Button onClick={() => setQrUrl("")} className="bg-[#615141] hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
               Back
             </Button>
           </div>

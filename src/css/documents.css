@@ -47,8 +47,8 @@
 
 .nav-item-active {
   background-color: #eff6ff;
-  color: #1d4ed8;
-  border-left-color: #2563eb;
+  color: #b58351;
+  border-left-color: #b58356;
 }
 
 .nav-item:hover {
@@ -89,7 +89,7 @@
 .accent-line {
   width: 5rem;
   height: 0.25rem;
-  background: #2563eb;
+  background: #b58351;
 }
 
 /* Parameters Table Styles */
@@ -144,7 +144,7 @@
 
 .field-code {
   background-color: #eff6ff;
-  color: #1d4ed8;
+  color: #b58351;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-family: 'Monaco', 'Consolas', monospace;
@@ -179,7 +179,7 @@
   font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
   font-size: 0.9rem;
   line-height: 1.5;
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid #d69e66;
   margin-top: 1rem;
 }
 
@@ -270,7 +270,7 @@
 }
 
 .guideline-title {
-  color: #1d4ed8;
+  color: #b58351;
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 0.75rem;
@@ -522,7 +522,7 @@
 }
 
 .nav-download-btn:hover {
-  background: #3b82f6;
+  background: #b58351;
   opacity: 1;
   transform: scale(1.1);
 }

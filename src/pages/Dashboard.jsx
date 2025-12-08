@@ -157,9 +157,9 @@ console.log(cardData?.transactionStatusCounts);
               <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {cardsToShow.map((card, i) => (
                   <div key={i} className="relative bg-white rounded-xl shadow-[0_4px_15px_rgba(255,165,0,0.2)] flex flex-col h-full transform transition-transform duration-500 hover:scale-105 hover:shadow-[0_6px_20px_rgba(255,165,0,0.3)]">
-                    <div className="flex items-center px-5 py-4 bg-blue-500 text-white relative z-10 gap-4 rounded-t-xl">
+                    <div className="flex items-center px-5 py-4 bg-[#b58351] text-white relative z-10 gap-4 rounded-t-xl">
                       <div className="bg-white rounded-full p-3 flex items-center justify-center shrink-0">
-                        <i className={`fa-solid ${card.icon} text-blue-500 text-xl`}></i>
+                        <i className={`fa-solid ${card.icon} text-[#b58351] text-xl`}></i>
                       </div>
                       <h5 className="text-base sm:text-lg font-semibold text-white truncate whitespace-nowrap">
                         {card.title}

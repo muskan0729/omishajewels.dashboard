@@ -94,7 +94,7 @@ export default function ReviewPaymentModal({
                     onClick={onConfirm}
                     disabled={glideLoading} // disable while Glide is opening
                     className={`w-full py-3 rounded-xl mt-6 text-lg font-semibold ${
-                        glideLoading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 text-white"
+                        glideLoading ? "bg-gray-400 cursor-not-allowed" : "bg-[#615141] text-white"
                     }`}
                 >
                     {glideLoading ? "Opening Payment..." : "Confirm & Continue"}

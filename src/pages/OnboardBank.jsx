@@ -154,8 +154,8 @@ const OnboardBank = () => {
                 : "bg-gray-50 hover:bg-blue-50"
             }
             paginationClassName="flex justify-end gap-2 mt-4"
-            previousClassName="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
-            nextClassName="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
+            previousClassName="bg-[#b58351] hover:bg-[#615141] text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
+            nextClassName="bg-[#b58351] hover:bg-[#615141] text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
             showPagination={true}
             showStatusFilter={true}
             showExport={false}

@@ -125,7 +125,7 @@ const handleSaveWebhook = async () => {
                 className={`${
                   isLoading
                     ? "bg-blue-700 cursor-not-allowed opacity-80"
-                    : "bg-blue-600 hover:bg-blue-700"
+                    : "bg-[#615141] hover:bg-blue-700"
                 } text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center`}
               >
                 {isLoading && (

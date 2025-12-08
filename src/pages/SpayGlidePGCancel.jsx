@@ -12,7 +12,7 @@ return (
       <h1 className="text-2xl font-bold text-red-600 mb-4">Payment Cancelled</h1>
       <p className="text-gray-700 mb-6">{message}</p>
       {/* <button
-        className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold"
+        className="px-6 py-3 bg-[#615141] text-white rounded-lg font-semibold"
         onClick={() => navigate("/")} // go back home or review page
       >
         Go Back

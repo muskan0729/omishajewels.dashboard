@@ -189,7 +189,7 @@ const Payoutrequest = () => {
           setSelectedUser(row);
           setShowModal(true);
         }}
-        className="text-white bg-blue-600 hover:bg-blue-700 px-4 py-1 rounded-lg text-sm cursor-pointer"
+        className="text-white bg-[#615141] hover:bg-blue-700 px-4 py-1 rounded-lg text-sm cursor-pointer"
       >
         send
       </Button>
@@ -369,7 +369,7 @@ const Payoutrequest = () => {
                   disabled={isLoading}
                   className={`${isLoading
                     ? "bg-blue-700 cursor-not-allowed opacity-80"
-                    : "bg-blue-600 hover:bg-blue-700"
+                    : "bg-[#615141] hover:bg-blue-700"
                     } text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center`}
                 >
                   {isLoading && (
@@ -649,7 +649,7 @@ const Payoutrequest = () => {
                   disabled={isLoading}
                   className={`${isLoading
                     ? "bg-blue-700 cursor-not-allowed opacity-80"
-                    : "bg-blue-600 hover:bg-blue-700"
+                    : "bg-[#615141] hover:bg-blue-700"
                     } text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center`}
                 // className="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
                 >
