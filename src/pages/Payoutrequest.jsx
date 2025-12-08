@@ -199,11 +199,11 @@ const Payoutrequest = () => {
   return (
     <>
 
-      {/* <div className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center mb-3 p-2.5">
+      {/* <div className="bg-gradient-to-t from-[#b58351] to-[#b6916d]  flex justify-between items-center mb-3 p-2.5">
         <h4 className="font-bold text-white text-lg py-2">Beneficiary List</h4> */}
       <div className="p-4">
         <div
-          className="bg-gradient-to-t from-sky-500 to-indigo-500 
+          className="bg-gradient-to-t from-[#b58351] to-[#b6916d]  
                flex justify-between items-center 
                rounded-lg p-4 mb-4"
         >

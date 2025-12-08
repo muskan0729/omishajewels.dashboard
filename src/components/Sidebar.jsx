@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import "../css/sidebar.css";
-import Logo from "../images/logo.jpg";
+import Logo from "../images/logo.png";
 
 export const Sidebar = ({ open, setOpen }) => {
   const role = atob(localStorage.getItem("role")); // admin / user / crypto

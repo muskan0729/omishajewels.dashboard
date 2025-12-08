@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Button from "../components/Button";
 import Table from "../components/Table";
-import Logo from "../images/logo.jpg";
+import Logo from "../images/logo.png";
 import Placeholder from "../images/placeholder.jpeg";
 import { Link, useNavigate } from "react-router-dom";
 import { useGet } from "../hooks/useGet";
@@ -242,7 +242,7 @@ export const ViewComplain = () => {
 
   return (
     <>
-      {/* <div className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center mb-3 p-2.5">
+      {/* <div className="bg-gradient-to-t from-[#b58351] to-[#b6916d]  flex justify-between items-center mb-3 p-2.5">
         <h4 className="font-bold text-white text-lg py-2">View Complain</h4>
         <Button
           type="button"
@@ -272,7 +272,7 @@ export const ViewComplain = () => {
       <div className="w-full flex justify-center py-8">
         <div className="w-full max-w-[1140px] px-4 lg:px-6 space-y-6">
           {/* -------- HEADER: View Complain -------- */}
-          <div className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center rounded-lg p-4 shadow-md">
+          <div className="bg-gradient-to-t from-[#b58351] to-[#b6916d]  flex justify-between items-center rounded-lg p-4 shadow-md">
             <h4 className="font-bold text-white text-lg">View Complain</h4>
             <Button
               type="button"

@@ -144,13 +144,23 @@ const pieOptions = {
 
       <h1 className="text-xl font-bold mb-4">Merchant Details</h1>
       {/* <label className="block text-gray-600 text-sm font-medium mb-1">Select Type</label> */}
-      <select 
-      className="w-50 px-4 py-2 border rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
-      value ={filter}
-      onChange={(e) => setFilter(e.target.value)}>
-        <option value ="payin">Payin</option>
-      <option value="payout">Payout</option>
-      </select>
+ <div className="relative inline-flex items-center bg-gray-100 rounded-full p-1 w-64">
+  <div
+    className={`absolute top-1 bottom-1 left-1 w-1/2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-transform duration-500 ease-out shadow-lg
+      ${filter === 'payout' ? 'translate-x-full' : 'translate-x-0'}`}
+  />
+  {['payin', 'payout'].map((type) => (
+    <button
+      key={type}
+      onClick={() => setFilter(type)}
+      className="relative z-10 w-1/2 py-3 text-center font-medium capitalize transition-colors duration-300"
+    >
+      <span className={filter === type ? 'text-white' : 'text-gray-600'}>
+        {type}
+      </span>
+    </button>
+  ))}
+</div>
       </div>
         
       {/* Cards */}
@@ -208,7 +218,7 @@ const pieOptions = {
       {/* Payout Refunded */}
       <div className="bg-gradient-to-r from-orange-100 to-orange-50 shadow-lg rounded-2xl p-6 hover:scale-105 transform transition duration-300 ease-in-out">
         <h3 className="text-gray-600 text-sm font-medium mb-2">Refunded</h3>
-        <p className="text-3xl font-bold text-orange-600">₹ {record.payout_refunded}</p>
+        <p className="text-3xl font-bold text-orange-600">₹ {record.refund_amount}</p>
       </div>
     </>
   )}
@@ -240,7 +250,11 @@ const pieOptions = {
     {/* Line Chart */}
     <div className="flex-1">
       <h3 className="text-lg font-semibold mb-4">Transactions Over Time</h3>
-      <MyBarChart record={record} />
+     {/* <MyBarChart record={record} type="payin" />
+    <MyBarChart record={record} type="payout" /> */}
+    <MyBarChart record={record} type={filter} />
+
+
     </div>
   </div>
 )}
