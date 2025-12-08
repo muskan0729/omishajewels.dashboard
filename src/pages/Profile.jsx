@@ -401,7 +401,7 @@ export const Profile = () => {
                 <Button
                   type="submit"
                   onClick={handleUpdate}
-                  className={`px-5 py-2 rounded-lg cursor-pointer text-white bg-blue-600 hover:bg-blue-700`}
+                  className={`px-5 py-2 rounded-lg cursor-pointer text-white bg-[#615141] hover:bg-blue-700`}
                 >
                   {profileLoading ? "Updating..." : "Update"}
                 </Button>
@@ -564,7 +564,7 @@ export const Profile = () => {
                 <Button
                   type="submit"
                   onClick={handleUpdate}
-                  className={`px-5 py-2 rounded-lg cursor-pointer text-white bg-blue-600 hover:bg-blue-700`}
+                  className={`px-5 py-2 rounded-lg cursor-pointer text-white bg-[#615141] hover:bg-blue-700`}
                 >
                   {profileLoading ? "Updating..." : "Update"}
                 </Button>
@@ -693,7 +693,7 @@ export const Profile = () => {
                 <Button
                   type="submit"
                   onClick={handleUpdate}
-                  className={`px-5 py-2 rounded-lg cursor-pointer text-white bg-blue-600 hover:bg-blue-700`}
+                  className={`px-5 py-2 rounded-lg cursor-pointer text-white bg-[#615141] hover:bg-blue-700`}
                 >
                   {profileLoading ? "Updating..." : "Update"}
                 </Button>
@@ -763,7 +763,7 @@ export const Profile = () => {
                 <Button
                   type="submit"
                   onClick={handleUpdate}
-                  className="cursor-pointer text-white bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg"
+                  className="cursor-pointer text-white bg-[#615141] hover:bg-blue-700 px-5 py-2 rounded-lg"
                 >
                   {profileLoading ? "Updating..." : "Update"}
                 </Button>
@@ -825,7 +825,7 @@ export const Profile = () => {
                 </div>
                 <Button
                   type="submit"
-                  className="cursor-pointer text-white bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg"
+                  className="cursor-pointer text-white bg-[#615141] hover:bg-blue-700 px-5 py-2 rounded-lg"
                 >
                   {passwordLoading ? "Changing" : "Change"}
                 </Button>

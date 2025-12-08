@@ -1132,7 +1132,7 @@ const handleSubmit = async (e) => {
               </div>
               <Button
                 type="button"
-                className="cursor-pointer text-white font-medium rounded-full w-10 h-10 text-lg flex items-center justify-center bg-blue-500 hover:bg-blue-800"
+                className="cursor-pointer text-white font-medium rounded-full w-10 h-10 text-lg flex items-center justify-center bg-[#b58351] hover:bg-blue-800"
                 onClick={handlePayinModal}
               >
                 +
@@ -1209,7 +1209,7 @@ const handleSubmit = async (e) => {
 
               <Button
                 type="button"
-                className="cursor-pointer text-white font-medium rounded-full w-10 h-10 text-lg flex items-center justify-center bg-blue-500 hover:bg-blue-800"
+                className="cursor-pointer text-white font-medium rounded-full w-10 h-10 text-lg flex items-center justify-center bg-[#b58351] hover:bg-blue-800"
                 onClick={handlePayoutModal}
               >
                 +
@@ -1255,7 +1255,7 @@ const handleSubmit = async (e) => {
 
               <Button
                 type="button"
-                className="cursor-pointer text-white font-medium rounded-full w-10 h-10 text-lg flex items-center justify-center bg-blue-500 hover:bg-blue-800"
+                className="cursor-pointer text-white font-medium rounded-full w-10 h-10 text-lg flex items-center justify-center bg-[#b58351] hover:bg-blue-800"
                 onClick={handleSchemeModal}
               >
                 +
@@ -1271,7 +1271,7 @@ const handleSubmit = async (e) => {
               className={`text-white font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center mr-3 ${
                 currentStep === 1
                   ? "disabled bg-gray-500 cursor-not-allowed"
-                  : "bg-blue-500 hover:bg-blue-800 cursor-pointer"
+                  : "bg-[#b58351] hover:bg-blue-800 cursor-pointer"
               }`}
               onClick={handlePrev}
             >
@@ -1281,7 +1281,7 @@ const handleSubmit = async (e) => {
             {currentStep < 4 && (
               <button
                 type="button"
-                className="cursor-pointer text-white bg-blue-600 hover:bg-blue-800 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+                className="cursor-pointer text-white bg-[#615141] hover:bg-blue-800 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
                 onClick={handleNext}
               >
                 Next &gt;
@@ -1291,7 +1291,7 @@ const handleSubmit = async (e) => {
             {currentStep === 4 && (
               <button
                 type="submit"
-                className="cursor-pointer text-white bg-blue-600 hover:bg-blue-800 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+                className="cursor-pointer text-white bg-[#615141] hover:bg-blue-800 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
               >
                 Submit
               </button>
@@ -1302,7 +1302,7 @@ const handleSubmit = async (e) => {
               <Button
                 type="button"
                 onClick={addDirector}
-                className="cursor-pointer px-4 py-2 mr-2 bg-blue-600 text-white rounded-lg hover:bg-blue-800"
+                className="cursor-pointer px-4 py-2 mr-2 bg-[#615141] text-white rounded-lg hover:bg-blue-800"
               >
                 + Add Director
               </Button>
@@ -1310,7 +1310,7 @@ const handleSubmit = async (e) => {
             <Button
               onClick={() => setShowConfirmModal(!showConfirmModal)}
               type="button"
-              className="cursor-pointer text-white bg-blue-600 hover:bg-blue-800 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+              className="cursor-pointer text-white bg-[#615141] hover:bg-blue-800 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
             >
               Go Back
             </Button>

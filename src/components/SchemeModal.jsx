@@ -466,7 +466,7 @@ export const SchemeModal = ({
             <Button
               type="submit"
               disabled={creating || updating}
-              className="cursor-pointer text-white bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg"
+              className="cursor-pointer text-white bg-[#615141] hover:bg-blue-700 px-5 py-2 rounded-lg"
             >
               {editData ? "Update" : "Submit"}
             </Button>

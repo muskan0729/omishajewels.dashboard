@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Button from "../components/Button";
 import Table from "../components/Table";
-import Logo from "../images/logo.png";
+import Logo from "../images/logo.jpg";
 import Placeholder from "../images/placeholder.jpeg";
 import { Link, useNavigate } from "react-router-dom";
 import { useGet } from "../hooks/useGet";
@@ -66,7 +66,7 @@ export const ViewComplain = () => {
         action: (
           <Button
             onClick={() => handleEdit(item)}
-            className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md"
+            className="cursor-pointer bg-[#b58351] hover:bg-[#615141] text-white text-xs font-medium px-3 py-1.5 rounded-md"
           >
             Edit
           </Button>
@@ -173,7 +173,7 @@ export const ViewComplain = () => {
     send: (
       <Button
         onClick={() => setShowSendMessageModal(!showSendMessageModal)}
-        className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md cursor-pointer"
+        className="bg-[#b58351] hover:bg-[#615141] text-white text-xs font-medium px-3 py-1.5 rounded-md cursor-pointer"
       >
         Send Message
       </Button>
@@ -182,7 +182,7 @@ export const ViewComplain = () => {
     view: (
       <Button
         onClick={() => setShowViewMessageModal(!showViewMessageModal)}
-        className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md cursor-pointer"
+        className="bg-[#b58351] hover:bg-[#615141] text-white text-xs font-medium px-3 py-1.5 rounded-md cursor-pointer"
       >
         View Message
       </Button>
@@ -440,22 +440,22 @@ export const ViewComplain = () => {
             </div>
 
             <div class="flex justify-end mt-3">
-              <div class="block relative max-w-xs bg-blue-500 text-white p-3 px-4 rounded-2xl rounded-br-none shadow-md">
+              <div class="block relative max-w-xs bg-[#b58351] text-white p-3 px-4 rounded-2xl rounded-br-none shadow-md">
                 <p class="text-lg leading-relaxed">Chat 1</p>
                 <p class="text-xs leading-relaxed text-gray-200">
                   {new Date().toLocaleString()}
                 </p>
-                <span class="absolute right-[-3px] bottom-0 w-2 h-2 bg-blue-500 rotate-45 rounded-sm"></span>
+                <span class="absolute right-[-3px] bottom-0 w-2 h-2 bg-[#b58351] rotate-45 rounded-sm"></span>
               </div>
             </div>
 
             <div class="flex justify-end mt-3">
-              <div class="block relative max-w-xs bg-blue-500 text-white p-3 px-4 rounded-2xl rounded-br-none shadow-md">
+              <div class="block relative max-w-xs bg-[#b58351] text-white p-3 px-4 rounded-2xl rounded-br-none shadow-md">
                 <p class="text-lg leading-relaxed">Chat 2</p>
                 <p class="text-xs leading-relaxed text-gray-200">
                   {new Date().toLocaleString()}
                 </p>
-                <span class="absolute right-[-3px] bottom-0 w-2 h-2 bg-blue-500 rotate-45 rounded-sm"></span>
+                <span class="absolute right-[-3px] bottom-0 w-2 h-2 bg-[#b58351] rotate-45 rounded-sm"></span>
               </div>
             </div>
           </div>

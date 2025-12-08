@@ -44,8 +44,8 @@ export const LineChart = ({ data }) => {
           gradient: {
             opacityFrom: 0.55,
             opacityTo: 0,
-            shade: "#1C64F2",
-            gradientToColors: ["#1C64F2"],
+            shade: "#615141",
+            gradientToColors: ["#615141"],
           },
         },
         dataLabels: { enabled: false },
@@ -59,7 +59,7 @@ export const LineChart = ({ data }) => {
           {
             name: "Transactions",
             data: amount,
-            color: "#1ab4dbff",
+            color: "#b58351",
           },
         ],
         xaxis: {

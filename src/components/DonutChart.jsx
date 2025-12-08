@@ -22,7 +22,7 @@ export const DonutChart = ({ data }) => {
 
     const options = {
       series: seriesData,
-      colors: ["#FDBA8C", "#1C64F2", "#16BDCA"],
+      colors: ["#FBBC05", "#34A853", "#EA4335"],
       chart: {
         height: 320,
         width: "100%",

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import logo from "../images/logo.png";
+import logo from "../images/logo.jpg";
 import paymentGatewayBg from "../images/login-background.jpg";
 import { usePost } from "../hooks/usePost";
 import { useNavigate } from "react-router-dom";
@@ -152,7 +152,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition focus:ring-4 focus:ring-blue-300 disabled:opacity-70"
+            className="w-full flex justify-center items-center gap-2 px-5 py-2.5 bg-[#615141] hover:bg-blue-700 text-white rounded-lg font-medium transition focus:ring-4 focus:ring-blue-300 disabled:opacity-70"
           >
             {loading ? (
               <span className="flex items-center gap-2">

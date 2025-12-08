@@ -622,7 +622,7 @@ const Table = ({
                   <input
                     type="text"
                     placeholder="Search..."
-                    className="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-sky-400 outline-none"
+                    className="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:bg-[#b58351] outline-none"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
@@ -708,7 +708,7 @@ const Table = ({
               )}
 
               <Button
-                className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-lg shadow-md transition min-w-[110px] h-[42px] flex items-center justify-center"
+                className="bg-[#b58351] hover:bg-[#b58351] text-white px-4 py-2 rounded-lg shadow-md transition min-w-[110px] h-[42px] flex items-center justify-center"
                 onClick={() => {
                   setStartDate(null);
                   setEndDate(null);

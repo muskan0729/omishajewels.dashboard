@@ -71,7 +71,7 @@ export const Header = ({ onMenuClick }) => {
         {showButton && (
           <button
             onClick={handleToggleRole}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-medium"
+            className="bg-[#b58351] hover:bg-[#615141] text-white px-3 py-1 rounded-lg text-sm font-medium"
           >
             Switch Role: {role === "admin" ? "admin" : "crypto"}
           </button>
