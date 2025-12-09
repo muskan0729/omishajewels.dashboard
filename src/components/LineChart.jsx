@@ -79,8 +79,8 @@ export const LineChart = ({ data }) => {
   }, [amount, months]);
 
   return (
-    <div className="max-w-3xl w-full bg-white rounded-lg shadow-sm p-4 md:p-6">
-      <div className="flex justify-between">
+    <div className="max-w-3xl w-full bg-white rounded-lg shadow-sm p-4 md:p-6 ">
+      <div className="flex justify-between ">
         <div>
           <h5 className="leading-none text-3xl font-bold text-gray-900 pb-2">
             {amount.reduce((a, b) => a + b, 0)}
