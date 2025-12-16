@@ -160,306 +160,377 @@ const Table = ({
     </div>
   );
 
-  return (
-    <div className="w-full">
+return (
+  <div className="w-full">
 
-      {/* FILTER BAR */}
-      {(showSearch || showStatusFilter || showExport || showDateFilter || showSelectUserFilter) && (
-        <div className="w-full bg-white shadow-md border border-sky-200 rounded-xl p-4 mb-4">
+    {/* FILTER BAR */}
+    {(showSearch || showStatusFilter || showExport || showDateFilter || showSelectUserFilter) && (
+      <div
+        className="
+          w-full 
+          bg-gradient-to-br from-[#f1d9b7] via-[#f8e9d4] to-[#e6d5b8] 
+          border border-[#d7c4a8] 
+          rounded-2xl 
+          shadow-xl 
+          p-5 
+          mb-8
+        "
+      >
+        {/* FILTER ROW */}
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
 
-          {/* TOP FLEX ROW — FIXED RESPONSIVE */}
-          <div
-            className="
-              flex flex-col lg:flex-row
-              justify-between
-              items-start lg:items-center
-              gap-4
-              w-full
-            "
-          >
+          {/* LEFT FILTERS */}
+          <div className="flex flex-wrap items-center gap-4">
 
-            {/* LEFT FILTER SECTION — STOPS TAKING FULL WIDTH */}
-            <div className="flex flex-wrap items-center gap-4 lg:max-w-[65%]">
-
-              {showSearch && (
-                <div className="relative w-56">
-                  <i className="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-400"></i>
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    className="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:bg-[#b58351] outline-none"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
-                </div>
-              )}
-
-              {showSelectUserFilter && (
-                <div className="w-56">
-                  <CustomSelect
-                    options={selectData}
-                    placeholder="Select Merchant"
-                    value={selectedMerchant}
-                    onChange={(option) => setSelectedMerchant(option)}
-                  />
-                </div>
-              )}
-
-              {showDateFilter && (
-                <div className="flex items-center gap-2">
-                  <DatePicker
-                    selected={startDate}
-                    onChange={(date) => setStartDate(date)}
-                    selectsStart
-                    startDate={startDate}
-                    endDate={endDate}
-                    placeholderText="Start Date"
-                    className="border border-gray-300 rounded-lg px-3 py-2 shadow-sm w-40"
-                  />
-
-                  <span className="text-gray-500 font-medium">→</span>
-
-                  <DatePicker
-                    selected={endDate}
-                    onChange={(date) => setEndDate(date)}
-                    selectsEnd
-                    startDate={startDate}
-                    endDate={endDate}
-                    minDate={startDate}
-                    placeholderText="End Date"
-                    className="border border-gray-300 rounded-lg px-3 py-2 shadow-sm w-40"
-                  />
-                </div>
-              )}
-
-              {showStatusFilter && (
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="border border-gray-300 bg-white rounded-lg px-3 py-2 shadow-sm font-medium"
-                >
-                  <option value="all">All</option>
-                  {statusList?.map((item, index) => (
-                    <option key={index} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-              )}
-
-            </div>
-
-            {/* RIGHT SIDE BUTTONS — ALWAYS STICK TO RIGHT */}
-            <div className="flex items-center gap-3 ml-auto">
-
-              {showExport && (
-                <div className="relative">
-                  <button
-                    onClick={() => setOpenExport(!openExport)}
-                    className="bg-yellow-400 text-white px-4 py-2 rounded-lg shadow-md hover:bg-yellow-500 transition flex items-center gap-2 min-w-[110px] h-[42px] justify-center"
-                  >
-                    <i className="fa-solid fa-download"></i> Export
-                  </button>
-
-                  {openExport && (
-                    <div className="absolute right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-2 w-40 z-50">
-                      <button onClick={exportCSV} className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md">CSV</button>
-                      <button onClick={exportJSON} className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md">JSON</button>
-                      <button onClick={exportTXT} className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md">TEXT</button>
-                      <button onClick={exportSQL} className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md">SQL</button>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <Button
-                className="bg-[#b58351] hover:bg-[#b58351] text-white px-4 py-2 rounded-lg shadow-md transition min-w-[110px] h-[42px] flex items-center justify-center"
-                onClick={() => {
-                  setStartDate(null);
-                  setEndDate(null);
-                  setStatusFilter("all");
-                  setSearch("");
-                  setSelectedMerchant(null);
-                }}
-              >
-                Clear All
-              </Button>
-
-            </div>
-          </div>
-
-          {/* TOTAL SUCCESSFUL */}
-          <div className="flex justify-end w-full mt-2">
-            {showSelectUserFilter && (
-              <div className="flex items-center gap-2 text-sm md:text-base font-semibold text-green-700 bg-green-50 px-3 py-2 rounded-lg shadow-sm">
-                <i className="fa-solid fa-circle-check text-green-600"></i>
-                <span>Total Successful: ₹{totalSuccessAmount.toFixed(2)}</span>
+            {/* 🔍 SEARCH */}
+            {showSearch && (
+              <div className="relative">
+                <i className="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-[#9c8a78]"></i>
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  className="
+                    w-56 pl-10 pr-3 py-2 
+                    bg-white 
+                    border border-[#d7c4a8] 
+                    rounded-xl 
+                    shadow-sm 
+                    text-[#4d443b]
+                    placeholder:text-[#b8a898]
+                    focus:ring-2 focus:ring-[#b58351]
+                  "
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
               </div>
             )}
+
+            {/* MERCHANT SELECT */}
+            {showSelectUserFilter && (
+              <div className="w-56">
+                <CustomSelect
+                  options={selectData}
+                  placeholder="Select Merchant"
+                  value={selectedMerchant}
+                  onChange={(option) => setSelectedMerchant(option)}
+                />
+              </div>
+            )}
+
+            {/* DATES */}
+            {showDateFilter && (
+              <div className="flex items-center gap-2">
+                <DatePicker
+                  selected={startDate}
+                  onChange={(date) => setStartDate(date)}
+                  className="
+                    w-40 px-3 py-2 
+                    border border-[#d7c4a8] 
+                    rounded-xl 
+                    shadow-sm 
+                    text-[#4d443b]
+                    placeholder:text-[#b19e8a]
+                    focus:ring-2 focus:ring-[#b58351]
+                  "
+                  placeholderText="Start Date"
+                />
+                <span className="text-[#9c8a78] font-semibold">—</span>
+                <DatePicker
+                  selected={endDate}
+                  onChange={(date) => setEndDate(date)}
+                  minDate={startDate}
+                  className="
+                    w-40 px-3 py-2 
+                    border border-[#d7c4a8] 
+                    rounded-xl 
+                    shadow-sm 
+                    text-[#4d443b]
+                    placeholder:text-[#b19e8a]
+                    focus:ring-2 focus:ring-[#b58351]
+                  "
+                  placeholderText="End Date"
+                />
+              </div>
+            )}
+
+            {/* STATUS */}
+            {showStatusFilter && (
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="
+                  px-3 py-2 
+                  border border-[#d7c4a8]
+                  rounded-xl 
+                  bg-white 
+                  shadow-sm 
+                  text-[#4d443b]
+                  focus:ring-2 focus:ring-[#b58351]
+                "
+              >
+                <option value="all">All</option>
+                {statusList?.map((item, index) => (
+                  <option key={index} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+
+          {/* RIGHT BUTTONS */}
+          <div className="flex items-center gap-3 ml-auto">
+
+            {/* EXPORT BTN */}
+            {showExport && (
+              <div className="relative">
+                <button
+                  onClick={() => setOpenExport(!openExport)}
+                  className="
+                    bg-gradient-to-r from-[#b58351] to-[#d7a874] 
+                    text-white 
+                    px-4 py-2 
+                    rounded-xl 
+                    shadow-lg 
+                    hover:shadow-xl 
+                    hover:brightness-110 
+                    transition 
+                    flex items-center gap-2 
+                    min-w-[110px] h-[42px]
+                  "
+                >
+                  <i className="fa-solid fa-download"></i> Export
+                </button>
+
+                {/* EXPORT MENU */}
+                {openExport && (
+                  <div
+                    className="
+                      absolute right-0 mt-2 bg-white 
+                      border border-[#d7c4a8] 
+                      rounded-xl 
+                      shadow-xl 
+                      p-2 
+                      w-40 z-40
+                    "
+                  >
+                    <button className="gold-option" onClick={exportCSV}>CSV</button>
+                    <button className="gold-option" onClick={exportJSON}>JSON</button>
+                    <button className="gold-option" onClick={exportTXT}>TEXT</button>
+                    <button className="gold-option" onClick={exportSQL}>SQL</button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* CLEAR BUTTON */}
+            <Button
+              className="
+                bg-[#f1d9b7] 
+                text-[#4d443b] 
+                px-4 py-2 
+                rounded-xl 
+                shadow-md 
+                hover:bg-[#e9cdaa]
+                transition 
+                min-w-[110px] h-[42px]
+              "
+              onClick={() => {
+                setStartDate(null);
+                setEndDate(null);
+                setStatusFilter("all");
+                setSearch("");
+                setSelectedMerchant(null);
+              }}
+            >
+              Clear All
+            </Button>
           </div>
         </div>
-      )}
 
-
-      {/* TABLE SECTION */}
-      <div className=" bg-white rounded-lg shadow-lg w-full border border-[#b58351]">
-
-        {/* ⭐ FIX: No min-w-max, no table-fixed, no nowrap */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left text-gray-700 border-collapse">
-
-            <thead className="uppercase text-white tracking-wide"
-              style={{ background: "#b58351" }}
-            >
-              <tr>
-                {columns.map((column, index) => (
-                  <th key={index} className="font-semibold text-md px-4 py-3 text-left border-b border-white/30">
-                    {column.header}
-                  </th>
-                ))}
-
-                {showDeleteColumn && (
-                  <th className="font-semibold text-md px-4 py-3 text-left border-b border-white/30">
-                    Delete
-                  </th>
-                )}
-              </tr>
-            </thead>
-
-            <tbody>
-              {filteredData.length > 0 ? (
-                filteredData
-                  .slice(
-                    (currentPage - 1) * entriesPerPage,
-                    currentPage * entriesPerPage
-                  )
-                  .map((row, rowIndex) => (
-                    <tr
-                      key={row.id}
-                      className={`${rowIndex % 2 === 0
-                          ? "bg-[#f1f7ff]"
-                          : "bg-white"
-                        } hover:bg-[#e0f0ff] transition-all duration-150 border-b border-gray-200`}
-                    >
-                      {columns.map((column, colIndex) => (
-                        <td
-                          key={colIndex}
-                          className="px-4 py-3 text-gray-800 text-left text-sm md:text-base break-words"
-                        >
-                          {column.Cell
-                            ? column.Cell({
-                                value: row[column.accessor],
-                                row,
-                              })
-                            : row[column.accessor]}
-                        </td>
-                      ))}
-
-                      {showDeleteColumn && (
-                        <td className="px-4 py-3">
-                          <Button
-                            type="button"
-                            onClick={() => handleConfirmModal(row.id)}
-                            className="text-red-800 p-3 rounded-xl cursor-pointer"
-                          >
-                            <i className="fa-solid fa-trash fa-lg"></i>
-                          </Button>
-                        </td>
-                      )}
-                    </tr>
-                  ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan={
-                      showDeleteColumn
-                        ? columns.length + 1
-                        : columns.length
-                    }
-                    className="text-center text-gray-600 py-6 bg-white font-medium"
-                  >
-                    No data found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        {/* Pagination (unchanged) */}
-        {showPagination && (
-          <div className="flex flex-col md:flex-row justify-between items-center bg-white px-4 py-3 rounded-b-lg border-t border-sky-200 mt-3">
-            <div className="flex items-center gap-2 text-sm text-gray-700">
-              <span>Show</span>
-              <select
-                value={entriesPerPage}
-                onChange={(e) => {
-                  setEntriesPerPage(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-1 focus:ring-sky-400 focus:outline-none"
-              >
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-              </select>
-              <span>entries</span>
-            </div>
-
-            <div className="flex items-center gap-2 mt-2 md:mt-0">
-              <Button
-                onClick={() =>
-                  setCurrentPage((prev) => Math.max(prev - 1, 1))
-                }
-                disabled={currentPage === 1}
-                className={`px-3 py-1 text-sm rounded-md font-medium transition ${
-                  currentPage === 1
-                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                    : "bg-gradient-to-r from-sky-200 to-indigo-200 text-sky-900 hover:from-sky-300 hover:to-indigo-300"
-                }`}
-              >
-                Prev
-              </Button>
-
-              <span className="text-sm text-gray-700">
-                Page <span className="font-semibold">{currentPage}</span>
-              </span>
-
-              <Button
-                onClick={() =>
-                  setCurrentPage((prev) =>
-                    prev < Math.ceil(filteredData.length / entriesPerPage)
-                      ? prev + 1
-                      : prev
-                  )
-                }
-                disabled={
-                  currentPage ===
-                  Math.ceil(filteredData.length / entriesPerPage)
-                }
-                className={`px-3 py-1 text-sm rounded-md font-medium transition ${
-                  currentPage ===
-                  Math.ceil(filteredData.length / entriesPerPage)
-                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                    : "bg-gradient-to-r from-sky-200 to-indigo-200 text-sky-900 hover:from-sky-300 hover:to-indigo-300"
-                }`}
-              >
-                Next
-              </Button>
+        {/* SUCCESS AMOUNT */}
+        {showSelectUserFilter && (
+          <div className="flex justify-end mt-3">
+            <div className="
+              bg-green-50 
+              border border-green-300 
+              text-green-700 
+              px-4 py-2 
+              rounded-xl 
+              text-sm 
+              shadow-sm 
+              flex items-center gap-2
+            ">
+              <i className="fa-solid fa-circle-check"></i>
+              Total Successful: ₹{totalSuccessAmount.toFixed(2)}
             </div>
           </div>
         )}
       </div>
+    )}
 
-      <ConfirmModal
-        showConfirmModal={showConfirmModal}
-        handleConfirmModal={() => setShowConfirmModal(false)}
-        action={handleDelete}
-        heading="Confirm Delete"
-        body="Are you sure you want to delete this record?"
-      />
+    {/* TABLE SECTION */}
+    <div className="w-full space-y-5">
+      {filteredData.length > 0 ? (
+        filteredData
+          .slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage)
+          .map((row) => (
+            <div
+              key={row.id}
+              className="
+                bg-gradient-to-br from-white to-[#faf4ec]
+                border border-[#e6ded4]
+                rounded-2xl 
+                shadow-lg 
+                p-5 
+                hover:shadow-xl 
+                hover:scale-[1.01] 
+                transition
+              "
+            >
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                {columns.map((col, i) => (
+                  <div key={i}>
+                    <p className="text-xs text-[#9c8a78] font-semibold uppercase tracking-wide">
+                      {col.header}
+                    </p>
+                    <p className="text-[#4d443b] text-sm mt-1">
+                      {col.Cell ? col.Cell({ value: row[col.accessor], row }) : row[col.accessor]}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {showDeleteColumn && (
+                <div className="flex justify-end mt-4">
+                  <Button
+                    type="button"
+                    className="
+                      bg-red-100 text-red-600 
+                      px-3 py-2 
+                      rounded-xl 
+                      hover:bg-red-200 
+                      transition
+                    "
+                    onClick={() => handleConfirmModal(row.id)}
+                  >
+                    <i className="fa-solid fa-trash"></i>
+                  </Button>
+                </div>
+              )}
+            </div>
+          ))
+      ) : (
+        <div
+          className="
+            text-center 
+            text-[#4d443b] 
+            py-6 
+            bg-gradient-to-br from-white to-[#faf4ec] 
+            border border-[#e6ded4] 
+            rounded-2xl 
+            shadow-sm
+          "
+        >
+          No data found
+        </div>
+      )}
+
+      {/* PAGINATION */}
+      {showPagination && (
+        <div
+          className="
+            flex flex-col md:flex-row justify-between items-center 
+            bg-gradient-to-br from-[#faf4ec] to-[#f8efe4]
+            border border-[#e6ded4] 
+            rounded-2xl 
+            shadow-md 
+            px-4 py-3 
+            mt-3
+          "
+        >
+          {/* ENTRIES */}
+          <div className="flex items-center gap-2 text-[#4d443b]">
+            Show
+            <select
+              value={entriesPerPage}
+              onChange={(e) => {
+                setEntriesPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="
+                border border-[#d7c4a8] 
+                rounded-lg px-2 py-1 
+                bg-white 
+                text-[#4d443b] 
+                shadow-sm
+              "
+            >
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+            entries
+          </div>
+
+          {/* PAGINATION BUTTONS */}
+          <div className="flex items-center gap-3 mt-3 md:mt-0">
+            <Button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className={`
+                px-4 py-1 rounded-xl text-sm transition
+                ${
+                  currentPage === 1
+                    ? "bg-gray-200 text-gray-500"
+                    : "bg-gradient-to-r from-[#f1d9b7] to-[#b58351] text-white hover:brightness-110"
+                }
+              `}
+            >
+              Prev
+            </Button>
+
+            <span className="text-[#4d443b]">
+              Page <strong>{currentPage}</strong>
+            </span>
+
+            <Button
+              onClick={() =>
+                setCurrentPage((prev) =>
+                  prev < Math.ceil(filteredData.length / entriesPerPage)
+                    ? prev + 1
+                    : prev
+                )
+              }
+              disabled={currentPage === Math.ceil(filteredData.length / entriesPerPage)}
+              className={`
+                px-4 py-1 rounded-xl text-sm transition
+                ${
+                  currentPage === Math.ceil(filteredData.length / entriesPerPage)
+                    ? "bg-gray-200 text-gray-500"
+                    : "bg-gradient-to-r from-[#f1d9b7] to-[#b58351] text-white hover:brightness-110"
+                }
+              `}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
-  );
+
+    {/* CONFIRM MODAL */}
+    <ConfirmModal
+      showConfirmModal={showConfirmModal}
+      handleConfirmModal={() => setShowConfirmModal(false)}
+      action={handleDelete}
+      heading="Confirm Delete"
+      body="Are you sure you want to delete this record?"
+    />
+  </div>
+);
+
 };
 
 export default Table;

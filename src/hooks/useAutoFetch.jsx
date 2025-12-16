@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useGet } from "./useGet"; // your existing hook
 
-export default function useAutoFetch(endpoint, intervalMs = 10000) {
+export default function useAutoFetch(endpoint, intervalMs = 3600000) {
   const { data, loading, error, refetch } = useGet(endpoint);
 
   useEffect(() => {

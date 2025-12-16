@@ -254,7 +254,7 @@ totalwallet: Number(item.total_payout || 0).toFixed(2),
 
         <Button
           onClick={() => navigate("/member-create")}
-          className="bg-white border border-sky-200 text-sky-800 font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200"
+          className="bg-[#e8bb6e] border border-[#b5895c] text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-[#ebaa69] hover:border-[#b5895c] transition-all duration-200"
         >
           + Create New
         </Button>
