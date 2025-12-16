@@ -52,10 +52,10 @@ export const BankModal = ({ showModal, handleModal, activeTab, refreshTable }) =
             onClick={(e) => e.stopPropagation()}
           >
             <div
-              className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 
+              className="text-white bg-gradient-to-r  from-[#f4e1c1] to-[#e6b35a] 
               font-medium rounded-t-lg text-sm px-5 py-3 flex justify-between items-center"
             >
-              <h4 className="font-bold text-white text-lg py-2">
+              <h4 className="font-bold text-[#615141] text-lg py-2">
                 {activeTab === "payin" ? "Add Payin Bank" : "Add Payout Bank"}
               </h4>
               <Button
@@ -82,14 +82,14 @@ export const BankModal = ({ showModal, handleModal, activeTab, refreshTable }) =
                     className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 peer ${
                       error?.error
                         ? "border-red-500 focus:border-red-500"
-                        : "border-gray-300 focus:border-blue-600"
+                        : "border-gray-300 focus:border-[#b58351]"
                     }`}
                     placeholder=" "
                     required
                   />
                   <label
                     htmlFor="floating_bank"
-                    className={`peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}
+                    className={`peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-[#b58351] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}
                   >
                     Bank Name
                   </label>
@@ -110,7 +110,7 @@ export const BankModal = ({ showModal, handleModal, activeTab, refreshTable }) =
                 <Button
                   type="submit"
                   disabled={loading}
-                  className={`cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                  className={`cursor-pointer text-white bg-[#615141] hover:bg-[#b58351] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   {loading ? "Saving..." : "Save"}
                 </Button>

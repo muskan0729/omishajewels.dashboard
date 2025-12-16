@@ -1,12 +1,17 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom"; // ✅ add useLocation
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { usePost } from "../hooks/usePost";
 import useAutoFetch from "../hooks/useAutoFetch";
 import { useGet } from "../hooks/useGet";
+import profile from "../images/2.png";
 
-export const Header = ({ onMenuClick }) => {
+export const Header = ({ onMenuClick, currentPath: propCurrentPath, role: propRole, onRoleChange }) => {
   const navigate = useNavigate();
-  const location = useLocation(); // ✅ get current route
+  const location = useLocation();
+
+  const currentPath = propCurrentPath || location.pathname; // fallback if no prop
+  const role = propRole || (typeof window !== "undefined" ? atob(localStorage.getItem("role") || "") : "user");
+
   const { execute: logout } = usePost("/logout");
   const { data } = useAutoFetch("/collection-record");
   const { data: merchantData } = useGet("/show-merchant");
@@ -15,13 +20,10 @@ export const Header = ({ onMenuClick }) => {
   const dropdownRef = useRef(null);
   const [activeStat, setActiveStat] = useState(null);
 
-  // State for role
-  const [role, setRole] = useState(atob(localStorage.getItem("role"))); // admin / user
   const email = localStorage.getItem("email");
 
-  // ✅ Show button only for specific email AND only on dashboard page
-  const showButton =
-    email === "saad.sayyed@example.com" && location.pathname === "/dashboard";
+  // Show button only for specific email AND only on dashboard page
+  const showButton = email === "saad.sayyed@example.com" && currentPath === "/dashboard";
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -73,22 +75,20 @@ export const Header = ({ onMenuClick }) => {
   };
 
   const handleToggleRole = () => {
-    const newRole = role === "admin" ? "admin" : "admin";
+    // Toggle between "admin" and "user"
+    const newRole = role === "admin" ? "user" : "admin";
     localStorage.setItem("role", btoa(newRole));
-    setRole(newRole);
-    window.location.reload();
+    if (onRoleChange) {
+      onRoleChange(newRole);
+    }
   };
 
   return (
-    <nav className="flex items-center justify-between w-full px-4 py-3 bg-white shadow-lg shadow-indigo-500/50">
+    <nav className="flex items-center justify-between w-full px-4 py-3 bg-white shadow-lg shadow-[#5d4534]-500/60">
       <div className="flex items-center gap-4">
-        <button
-          onClick={onMenuClick}
-          className="md:hidden text-2xl text-blue-600"
-        >
+        <button onClick={onMenuClick} className="md:hidden text-2xl" aria-label="Toggle menu">
           ☰
         </button>
-
 
         {/* Stats */}
         {role !== "admin" && (
@@ -112,10 +112,9 @@ export const Header = ({ onMenuClick }) => {
                   onMouseLeave={() => setActiveStat(null)}
                 >
                   <button
-                    onClick={() =>
-                      setActiveStat(activeStat === item.id ? null : item.id)
-                    }
+                    onClick={() => setActiveStat(activeStat === item.id ? null : item.id)}
                     className="flex flex-col items-center"
+                    aria-label={item.label}
                   >
                     <i className={`${item.icon} fa-xl`}></i>
                   </button>
@@ -135,47 +134,37 @@ export const Header = ({ onMenuClick }) => {
 
       {/* Profile Dropdown */}
       <div className="relative" ref={dropdownRef}>
-        <button
-          onClick={() => setOpen(!open)}
-          className="flex items-center focus:outline-none"
-        >
-          <img
-            className="w-10 h-10 rounded-full border"
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRduYoJopcD2_WmDjt978P3pjTLl-oQX-ZsTOaof805POhNgFzpYEy5LnA&s"
-            alt="profile"
-          />
+        <button onClick={() => setOpen(!open)} className="flex items-center focus:outline-none" aria-haspopup="true" aria-expanded={open}>
+          <img className="w-10 h-10 rounded-full border" src={profile} alt="profile" />
         </button>
 
         {open && (
           <ul
             className="absolute right-0 mt-3 w-60 shadow-xl/30 z-50 px-4 py-4 rounded-lg"
             style={{ backgroundColor: "#A7B7F1" }}
+            role="menu"
           >
             <div className="bg-gray-100 rounded-lg">
               <div className="text-center text-gray-700 py-2">
-                <h6 className="font-semibold">
-                  {merchantData?.data?.name || "Admin"}
-                </h6>
+                <h6 className="font-semibold">{merchantData?.data?.name || "Admin"}</h6>
                 <h6 className="text-sm">{merchantData?.data?.email}</h6>
                 <hr className="my-2" />
               </div>
 
               <li>
-                <Link
-                  to={"/profile"}
-                  className="block px-4 py-2 text-gray-700 hover:bg-gray-200 rounded"
-                >
+                <Link to={"/profile"} className="block px-4 py-2 text-gray-700 hover:bg-gray-200 rounded" role="menuitem">
                   Profile
                 </Link>
               </li>
 
               <li>
-                <a
+                <button
                   onClick={handleLogout}
-                  className="cursor-pointer block px-4 py-2 text-gray-700 hover:bg-gray-200 rounded"
+                  className="cursor-pointer block px-4 py-2 text-gray-700 hover:bg-gray-200 rounded w-full text-left"
+                  role="menuitem"
                 >
                   Logout
-                </a>
+                </button>
               </li>
             </div>
           </ul>

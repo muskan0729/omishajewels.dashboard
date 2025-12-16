@@ -37,11 +37,10 @@ export const SchemeModal = ({
     editData ? `/update-scheme/${editData.id}` : ""
   );
 
-  // Initialize modal state when it opens
+  // Initialize modal state
   useEffect(() => {
     if (showModal) {
       if (editData) {
-        // Pre-fill with edit data
         setName(editData.name || "");
         setPayin({
           type: editData.payin_commision_type,
@@ -72,7 +71,6 @@ export const SchemeModal = ({
         );
         setPercentage(editData.gst_amount || 18);
       } else {
-        // Reset for adding new scheme
         setName("");
         setPayin({ type: "percent", amount: 0 });
         setPayout({
@@ -123,14 +121,12 @@ export const SchemeModal = ({
         await updateScheme(payload);
         toast.success("Scheme updated successfully!");
       } else {
-        console.log("Payload of Scheme: ", payload);
         await createScheme(payload);
         toast.success("Scheme created successfully!");
       }
       refreshTable();
       handleModal();
     } catch (err) {
-      console.error("Error saving scheme:", err);
       toast.error(err.message || "Something went wrong");
     }
   };
@@ -139,340 +135,443 @@ export const SchemeModal = ({
 
   return (
     <>
-      <div
-        className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50"
-        // onClick={handleModal}
-      ></div>
+      {/* Background Overlay */}
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" />
 
-      <div
-        className="fixed top-10 left-1/2 transform -translate-x-1/2 z-50 bg-white border rounded-lg w-full max-w-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white font-medium rounded-t-lg px-5 py-3 flex justify-between items-center">
-          <h3 className="text-lg font-semibold">
-            {editData ? "Edit Scheme" : "Add New Scheme"}
-          </h3>
-          <Button
-            onClick={handleModal}
-            className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-red-500 font-bold text-lg shadow-md hover:bg-red-500 hover:text-white transition"
-          >
-            <i className="fa-solid fa-xmark fa-lg"></i>
-          </Button>
-        </div>
+      {/* Modal Box */}
+      <div className="fixed top-8 left-1/2 -translate-x-1/2 z-50 w-full max-w-2xl">
 
-        <form className="p-5" onSubmit={handleSubmit}>
-          {/* Scheme Name */}
-          <div className="mb-5">
-            <label className="block mb-1 text-sm font-medium">
-              Scheme Name
-            </label>
-            <input
-              type="text"
-              name="name"
-              placeholder="Enter Scheme Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full border rounded-lg p-2 text-sm"
-            />
-          </div>
+        <div className="bg-white shadow-2xl rounded-xl overflow-hidden border border-[#e8d5b5]">
 
-          {/* Tabs */}
-          <div className="border-b border-gray-200 mb-2">
-            <ul className="flex flex-wrap -mb-px text-sm font-medium text-center">
-              {["tab1", "tab2", "tab3", "tab4"].map((tab, idx) => {
-                const tabInfo = ["Payin", "Payout", "Rolling Amount", "GST"];
-                const icons = [
-                  "fa-money-bill-transfer",
-                  "fa-credit-card",
-                  "fa-rotate",
-                  "fa-percent",
-                ];
-                return (
-                  <li
-                    key={tab}
-                    className={`me-2 hover:text-blue-900 ${
-                      activeTab === tab ? "text-blue-500" : "text-gray-500"
-                    }`}
-                  >
-                    <Button
-                      type="button"
-                      onClick={() => setActiveTab(tab)}
-                      className="inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:border-blue-900 group"
-                    >
-                      <i className={`fa-solid ${icons[idx]} me-2`}></i>
-                      {tabInfo[idx]}
-                    </Button>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
+          {/* Header */}
+          <div className="bg-gradient-to-r from-[#f3d9a3] to-[#d7a248] text-[#5a3e1b] px-6 py-4 flex justify-between items-center shadow-md">
+            <h3 className="text-lg font-semibold tracking-wide">
+              {editData ? "Edit Scheme" : "Add New Scheme"}
+            </h3>
 
-          {/* Table */}
-          <div className="relative">
-            <table className="text-sm text-left text-gray-500 w-full">
-              <thead className="text-md text-white uppercase bg-gradient-to-r from-blue-400 to-blue-700">
-                <tr>
-                  <th className="px-6 py-3">Operator</th>
-                  <th className="px-6 py-3">Type</th>
-                  <th className="px-6 py-3">Amount/Percentage</th>
-                </tr>
-              </thead>
-              <tbody>
-                {/* Payin */}
-                {activeTab === "tab1" && (
-                  <tr className="border-b border-gray-500">
-                    <td className="px-6 py-4 font-medium text-gray-900">
-                      Payin Commission Slab
-                    </td>
-                    <td className="px-6 py-4">
-                      <select
-                        value={payin.type}
-                        onChange={(e) =>
-                          setPayin({ ...payin, type: e.target.value })
-                        }
-                      >
-                        <option value="flat">Flat</option>
-                        <option value="percent">Percent</option>
-                      </select>
-                    </td>
-                    <td className="px-6 py-4">
-                      <input
-                        type="number"
-                        value={payin.amount}
-                        onChange={(e) =>
-                          setPayin({ ...payin, amount: e.target.value })
-                        }
-                        className="w-full border rounded-lg p-2 text-sm"
-                      />
-                    </td>
-                  </tr>
-                )}
-
-                {/* Payout */}
-                {activeTab === "tab2" && (
-                  <>
-                    <tr className="border-b border-gray-500">
-                      <td className="px-6 py-4 font-medium text-gray-900">
-                        Payout Below 700
-                      </td>
-                      <td className="px-6 py-4">
-                        <select
-                          value={payout.below700.type}
-                          onChange={(e) =>
-                            setPayout({
-                              ...payout,
-                              below700: {
-                                ...payout.below700,
-                                type: e.target.value,
-                              },
-                            })
-                          }
-                        >
-                          <option value="flat">Flat</option>
-                          <option value="percent">Percent</option>
-                        </select>
-                      </td>
-                      <td className="px-6 py-4">
-                        <input
-                          type="number"
-                          value={payout.below700.amount}
-                          onChange={(e) =>
-                            setPayout({
-                              ...payout,
-                              below700: {
-                                ...payout.below700,
-                                amount: e.target.value,
-                              },
-                            })
-                          }
-                          className="w-full border rounded-lg p-2 text-sm"
-                        />
-                      </td>
-                    </tr>
-
-                    <tr className="border-b border-gray-500 bg-blue-100">
-                      <td className="px-6 py-4 font-medium text-gray-900">
-                        Payout Above 700
-                      </td>
-                      <td className="px-6 py-4">
-                        <select
-                          value={payout.above700.type}
-                          onChange={(e) =>
-                            setPayout({
-                              ...payout,
-                              above700: {
-                                ...payout.above700,
-                                type: e.target.value,
-                              },
-                            })
-                          }
-                        >
-                          <option value="flat">Flat</option>
-                          <option value="percent">Percent</option>
-                        </select>
-                      </td>
-                      <td className="px-6 py-4">
-                        <input
-                          type="number"
-                          value={payout.above700.amount}
-                          onChange={(e) =>
-                            setPayout({
-                              ...payout,
-                              above700: {
-                                ...payout.above700,
-                                amount: e.target.value,
-                              },
-                            })
-                          }
-                          className="w-full border rounded-lg p-2 text-sm"
-                        />
-                      </td>
-                    </tr>
-                  </>
-                )}
-
-                {/* Rolling */}
-                {activeTab === "tab3" && (
-                  <>
-                    {/* Rolling Payin */}
-                    <tr className="border-b border-gray-500">
-                      <td className="px-6 py-4 font-medium text-gray-900">
-                        <label className="flex items-center space-x-2 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="rollingOption"
-                            value="payin"
-                            checked={selectedRolling === "payin"}
-                            onChange={() => setSelectedRolling("payin")}
-                          />
-                          <span>Rolling Payin Amount</span>
-                        </label>
-                      </td>
-                      <td className="px-6 py-4">
-                        <select
-                          value={rollingPayin.type}
-                          onChange={(e) =>
-                            setRollingPayin((prev) => ({
-                              ...prev,
-                              type: e.target.value,
-                            }))
-                          }
-                          disabled={selectedRolling !== "payin"}
-                        >
-                          <option value="flat">Flat</option>
-                          <option value="percent">Percent</option>
-                        </select>
-                      </td>
-                      <td className="px-6 py-4">
-                        <input
-                          type="number"
-                          value={
-                            selectedRolling === "payin"
-                              ? rollingPayin.amountStr
-                              : ""
-                          }
-                          onChange={(e) =>
-                            setRollingPayin((prev) => ({
-                              ...prev,
-                              amountStr: e.target.value,
-                              amount: parseFloat(e.target.value) || 0,
-                            }))
-                          }
-                          disabled={selectedRolling !== "payin"}
-                          className="w-full border rounded-lg p-2 text-sm"
-                        />
-                      </td>
-                    </tr>
-
-                    {/* Rolling Fixed */}
-                    <tr className="border-b border-gray-500">
-                      <td className="px-6 py-4 font-medium text-gray-900">
-                        <label className="flex items-center space-x-2 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="rollingOption"
-                            value="fixed"
-                            checked={selectedRolling === "fixed"}
-                            onChange={() => setSelectedRolling("fixed")}
-                          />
-                          <span>Rolling Fixed Amount</span>
-                        </label>
-                      </td>
-                      <td className="px-6 py-4">
-                        <select
-                          value={rollingFixed.type}
-                          onChange={(e) =>
-                            setRollingFixed((prev) => ({
-                              ...prev,
-                              type: e.target.value,
-                            }))
-                          }
-                          disabled={selectedRolling !== "fixed"}
-                        >
-                          <option value="flat">Flat</option>
-                          <option value="percent">Percent</option>
-                        </select>
-                      </td>
-                      <td className="px-6 py-4">
-                        <input
-                          type="number"
-                          value={
-                            selectedRolling === "fixed"
-                              ? rollingFixed.amountStr
-                              : ""
-                          }
-                          onChange={(e) =>
-                            setRollingFixed((prev) => ({
-                              ...prev,
-                              amountStr: e.target.value,
-                              amount: parseFloat(e.target.value) || 0,
-                            }))
-                          }
-                          disabled={selectedRolling !== "fixed"}
-                          className="w-full border rounded-lg p-2 text-sm"
-                        />
-                      </td>
-                    </tr>
-                  </>
-                )}
-
-                {/* GST */}
-                {activeTab === "tab4" && (
-                  <tr className="border-b border-gray-500">
-                    <td className="px-6 py-4 font-medium text-gray-900">
-                      Goods and Service Tax
-                    </td>
-                    <td className="px-6 py-4">
-                      <select value="percent" disabled>
-                        <option value="percent">Percent</option>
-                      </select>
-                    </td>
-                    <td className="px-6 py-4">
-                      <input
-                        type="number"
-                        value={percentage}
-                        onChange={(e) => setPercentage(e.target.value)}
-                        className="w-full border rounded-lg p-2 text-sm"
-                      />
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="mt-6 text-right">
-            <Button
-              type="submit"
-              disabled={creating || updating}
-              className="cursor-pointer text-white bg-[#615141] hover:bg-blue-700 px-5 py-2 rounded-lg"
+            <button
+              onClick={handleModal}
+              className="bg-white text-red-600 w-8 h-8 rounded-full flex items-center justify-center shadow hover:bg-red-500 hover:text-white transition"
             >
-              {editData ? "Update" : "Submit"}
-            </Button>
+              ✕
+            </button>
           </div>
-        </form>
+
+          {/* Form Body */}
+          <form onSubmit={handleSubmit} className="p-6 bg-gradient-to-b from-white to-[#faf6ef]">
+
+            {/* Scheme Name */}
+            <div className="mb-6">
+              <label className="block mb-1 text-sm font-medium text-[#8d6c3c]">
+                Scheme Name
+              </label>
+              <input
+                type="text"
+                className="w-full border border-[#d5c3a3] rounded-lg p-2 text-sm shadow-sm focus:ring-[#c79a3b] focus:border-[#c79a3b]"
+                placeholder="Enter Scheme Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+
+            {/* Tabs */}
+            <div className="border-b border-[#d5c3a3] mb-5">
+              <ul className="flex gap-1 text-sm font-medium">
+
+                {[
+                  { id: "tab1", name: "Payin", icon: "fa-money-bill-transfer" },
+                  { id: "tab2", name: "Payout", icon: "fa-credit-card" },
+                  { id: "tab3", name: "Rolling Amount", icon: "fa-rotate" },
+                  { id: "tab4", name: "GST", icon: "fa-percent" },
+                ].map((tab) => (
+                  <li key={tab.id}>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`px-4 py-2 rounded-t-lg transition-all flex items-center gap-2 
+                        ${
+                          activeTab === tab.id
+                            ? "bg-[#c59b42] text-white shadow"
+                            : "text-[#8d6c3c] hover:text-[#c59b42]"
+                        }`}
+                    >
+                      <i className={`fa-solid ${tab.icon}`}></i>
+                      {tab.name}
+                    </button>
+                  </li>
+                ))}
+
+              </ul>
+            </div>
+
+            {/* Table Section */}
+        <div className="bg-white rounded-lg border border-[#e8d5b5] shadow-lg overflow-hidden">
+  <table className="w-full text-sm">
+    <thead className="bg-gradient-to-r from-[#f3d9a3] to-[#e6b35a] text-[#704f21]">
+      <tr>
+        <th className="px-5 py-3 text-left">Operator</th>
+        <th className="px-5 py-3 text-left">Type</th>
+        <th className="px-5 py-3 text-left">Amount</th>
+      </tr>
+    </thead>
+
+    <tbody className="divide-y divide-[#e6decf]">
+
+      {/* TAB 1 */}
+      {activeTab === "tab1" && (
+        <tr>
+          <td className="px-5 py-4 font-semibold">Payin Commission</td>
+
+          {/* SELECT */}
+          <td className="px-5 py-4">
+            <select
+              value={payin.type}
+              onChange={(e) => setPayin({ ...payin, type: e.target.value })}
+              className="
+                w-full px-3 py-2 
+                rounded-lg 
+                border border-[#d5c3a3] 
+                bg-white 
+                shadow-sm 
+                text-gray-700 
+                focus:outline-none 
+                focus:ring-2 
+                focus:ring-[#d6a55d] 
+                focus:border-[#b3843d] 
+                transition-all
+              "
+            >
+              <option value="flat">Flat</option>
+              <option value="percent">Percent</option>
+            </select>
+          </td>
+
+          {/* INPUT */}
+          <td className="px-5 py-4">
+            <input
+              type="number"
+              value={payin.amount}
+              onChange={(e) => setPayin({ ...payin, amount: e.target.value })}
+              className="
+                w-full px-3 py-2 
+                rounded-lg
+                border border-[#d5c3a3] 
+                bg-white 
+                shadow-sm 
+                text-gray-700 
+                focus:outline-none 
+                focus:ring-2 
+                focus:ring-[#d6a55d] 
+                focus:border-[#b3843d] 
+                transition-all
+              "
+            />
+          </td>
+        </tr>
+      )}
+
+      {/* TAB 2 */}
+      {activeTab === "tab2" && (
+        <>
+          <tr>
+            <td className="px-5 py-4 font-semibold">Payout Below 700</td>
+            <td className="px-5 py-4">
+              <select
+                value={payout.below700.type}
+                onChange={(e) =>
+                  setPayout({
+                    ...payout,
+                    below700: { ...payout.below700, type: e.target.value },
+                  })
+                }
+                className="
+                  w-full px-3 py-2 
+                  rounded-lg 
+                  border border-[#d5c3a3] 
+                  bg-white 
+                  shadow-sm 
+                  text-gray-700 
+                  focus:outline-none 
+                  focus:ring-2 
+                  focus:ring-[#d6a55d] 
+                  focus:border-[#b3843d] 
+                  transition-all
+                "
+              >
+                <option value="flat">Flat</option>
+                <option value="percent">Percent</option>
+              </select>
+            </td>
+
+            <td className="px-5 py-4">
+              <input
+                type="number"
+                value={payout.below700.amount}
+                onChange={(e) =>
+                  setPayout({
+                    ...payout,
+                    below700: { ...payout.below700, amount: e.target.value },
+                  })
+                }
+                className="
+                  w-full px-3 py-2 
+                  rounded-lg 
+                  border border-[#d5c3a3] 
+                  bg-white 
+                  shadow-sm 
+                  text-gray-700 
+                  focus:outline-none 
+                  focus:ring-2 
+                  focus:ring-[#d6a55d] 
+                  focus:border-[#b3843d] 
+                  transition-all
+                "
+              />
+            </td>
+          </tr>
+
+          <tr className="bg-[#fff6dd]">
+            <td className="px-5 py-4 font-semibold">Payout Above 700</td>
+
+            <td className="px-5 py-4">
+              <select
+                value={payout.above700.type}
+                onChange={(e) =>
+                  setPayout({
+                    ...payout,
+                    above700: { ...payout.above700, type: e.target.value },
+                  })
+                }
+                className="
+                  w-full px-3 py-2 
+                  rounded-lg 
+                  border border-[#d5c3a3] 
+                  bg-white 
+                  shadow-sm 
+                  text-gray-700 
+                  focus:outline-none 
+                  focus:ring-2 
+                  focus:ring-[#d6a55d] 
+                  focus:border-[#b3843d] 
+                  transition-all
+                "
+              >
+                <option value="flat">Flat</option>
+                <option value="percent">Percent</option>
+              </select>
+            </td>
+
+            <td className="px-5 py-4">
+              <input
+                type="number"
+                value={payout.above700.amount}
+                onChange={(e) =>
+                  setPayout({
+                    ...payout,
+                    above700: { ...payout.above700, amount: e.target.value },
+                  })
+                }
+                className="
+                  w-full px-3 py-2 
+                  rounded-lg 
+                  border border-[#d5c3a3] 
+                  bg-white 
+                  shadow-sm 
+                  text-gray-700 
+                  focus:outline-none 
+                  focus:ring-2 
+                  focus:ring-[#d6a55d] 
+                  focus:border-[#b3843d] 
+                  transition-all
+                "
+              />
+            </td>
+          </tr>
+        </>
+      )}
+
+      {/* TAB 3 – Rolling Amount */}
+      {activeTab === "tab3" && (
+        <>
+          {/* PAYIN */}
+          <tr>
+            <td className="px-5 py-4 font-semibold">
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="rollingOption"
+                  checked={selectedRolling === "payin"}
+                  onChange={() => setSelectedRolling("payin")}
+                />
+                Rolling Payin Amount
+              </label>
+            </td>
+
+            <td className="px-5 py-4">
+              <select
+                disabled={selectedRolling !== "payin"}
+                value={rollingPayin.type}
+                onChange={(e) =>
+                  setRollingPayin({ ...rollingPayin, type: e.target.value })
+                }
+                className="
+                  w-full px-3 py-2 rounded-lg
+                  border border-[#d5c3a3] bg-white 
+                  shadow-sm text-gray-700 
+                  disabled:bg-gray-200 
+                  focus:ring-2 focus:ring-[#d6a55d] 
+                  focus:border-[#b3843d]
+                  transition-all
+                "
+              >
+                <option value="flat">Flat</option>
+                <option value="percent">Percent</option>
+              </select>
+            </td>
+
+            <td className="px-5 py-4">
+              <input
+                disabled={selectedRolling !== "payin"}
+                type="number"
+                value={selectedRolling === "payin" ? rollingPayin.amountStr : ""}
+                onChange={(e) =>
+                  setRollingPayin({
+                    ...rollingPayin,
+                    amountStr: e.target.value,
+                  })
+                }
+                className="
+                  w-full px-3 py-2 
+                  rounded-lg 
+                  border border-[#d5c3a3] 
+                  bg-white shadow-sm 
+                  text-gray-700 disabled:bg-gray-200 
+                  focus:ring-2 focus:ring-[#d6a55d] 
+                  focus:border-[#b3843d]
+                  transition-all
+                "
+              />
+            </td>
+          </tr>
+
+          {/* FIXED */}
+          <tr>
+            <td className="px-5 py-4 font-semibold">
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="rollingOption"
+                  checked={selectedRolling === "fixed"}
+                  onChange={() => setSelectedRolling("fixed")}
+                />
+                Rolling Fixed Amount
+              </label>
+            </td>
+
+            <td className="px-5 py-4">
+              <select
+                disabled={selectedRolling !== "fixed"}
+                value={rollingFixed.type}
+                onChange={(e) =>
+                  setRollingFixed({ ...rollingFixed, type: e.target.value })
+                }
+                className="
+                  w-full px-3 py-2 
+                  rounded-lg 
+                  border border-[#d5c3a3] 
+                  bg-white 
+                  shadow-sm 
+                  text-gray-700 
+                  disabled:bg-gray-200
+                  focus:ring-2 focus:ring-[#d6a55d]
+                  focus:border-[#b3843d]
+                  transition-all
+                "
+              >
+                <option value="flat">Flat</option>
+                <option value="percent">Percent</option>
+              </select>
+            </td>
+
+            <td className="px-5 py-4">
+              <input
+                disabled={selectedRolling !== "fixed"}
+                type="number"
+                value={selectedRolling === "fixed" ? rollingFixed.amountStr : ""}
+                onChange={(e) =>
+                  setRollingFixed({
+                    ...rollingFixed,
+                    amountStr: e.target.value,
+                  })
+                }
+                className="
+                  w-full px-3 py-2 
+                  rounded-lg 
+                  border border-[#d5c3a3]
+                  bg-white shadow-sm
+                  text-gray-700 
+                  disabled:bg-gray-200
+                  focus:ring-2 focus:ring-[#d6a55d]
+                  focus:border-[#b3843d]
+                  transition-all
+                "
+              />
+            </td>
+          </tr>
+        </>
+      )}
+
+      {/* TAB 4 – GST */}
+      {activeTab === "tab4" && (
+        <tr>
+          <td className="px-5 py-4 font-semibold">GST (%)</td>
+          <td className="px-5 py-4">
+            <select disabled className="
+              w-full px-3 py-2 rounded-lg
+              border border-[#d5c3a3] bg-gray-200 
+            ">
+              <option value="percent">Percent</option>
+            </select>
+          </td>
+          <td className="px-5 py-4">
+            <input
+              type="number"
+              value={percentage}
+              onChange={(e) => setPercentage(e.target.value)}
+              className="
+                w-full px-3 py-2 
+                rounded-lg 
+                border border-[#d5c3a3]
+                bg-white shadow-sm
+                text-gray-700 
+                focus:ring-2 focus:ring-[#d6a55d]
+                focus:border-[#b3843d]
+                transition-all
+              "
+            />
+          </td>
+        </tr>
+      )}
+
+    </tbody>
+  </table>
+</div>
+
+
+            {/* Submit */}
+            <div className="mt-6 flex justify-end">
+              <Button
+                disabled={creating || updating}
+                className="px-6 py-2 rounded-lg bg-[#c59b42] text-white hover:bg-[#a57d2a] shadow-md transition"
+              >
+                {editData ? "Update Scheme" : "Create Scheme"}
+              </Button>
+            </div>
+
+          </form>
+        </div>
       </div>
     </>
   );
 };
+       

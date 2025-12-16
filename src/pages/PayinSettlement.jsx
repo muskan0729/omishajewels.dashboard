@@ -46,7 +46,7 @@ const PayinSettlement = () => {
           setSelectedUser(row);
           setShowModal(true);
         }}
-        className="bg-[#615141] hover:bg-blue-700 text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all"
+        className="bg-[#615141] hover:bg-[#b58351] text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all"
       >
         Payin Settlement
       </Button>
@@ -118,7 +118,7 @@ const PayinSettlement = () => {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="flex justify-between items-center bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white rounded-t-lg px-5 py-3">
+            <div className="flex justify-between items-center bg-gradient-to-r  from-[#f4e1c1] to-[#e6b35a] text-white rounded-t-lg px-5 py-3">
               <h3 className="text-lg font-semibold">
                 Payin Settlement for {selectedUser?.name}
               </h3>

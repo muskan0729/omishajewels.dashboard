@@ -244,7 +244,7 @@ const Payoutrequest = () => {
             onClick={(e) => e.stopPropagation()}
           >
             {/* ✅ Modal Header */}
-            <div className="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white font-medium rounded-t-lg px-5 py-3 flex justify-between items-center">
+            <div className="bg-gradient-to-r  from-[#f4e1c1] to-[#e6b35a] text-white font-medium rounded-t-lg px-5 py-3 flex justify-between items-center">
               <h3 className="text-lg font-semibold">Payout to Beneficiary</h3>
               <Button
                 onClick={() => setShowModal(false)}
@@ -410,7 +410,7 @@ const Payoutrequest = () => {
           >
             {/* Modal Header */}
             <div
-              className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 
+              className="text-white bg-gradient-to-r  from-[#f4e1c1] to-[#e6b35a] 
               font-medium rounded-t-lg text-sm px-5 py-3 flex justify-between items-center"
             >
               <h4 className="font-bold text-white text-lg py-2">

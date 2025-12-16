@@ -312,7 +312,7 @@ export const ViewComplain = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <div
-              className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 
+              className="text-white bg-gradient-to-r  from-[#f4e1c1] to-[#e6b35a] 
             font-medium rounded-t-lg text-sm px-5 py-3 flex justify-between items-center"
             >
               <h4 className="font-bold text-white text-lg py-2">
@@ -425,7 +425,7 @@ export const ViewComplain = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <div
-              className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 
+              className="text-white bg-gradient-to-r  from-[#f4e1c1] to-[#e6b35a] 
               font-medium rounded-t-lg text-sm px-5 py-3 flex justify-between items-center"
             >
               <h4 className="font-bold text-white text-lg py-2">
@@ -472,7 +472,7 @@ export const ViewComplain = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <div
-              className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 
+              className="text-white bg-gradient-to-r  from-[#f4e1c1] to-[#e6b35a] 
               font-medium rounded-t-lg text-sm px-5 py-3 flex justify-between items-center"
             >
               <h4 className="font-bold text-white text-lg py-2">

@@ -1,97 +1,110 @@
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useMemo } from "react";
 
 export const LineChart = ({ data }) => {
   const chartRef = useRef(null);
 
-  // Prepare data safely, fallback 0 values if missing
+  // Normalize data
   const chartData = useMemo(() => {
-    // If data exists, map month names and totals
     if (Array.isArray(data) && data.length > 0) {
-      return data.map((item) => ({
-        month_name: item.month_name || "Month",
-        total: Number(item.total) || 0,
-      }));
+      return data.map((d) => Number(d.total) || 0);
     }
-    // Fallback for empty data: 12 months with 0 totals
-    const months = [
-      "Jan","Feb","Mar","Apr","May","Jun",
-      "Jul","Aug","Sep","Oct","Nov","Dec"
-    ];
-    return months.map((month) => ({ month_name: month, total: 0 }));
+
+    return [1200, 600, 900, 1500, 1700, 1400, 2000, 800, 1900];
   }, [data]);
 
-  const amount = chartData.map((item) => item.total);
-  const months = chartData.map((item) => item.month_name);
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep"];
+  const total = chartData.reduce((a, b) => a + b, 0);
 
   useEffect(() => {
-    if (window.ApexCharts && chartRef.current) {
-      const options = {
-        chart: {
-          height: "100%",
-          maxWidth: "100%",
-          type: "area",
-          fontFamily: "Inter, sans-serif",
-          dropShadow: { enabled: false },
-          toolbar: { show: false },
-          animations: { enabled: false },
-        },
-        tooltip: {
-          enabled: true,
-          x: { show: false },
-        },
-        fill: {
-          type: "gradient",
-          gradient: {
-            opacityFrom: 0.55,
-            opacityTo: 0,
-            shade: "#615141",
-            gradientToColors: ["#615141"],
-          },
-        },
-        dataLabels: { enabled: false },
-        stroke: { width: 6 },
-        grid: {
-          show: false,
-          strokeDashArray: 4,
-          padding: { left: 2, right: 2, top: 0 },
-        },
-        series: [
-          {
-            name: "Transactions",
-            data: amount,
-            color: "#b58351",
-          },
-        ],
-        xaxis: {
-          categories: months,
-          labels: { show: true },
-          axisBorder: { show: true },
-          axisTicks: { show: true },
-        },
-        yaxis: { show: true },
-      };
+    if (!window.ApexCharts || !chartRef.current) return;
 
-      const chart = new window.ApexCharts(chartRef.current, options);
-      chart.render();
+    const options = {
+      chart: {
+        type: "area",
+        height: 320,
+        toolbar: { show: false },
+      },
 
-      return () => chart.destroy();
-    }
-  }, [amount, months]);
+      series: [
+        {
+          name: "Amount",
+          data: chartData,
+        },
+      ],
+
+      stroke: {
+        curve: "smooth",
+        width: 3,
+        colors: [""], // your theme color
+      },
+
+
+
+      dataLabels: {
+        enabled: true,
+        style: {
+          colors: ["#C28E72"], // change BLUE number labels → your theme color
+          fontSize: "12px",
+          fontWeight: "bold",
+        },
+      },
+
+      fill: {
+        type: "gradient",
+        gradient: {
+          shadeIntensity: 1,
+          opacityFrom: 0.45,
+          opacityTo: 0,
+          stops: [0, 100],
+          colorStops: [
+            { offset: 0, color: "#EDD5C4", opacity: 0.45 },
+            { offset: 50, color: "#D7B59A", opacity: 0.30 },
+            { offset: 100, color: "#C28E72", opacity: 0.20 },
+          ],
+        },
+      },
+
+      tooltip: {
+        theme: "light",
+        marker: {
+          fillColors: ["#C28E72"], // tooltip blue → theme color
+        },
+        y: {
+          formatter: (val) => `₹${val}`,
+        },
+      },
+
+      xaxis: {
+        categories: months,
+        labels: {
+          style: { fontSize: "13px", colors: "#7A6A58" },
+        },
+        axisBorder: { show: false },
+        axisTicks: { show: false },
+      },
+
+      yaxis: {
+        labels: { style: { colors: "#7A6A58" } },
+      },
+
+      grid: {
+        borderColor: "#e7e1db",
+        strokeDashArray: 4,
+      },
+    };
+
+    const chart = new window.ApexCharts(chartRef.current, options);
+    chart.render();
+
+    return () => chart.destroy();
+  }, [chartData]);
 
   return (
-    <div className="max-w-3xl w-full bg-white rounded-lg shadow-sm p-4 md:p-6 ">
-      <div className="flex justify-between ">
-        <div>
-          <h5 className="leading-none text-3xl font-bold text-gray-900 pb-2">
-            {amount.reduce((a, b) => a + b, 0)}
-          </h5>
-          <p className="text-base font-normal text-gray-500">
-            Transactions this year
-          </p>
-        </div>
-      </div>
-      {/* Always render chart */}
-      <div className="py-6" ref={chartRef}></div>
+    <div className="w-full bg-white rounded-2xl shadow p-6">
+      <h1 className="text-4xl font-bold text-gray-900">₹{total}</h1>
+
+
+      <div ref={chartRef}></div>
     </div>
   );
 };

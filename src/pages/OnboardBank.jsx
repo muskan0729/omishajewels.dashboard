@@ -105,7 +105,7 @@ const OnboardBank = () => {
       <div className="bg-gradient-to-t from-[#b58351] to-[#b6916d]  rounded-lg flex justify-between items-center p-4 shadow-md">
         <h4 className="font-bold text-white text-xl">Onboard Bank</h4>
         <Button
-          className="bg-white border border-sky-200 text-sky-800 font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200"
+         className="bg-[#e8bb6e] border border-[#b5895c] text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-[#ebaa69] hover:border-[#b5895c] transition-all duration-200"
           onClick={handleModal}
         >
           ADD BANK
@@ -117,7 +117,7 @@ const OnboardBank = () => {
       <div className="flex gap-4">
         <Button
           className={`px-4 py-2 rounded-lg font-medium ${activeTab === "payin"
-              ? "bg-blue-100 text-blue-600 shadow-md"
+              ? "bg-[#ebc8a6] text-[#615141] shadow-md"
               : "bg-white text-gray-600 hover:bg-blue-50 transition"
             }`}
           onClick={() => setActiveTab("payin")}
@@ -126,7 +126,7 @@ const OnboardBank = () => {
         </Button>
         <Button
           className={`px-4 py-2 rounded-lg font-medium ${activeTab === "payout"
-              ? "bg-blue-100 text-blue-600 shadow-md"
+              ? "bg-[#ebc8a6] text-[#615141] shadow-md"
               : "bg-white text-gray-600 hover:bg-blue-50 transition"
             }`}
           onClick={() => setActiveTab("payout")}

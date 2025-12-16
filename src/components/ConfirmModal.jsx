@@ -12,7 +12,7 @@ export const ConfirmModal = ({showConfirmModal, handleConfirmModal, action, head
             className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 transform transition-all scale-100"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white font-medium rounded-t-lg px-5 py-3 flex justify-between items-center">
+            <div className="bg-gradient-to-r  from-[#f4e1c1] to-[#e6b35a] text-white font-medium rounded-t-lg px-5 py-3 flex justify-between items-center">
               <h3 className="text-lg font-semibold">{heading}</h3>
               <Button
                 onClick={() => handleConfirmModal(false)}

@@ -330,250 +330,270 @@ const handleSubmit = async (e) => {
       <Stepper currentStep={currentStep} />
 
       <form onSubmit={handleSubmit} encType="multipart/form-data">
-        {currentStep === 1 && (
-          <div className="grid gap-6 mb-6 md:grid-cols-2">
-            <div className="relative">
-              <input
-                type="text"
-                name="name"
-                id="floating_outlined_name"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 appearance-none peer ${
-                  errors?.name ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder=""
-                value={memberFormData.name}
-                onChange={handleChange}
-              />
-              <label
-                for="floating_outlined_name"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.name
-                    ? "peer-focus:text-red-600"
-                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
-              >
-                Business Name <span className="text-red-600">*</span>
-              </label>
-              {errors?.name && (
-                <span className="mt-1 text-sm text-red-500">
-                  {errors?.name}
-                </span>
-              )}
-            </div>
-            <div className="relative">
-              <input
-                type="number"
-                name="mobile_no"
-                id="floating_outlined_mobile"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 appearance-none peer ${
-                  errors?.mobile_no ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder=""
-                value={memberFormData.mobile_no}
-                onChange={handleChange}
-              />
-              <label
-                for="floating_outlined_mobile"
-                className={`absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.mobile_no
-                    ? "peer-focus:text-red-600"
-                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
-              >
-                Business Mobile <span className="text-red-600">*</span>
-              </label>
-              {errors?.mobile_no && (
-                <span className="text-sm text-red-500">
-                  {errors?.mobile_no}
-                </span>
-              )}
-            </div>
-            <div className="relative">
-              <input
-                type="email"
-                name="email"
-                id="floating_outlined_email"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                  errors?.email ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder=""
-                value={memberFormData.email}
-                onChange={handleChange}
-              />
-              <label
-                for="floating_outlined_email"
-                className={`absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.email
-                    ? "peer-focus:text-red-600"
-                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
-              >
-                Business Email <span className="text-red-600">*</span>
-              </label>
-              {errors?.email && (
-                <span className="text-sm text-red-500">{errors?.email}</span>
-              )}
-            </div>
-            <div className="relative">
-              <input
-                type="number"
-                name="business_mcc"
-                id="floating_outlined_mcc"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                  errors?.business_mcc ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder=""
-                value={memberFormData.business_mcc}
-                onChange={handleChange}
-              />
-              <label
-                for="floating_outlined_mcc"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.business_mcc
-                    ? "peer-focus:text-red-600"
-                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
-              >
-                Business MCC <span className="text-red-600">*</span>
-              </label>
-              {errors?.business_mcc && (
-                <span className="text-sm text-red-500">
-                  {errors?.business_mcc}
-                </span>
-              )}
-            </div>
-            <div className="relative">
-              <input
-                type="text"
-                name="city"
-                id="floating_outlined_city"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                  errors?.city ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder=""
-                value={memberFormData.city}
-                onChange={handleChange}
-              />
-              <label
-                for="floating_outlined_city"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.city
-                    ? "peer-focus:text-red-600"
-                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
-              >
-                City <span className="text-red-600">*</span>
-              </label>
-              {errors?.city && (
-                <span className="text-sm text-red-500">{errors?.city}</span>
-              )}
-            </div>
-            <div className="relative">
-              <input
-                type="text"
-                name="state"
-                id="floating_outlined_state"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                  errors?.state ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder=""
-                value={memberFormData.state}
-                onChange={handleChange}
-              />
-              <label
-                for="floating_outlined_state"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.state
-                    ? "peer-focus:text-red-600"
-                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
-              >
-                State <span className="text-red-600">*</span>
-              </label>
-              {errors?.state && (
-                <span className="text-sm text-red-500">{errors?.state}</span>
-              )}
-            </div>
-            <div className="relative">
-              <input
-                type="text"
-                name="district"
-                id="floating_outlined_district"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                  errors?.district ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder=""
-                value={memberFormData.district}
-                onChange={handleChange}
-              />
-              <label
-                for="floating_outlined_district"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.district
-                    ? "peer-focus:text-red-600"
-                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
-              >
-                District <span className="text-red-600">*</span>
-              </label>
-              {errors?.district && (
-                <span className="text-sm text-red-500">{errors?.district}</span>
-              )}
-            </div>
-            <div className="relative">
-              <input
-                type="number"
-                name="pin_code"
-                id="floating_outlined_pin"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                  errors?.pin_code ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder=""
-                value={memberFormData.pin_code}
-                onChange={handleChange}
-              />
-              <label
-                for="floating_outlined_pin"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.pin_code
-                    ? "peer-focus:text-red-600"
-                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
-              >
-                Pincode <span className="text-red-600">*</span>
-              </label>
-              {errors?.pin_code && (
-                <span className="text-sm text-red-500">{errors?.pin_code}</span>
-              )}
-            </div>
-            <div className="relative">
-              <input
-                type="text"
-                name="address"
-                id="floating_outlined_address"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                  errors?.address ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder=""
-                value={memberFormData.address}
-                onChange={handleChange}
-              />
-              <label
-                for="floating_outlined_address"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.address
-                    ? "peer-focus:text-red-600"
-                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
-              >
-                Address <span className="text-red-600">*</span>
-              </label>
-              {errors?.address && (
-                <span className="text-sm text-red-500">{errors?.address}</span>
-              )}
-            </div>
-          </div>
-        )}
+     {currentStep === 1 && (
+  <div className="grid gap-6 mb-6 md:grid-cols-1">
+    {/* Box Layout Wrapper */}
+    <div className="p-6 bg-white rounded-lg shadow-md border border-gray-200">
+      <h2 className="text-lg font-semibold mb-4">Merchant Info</h2>
+      <div className="grid gap-6 md:grid-cols-2">
+
+        {/* Business Name */}
+        <div className="relative">
+          <input
+            type="text"
+            name="name"
+            id="floating_outlined_name"
+            className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 appearance-none peer ${
+              errors?.name ? "border-red-500" : "border-gray-300"
+            }`}
+            placeholder=""
+            value={memberFormData.name}
+            onChange={handleChange}
+          />
+          <label
+            htmlFor="floating_outlined_name"
+            className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+              errors?.name
+                ? "peer-focus:text-red-600"
+                : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4"
+            }`}
+          >
+            Business Name <span className="text-red-600">*</span>
+          </label>
+          {errors?.name && (
+            <span className="mt-1 text-sm text-red-500">{errors?.name}</span>
+          )}
+        </div>
+
+        {/* Business Mobile */}
+        <div className="relative">
+          <input
+            type="number"
+            name="mobile_no"
+            id="floating_outlined_mobile"
+            className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 appearance-none peer ${
+              errors?.mobile_no ? "border-red-500" : "border-gray-300"
+            }`}
+            placeholder=""
+            value={memberFormData.mobile_no}
+            onChange={handleChange}
+          />
+          <label
+            htmlFor="floating_outlined_mobile"
+            className={`absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+              errors?.mobile_no
+                ? "peer-focus:text-red-600"
+                : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4"
+            }`}
+          >
+            Business Mobile <span className="text-red-600">*</span>
+          </label>
+          {errors?.mobile_no && (
+            <span className="text-sm text-red-500">{errors?.mobile_no}</span>
+          )}
+        </div>
+
+        {/* Business Email */}
+        <div className="relative">
+          <input
+            type="email"
+            name="email"
+            id="floating_outlined_email"
+            className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+              errors?.email ? "border-red-500" : "border-gray-300"
+            }`}
+            placeholder=""
+            value={memberFormData.email}
+            onChange={handleChange}
+          />
+          <label
+            htmlFor="floating_outlined_email"
+            className={`absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+              errors?.email
+                ? "peer-focus:text-red-600"
+                : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4"
+            }`}
+          >
+            Business Email <span className="text-red-600">*</span>
+          </label>
+          {errors?.email && (
+            <span className="text-sm text-red-500">{errors?.email}</span>
+          )}
+        </div>
+
+        {/* Business MCC */}
+        <div className="relative">
+          <input
+            type="number"
+            name="business_mcc"
+            id="floating_outlined_mcc"
+            className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+              errors?.business_mcc ? "border-red-500" : "border-gray-300"
+            }`}
+            placeholder=""
+            value={memberFormData.business_mcc}
+            onChange={handleChange}
+          />
+          <label
+            htmlFor="floating_outlined_mcc"
+            className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+              errors?.business_mcc
+                ? "peer-focus:text-red-600"
+                : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4"
+            }`}
+          >
+            Business MCC <span className="text-red-600">*</span>
+          </label>
+          {errors?.business_mcc && (
+            <span className="text-sm text-red-500">{errors?.business_mcc}</span>
+          )}
+        </div>
+
+        {/* City */}
+        <div className="relative">
+          <input
+            type="text"
+            name="city"
+            id="floating_outlined_city"
+            className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+              errors?.city ? "border-red-500" : "border-gray-300"
+            }`}
+            placeholder=""
+            value={memberFormData.city}
+            onChange={handleChange}
+          />
+          <label
+            htmlFor="floating_outlined_city"
+            className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+              errors?.city
+                ? "peer-focus:text-red-600"
+                : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4"
+            }`}
+          >
+            City <span className="text-red-600">*</span>
+          </label>
+          {errors?.city && (
+            <span className="text-sm text-red-500">{errors?.city}</span>
+          )}
+        </div>
+
+        {/* State */}
+        <div className="relative">
+          <input
+            type="text"
+            name="state"
+            id="floating_outlined_state"
+            className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+              errors?.state ? "border-red-500" : "border-gray-300"
+            }`}
+            placeholder=""
+            value={memberFormData.state}
+            onChange={handleChange}
+          />
+          <label
+            htmlFor="floating_outlined_state"
+            className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+              errors?.state
+                ? "peer-focus:text-red-600"
+                : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4"
+            }`}
+          >
+            State <span className="text-red-600">*</span>
+          </label>
+          {errors?.state && (
+            <span className="text-sm text-red-500">{errors?.state}</span>
+          )}
+        </div>
+
+        {/* District */}
+        <div className="relative">
+          <input
+            type="text"
+            name="district"
+            id="floating_outlined_district"
+            className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+              errors?.district ? "border-red-500" : "border-gray-300"
+            }`}
+            placeholder=""
+            value={memberFormData.district}
+            onChange={handleChange}
+          />
+          <label
+            htmlFor="floating_outlined_district"
+            className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+              errors?.district
+                ? "peer-focus:text-red-600"
+                : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4"
+            }`}
+          >
+            District <span className="text-red-600">*</span>
+          </label>
+          {errors?.district && (
+            <span className="text-sm text-red-500">{errors?.district}</span>
+          )}
+        </div>
+
+        {/* Pincode */}
+        <div className="relative">
+          <input
+            type="number"
+            name="pin_code"
+            id="floating_outlined_pin"
+            className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+              errors?.pin_code ? "border-red-500" : "border-gray-300"
+            }`}
+            placeholder=""
+            value={memberFormData.pin_code}
+            onChange={handleChange}
+          />
+          <label
+            htmlFor="floating_outlined_pin"
+            className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+              errors?.pin_code
+                ? "peer-focus:text-red-600"
+                : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4"
+            }`}
+          >
+            Pincode <span className="text-red-600">*</span>
+          </label>
+          {errors?.pin_code && (
+            <span className="text-sm text-red-500">{errors?.pin_code}</span>
+          )}
+        </div>
+
+        {/* Address */}
+        <div className="relative md:col-span-2">
+          <input
+            type="text"
+            name="address"
+            id="floating_outlined_address"
+            className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+              errors?.address ? "border-red-500" : "border-gray-300"
+            }`}
+            placeholder=""
+            value={memberFormData.address}
+            onChange={handleChange}
+          />
+          <label
+            htmlFor="floating_outlined_address"
+            className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+              errors?.address
+                ? "peer-focus:text-red-600"
+                : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4"
+            }`}
+          >
+            Address <span className="text-red-600">*</span>
+          </label>
+          {errors?.address && (
+            <span className="text-sm text-red-500">{errors?.address}</span>
+          )}
+        </div>
+
+      </div>
+    </div>
+  </div>
+)}
+
 
         {currentStep === 2 && (
           <div className="grid gap-6 mb-5 md:grid-cols-2">
