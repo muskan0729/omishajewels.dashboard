@@ -55,8 +55,18 @@ const Table = ({
         setOpenExport(false);
       }
     };
+
+    const handleScroll = () => {
+      setOpenExport(false);
+    };
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    window.addEventListener("scroll", handleScroll, true);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", handleScroll, true);
+    };
   }, []);
 
   const handleConfirmModal = (id) => {
@@ -130,6 +140,55 @@ const Table = ({
         0
       );
   }, [filteredData]);
+
+  // ✅ Export functions
+  const downloadFile = (content, fileName, mimeType) => {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportCSV = () => {
+    const headers = columns.map((c) => c.header).join(",");
+    const rows = filteredData
+      .map((row) => columns.map((c) => `"${row[c.accessor] ?? ""}"`).join(","))
+      .join("\n");
+    downloadFile(`${headers}\n${rows}`, "table.csv", "text/csv");
+  };
+
+  const exportJSON = () => {
+    downloadFile(JSON.stringify(filteredData, null, 2), "table.json", "application/json");
+  };
+
+  const exportTXT = () => {
+    const headers = columns.map((c) => c.header).join(" | ");
+    const rows = filteredData
+      .map((row) => columns.map((c) => row[c.accessor]).join(" | "))
+      .join("\n");
+    downloadFile(`${headers}\n${rows}`, "table.txt", "text/plain");
+  };
+
+  const exportSQL = () => {
+    const tableName = "export_table";
+    const sqlRows = filteredData
+      .map((row) => {
+        const values = columns
+          .map((c) => {
+            const val = row[c.accessor];
+            if (val === null || val === undefined) return "NULL";
+            if (typeof val === "number") return val;
+            return `'${String(val).replace(/'/g, "''")}'`;
+          })
+          .join(", ");
+        return `INSERT INTO ${tableName} (${columns.map((c) => c.accessor).join(", ")}) VALUES (${values});`;
+      })
+      .join("\n");
+    downloadFile(sqlRows, "table.sql", "text/sql");
+  };
 
   const months = ["Jan","Feb","Mar","Apr","May","Jun",
     "Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -225,6 +284,7 @@ return (
                   onChange={(date) => setStartDate(date)}
                   className="
                     w-40 px-3 py-2 
+                    bg-white
                     border border-[#d7c4a8] 
                     rounded-xl 
                     shadow-sm 
@@ -241,6 +301,7 @@ return (
                   minDate={startDate}
                   className="
                     w-40 px-3 py-2 
+                    bg-white
                     border border-[#d7c4a8] 
                     rounded-xl 
                     shadow-sm 
@@ -283,12 +344,12 @@ return (
 
             {/* EXPORT BTN */}
             {showExport && (
-              <div className="relative">
+              <div className="relative" ref={exportRef}>
                 <button
                   onClick={() => setOpenExport(!openExport)}
                   className="
                     bg-gradient-to-r from-[#b58351] to-[#d7a874] 
-                    text-white 
+                    text-white
                     px-4 py-2 
                     rounded-xl 
                     shadow-lg 
@@ -311,13 +372,13 @@ return (
                       rounded-xl 
                       shadow-xl 
                       p-2 
-                      w-40 z-40
+                      w-40 z-30
                     "
                   >
-                    <button className="gold-option" onClick={exportCSV}>CSV</button>
-                    <button className="gold-option" onClick={exportJSON}>JSON</button>
-                    <button className="gold-option" onClick={exportTXT}>TEXT</button>
-                    <button className="gold-option" onClick={exportSQL}>SQL</button>
+                    <button className="gold-option w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md" onClick={exportCSV}>CSV</button>
+                    <button className="gold-option w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md" onClick={exportJSON}>JSON</button>
+                    <button className="gold-option w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md" onClick={exportTXT}>TEXT</button>
+                    <button className="gold-option w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md" onClick={exportSQL}>SQL</button>
                   </div>
                 )}
               </div>

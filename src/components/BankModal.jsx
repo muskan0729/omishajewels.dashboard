@@ -110,7 +110,10 @@ export const BankModal = ({ showModal, handleModal, activeTab, refreshTable }) =
                 <Button
                   type="submit"
                   disabled={loading}
-                  className={`cursor-pointer text-white bg-[#615141] hover:bg-[#b58351] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                  className={`cursor-pointer text-white bg-gradient-to-r from-[#b58351] to-[#d7a874]
+                  hover:brightness-110 focus:ring-6 
+                  focus:outline-none focus:ring-yellow-100 font-medium rounded-lg text-sm w-full sm:w-auto 
+                  // px-5 py-2.5 text-center ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   {loading ? "Saving..." : "Save"}
                 </Button>

@@ -1,6 +1,12 @@
 import Button from "./Button";
 
-export const ConfirmModal = ({showConfirmModal, handleConfirmModal, action, heading, body}) => {
+export const ConfirmModal = ({
+  showConfirmModal,
+  handleConfirmModal,
+  action,
+  heading,
+  body,
+}) => {
   return (
     <div>
       {showConfirmModal && (
@@ -12,7 +18,7 @@ export const ConfirmModal = ({showConfirmModal, handleConfirmModal, action, head
             className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 transform transition-all scale-100"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-gradient-to-r  from-[#f4e1c1] to-[#e6b35a] text-white font-medium rounded-t-lg px-5 py-3 flex justify-between items-center">
+            <div className="bg-gradient-to-r  from-[#b58351] to-[#b6916d] text-white font-medium rounded-t-lg px-5 py-3 flex justify-between items-center">
               <h3 className="text-lg font-semibold">{heading}</h3>
               <Button
                 onClick={() => handleConfirmModal(false)}
@@ -35,7 +41,10 @@ export const ConfirmModal = ({showConfirmModal, handleConfirmModal, action, head
               <Button
                 onClick={action}
                 type="button"
-                className="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+                className="cursor-pointer text-white  bg-gradient-to-t from-[#b58351] to-[#b6916d] 
+                hover:brightness-110 focus:ring-6 focus:outline-none focus:ring-yellow-100 font-medium
+                rounded-lg text-sm w-full sm:w-auto
+                px-5 py-2.5 text-center"
               >
                 Yes
               </Button>

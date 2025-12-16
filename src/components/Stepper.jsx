@@ -1,72 +1,95 @@
 import React from "react";
 
-export const Stepper = ({ currentStep }) => {
+const steps = [
+  { id: 1, label: "Merchant Info" },
+  { id: 2, label: "Company Info" },
+  { id: 3, label: "Director Info" },
+  { id: 4, label: "Scheme Selection" },
+];
+
+export const Stepper = ({ currentStep = 1 }) => {
   return (
-    <ol class="items-center w-full space-y-4 sm:flex sm:space-x-8 sm:space-y-0 rtl:space-x-reverse justify-evenly mb-5">
-      <li
-        className={`flex items-center space-x-2.5 rtl:space-x-reverse ${
-          currentStep === 1 ? "text-blue-600" : "text-gray-500"
-        }`}
-      >
-        <span
-          className={`flex items-center justify-center w-8 h-8 border rounded-full shrink-0 ${
-            currentStep === 1 ? "border-blue-600" : "border-gray-500"
-          }`}
-        >
-          1
-        </span>
-        <span>
-          <h3 class="font-medium leading-tight">Merchant Info</h3>
-        </span>
-      </li>
-      <li
-        className={`flex items-center space-x-2.5 rtl:space-x-reverse ${
-          currentStep === 2 ? "text-blue-600" : "text-gray-500"
-        }`}
-      >
-        <span
-          className={`flex items-center justify-center w-8 h-8 border rounded-full shrink-0 ${
-            currentStep === 2 ? "border-blue-600" : "border-gray-500"
-          }`}
-        >
-          2
-        </span>
-        <span>
-          <h3 class="font-medium leading-tight">Company Info</h3>
-        </span>
-      </li>
-      <li
-        className={`flex items-center space-x-2.5 rtl:space-x-reverse ${
-          currentStep === 3 ? "text-blue-600" : "text-gray-500"
-        }`}
-      >
-        <span
-          className={`flex items-center justify-center w-8 h-8 border rounded-full shrink-0 ${
-            currentStep === 3 ? "border-blue-600" : "border-gray-500"
-          }`}
-        >
-          3
-        </span>
-        <span>
-          <h3 class="font-medium leading-tight">Director Info</h3>
-        </span>
-      </li>
-      <li
-        className={`flex items-center space-x-2.5 rtl:space-x-reverse ${
-          currentStep === 4 ? "text-blue-600" : "text-gray-500"
-        }`}
-      >
-        <span
-          className={`flex items-center justify-center w-8 h-8 border rounded-full shrink-0 ${
-            currentStep === 4 ? "border-blue-600" : "border-gray-500"
-          }`}
-        >
-          4
-        </span>
-        <span>
-          <h3 class="font-medium leading-tight">Scheme Selection</h3>
-        </span>
-      </li>
-    </ol>
+    <div className="w-full mb-6">
+      <div className="flex items-center justify-between">
+        {steps.map((step, index) => {
+          const isActive = step.id === currentStep;
+          const isCompleted = step.id < currentStep;
+
+          return (
+            <React.Fragment key={step.id}>
+              {/* STEP */}
+              <div className="flex flex-col items-center flex-1">
+                {/* CIRCLE */}
+                <div
+                  className={`
+                    flex items-center justify-center
+                    w-10 h-10 rounded-full border-2
+                    font-semibold text-sm
+                    transition-all duration-300
+                    ${
+                      isCompleted
+                        ? "bg-[#b58351] border-[#b58351] text-white"
+                        : isActive
+                        ? "border-[#b58351] text-[#b58351] bg-white shadow-md"
+                        : "border-gray-300 text-gray-400 bg-white"
+                    }
+                  `}
+                >
+                  {step.id}
+                </div>
+
+                {/* LABEL */}
+                <span
+                  className={`
+                    mt-2 text-sm font-medium text-center
+                    transition-colors duration-300
+                    ${
+                      isActive
+                        ? "text-[#b58351]"
+                        : isCompleted
+                        ? "text-[#615141]"
+                        : "text-gray-400"
+                    }
+                  `}
+                >
+                  {step.label}
+                </span>
+              </div>
+
+              {index !== steps.length - 1 && (
+              <div className="flex items-center flex-1 mx-2">
+                {/* Line */}
+                <div
+                  className={`
+                    flex-1 h-[2px]
+                    transition-colors duration-300
+                    ${
+                      currentStep > step.id
+                        ? "bg-[#b58351]"
+                        : "bg-gray-300"
+                    }
+                  `}
+                />
+
+                {/* Arrow Head */}
+                <div
+                  className={`
+                    w-0 h-0
+                    border-t-4 border-b-4 border-l-6
+                    border-t-transparent border-b-transparent
+                    ${
+                      currentStep > step.id
+                        ? "border-l-[#b58351]"
+                        : "border-l-gray-300"
+                    }
+                  `}
+                />
+              </div>
+            )}
+            </React.Fragment>
+          );
+        })}
+      </div>
+    </div>
   );
 };
