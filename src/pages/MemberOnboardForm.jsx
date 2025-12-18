@@ -12,6 +12,7 @@ import { useToast } from "../contexts/ToastContext";
 export const MemberOnboardForm = () => {
   const [errors, setErrors] = useState();
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [showSchemeModal, setShowSchemeModal] = useState(false);
   const [showPayinModal, setShowPayinModal] = useState(false);
   const [showPayoutModal, setShowPayoutModal] = useState(false);
@@ -58,43 +59,43 @@ export const MemberOnboardForm = () => {
     scheme_id: "",
   });
 
-  const stepRequiredFields = {
-    1: [
-      "name",
-      "mobile_no",
-      "email",
-      "business_mcc",
-      "city",
-      "district",
-      "state",
-      "pin_code",
-      "address",
-    ],
-    2: [
-      "company_pan_no",
-      "company_gst_no",
-      "cin_llpin",
-      "account_holder_name",
-      "bank_account_no",
-      "ifsc_code",
-      "website_url",
-      "company_type",
-      "date_of_incorporation",
-      "company_pan_no_doc", // add file here
-      "company_gst_no_doc", // add file here
-      "cancel_cheque_doc", // add file here
-    ],
-    3: [
-      "director_name",
-      "director_pan_no",
-      "director_aadhar_no",
-      "director_gender",
-      "director_dob",
-      "user_pan_doc", // add director files here if required
-      "user_addhar_doc",
-    ],
-    4: ["payin_at_onboard", "payout_at_onboard", "scheme_id"],
-  };
+const stepRequiredFields = {
+  1: [
+    "name",
+    "mobile_no",
+    "email",
+    "business_mcc",
+    "city",
+    "district",
+    "state",
+    "pin_code",
+    "address",
+  ],
+  2: [
+    "company_pan_no",
+    "company_gst_no",
+    "cin_llpin",
+    "account_holder_name",
+    "bank_account_no",
+    "ifsc_code",
+    "website_url",
+    "company_type",
+    "date_of_incorporation",
+    "company_pan_no_doc",   // add file here
+    "company_gst_no_doc",   // add file here
+    "cancel_cheque_doc",    // add file here
+  ],
+  3: [
+    "director_name",
+    "director_pan_no",
+    "director_aadhar_no",
+    "director_gender",
+    "director_dob",
+    "user_pan_doc",     // add director files here if required
+    "user_addhar_doc",
+  ],
+  4: ["payin_at_onboard", "payout_at_onboard", "scheme_id"],
+};
 
   const navigate = useNavigate();
 
@@ -134,45 +135,230 @@ export const MemberOnboardForm = () => {
     }
   };
 
-  const validateStep = () => {
-    const requiredFields = stepRequiredFields[currentStep];
-    const newErrors = {};
+  const phoneRegex = /^(\+91[\-\s]?)?[0]?(91)?[6789]\d{9}$/;
+const nameRegex = /^[A-Za-z ]+$/;
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const textRegex = /^[A-Za-z]+$/;
+const textNumberRegex = /^[A-Za-z0-9]+$/;
+const numberRegex = /^[0-9]{4}$/;
+const pinnumberRegex = /^[0-9]{6}$/;
+const aadharRegex = /^[0-9]{12}$/;
+const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
 
-    if (currentStep === 3) {
-      memberFormData.director_info.forEach((director, idx) => {
-        requiredFields.forEach((field) => {
-          if (!director[field] || director[field].trim() === "") {
-            if (!newErrors.director) newErrors.director = [];
-            newErrors.director[idx] = {
-              ...newErrors.director[idx],
-              [field]: "This field is required",
-            };
-          }
-        });
-      });
-    } else {
-      requiredFields.forEach((field) => {
-        let value;
+const validationRules = {
+  name: {
+    required: true,
+    pattern: nameRegex,
+    message: "Name is not valid",
+  },
+  mobile_no: {
+    required: true,
+    pattern: phoneRegex,
+    message: "Mobile number is not valid",
+  },
+  email: {
+    required: true,
+    pattern: emailRegex,
+    message: "Email is not valid",
+  },
+  business_mcc: {
+    required: true,
+    pattern: numberRegex,
+    message: "Business MCC must be 4 digits",
+  },
+  city: {
+    required: true,
+    pattern: textRegex,
+    message: "City name is not valid",
+  },
+  state: {
+    required: true,
+    pattern: textRegex,
+    message: "State name is not valid",
+  },
+  district: {
+    required: true,
+    pattern: textRegex,
+    message: "District name is not valid",
+  },
+  pin_code: {
+    required: true,
+    pattern: pinnumberRegex,
+    message: "Pin code must be 6 digits",
+  },
+  account_holder_name: {
+    required: true,
+    pattern: nameRegex,
+    message: "Account holder name is not valid",
+  },
+  bank_account_no: {
+    required: true,
+    pattern: textNumberRegex,
+    message: "Bank account number is not valid",
+  },
+  cin_llpin: {
+    required: true,
+    pattern: textNumberRegex,
+    message: "CIN / LLPIN is not valid",
+  },
+  company_pan_no: {
+    required: true,
+    pattern: panRegex,
+    message: "Company PAN number is not valid",
+  },
+  company_gst_no: {
+    required: true,
+    pattern: textNumberRegex,
+    message: "Company GST number is not valid",
+  },
 
-        value = memberFormData[field];
+  // input file
 
-        if (!value || value === "") {
-          newErrors[field] = `This field is required`;
-        }
-      });
+  company_pan_no_doc: {
+  required: true,
+  allowedTypes: ["image/jpeg", "image/png", "application/pdf"],
+  maxSize: 2 * 1024 * 1024, // 2MB
+  message: "PAN document is required (PDF/JPG/PNG, max 2MB)",
+  },
+
+  company_gst_no_doc: {
+  required: true,
+  allowedTypes: ["image/jpeg", "image/png", "application/pdf"],
+  maxSize: 2 * 1024 * 1024,
+  message: "GST document is required (PDF/JPG/PNG, max 2MB)",
+  },
+
+  cancel_cheque_doc: {
+  required: true,
+  allowedTypes: ["image/jpeg", "image/png", "application/pdf"],
+  maxSize: 2 * 1024 * 1024, // 2MB
+  message: "Cancelled cheque document is required (PDF/JPG/PNG, max 2MB)",
+  },
+
+  // 👤 Director
+  director_name: {
+    required: true,
+    pattern: nameRegex,
+    message: "Director name is not valid",
+  },
+  director_pan_no: {
+    required: true,
+    pattern: panRegex,
+    message: "Director PAN number is not valid",
+  },
+  director_aadhar_no: {
+    required: true,
+    pattern: aadharRegex,
+    message: "Aadhaar number must be 12 digits",
+  },
+
+  user_pan_doc: {
+  required: true,
+  allowedTypes: ["image/jpeg", "image/png", "application/pdf"],
+  maxSize: 2 * 1024 * 1024, // 2MB
+  message: "Director PAN document is required (PDF/JPG/PNG, max 2MB)",
+  },
+
+  user_addhar_doc: {
+  required: true,
+  allowedTypes: ["image/jpeg", "image/png", "application/pdf"],
+  maxSize: 2 * 1024 * 1024, // 2MB
+  message: "Director Aadhaar document is required (PDF/JPG/PNG, max 2MB)",
+  },
+
+
+};
+
+const validateFileValue = (file, rules) => {
+  if (rules?.required && !file) {
+    return rules.message || "File is required";
+  }
+
+  if (file && rules?.allowedTypes && !rules.allowedTypes.includes(file.type)) {
+    return "Invalid file type";
+  }
+
+  if (file && rules?.maxSize && file.size > rules.maxSize) {
+    return "File size exceeds limit";
+  }
+
+  return null;
+};
+
+  
+const validateStep = () => {
+  const requiredFields = stepRequiredFields[currentStep];
+  const newErrors = {};
+
+  const validateValue = (value, field) => {
+    const rules = validationRules[field];
+
+    // 🟢 FILE INPUT VALIDATION
+    if (
+      value instanceof File ||
+      rules?.allowedTypes ||
+      rules?.maxSize
+    ) {
+      return validateFileValue(value, rules);
     }
 
-    setErrors(newErrors);
+    // 🔵 TEXT / SELECT / DATE INPUT VALIDATION
+    if (
+      value === undefined ||
+      value === null ||
+      (typeof value === "string" && value.trim() === "")
+    ) {
+      return "This field is required.";
+    }
 
-    return Object.keys(newErrors).length === 0; // true if no errors
+    if (rules?.pattern && typeof value === "string") {
+      if (!rules.pattern.test(value.trim())) {
+        return rules.message || "Invalid format";
+      }
+    }
+
+    return null;
   };
 
+  // 👤 STEP 3 — Directors
+  if (currentStep === 3) {
+    memberFormData.director_info.forEach((director, idx) => {
+      requiredFields.forEach((field) => {
+        const error = validateValue(director[field], field);
+
+        if (error) {
+          if (!newErrors.director) newErrors.director = [];
+          newErrors.director[idx] = {
+            ...newErrors.director[idx],
+            [field]: error,
+          };
+        }
+      });
+    });
+  }
+  // 🧾 Other steps
+  else {
+    requiredFields.forEach((field) => {
+      const error = validateValue(memberFormData[field], field);
+      if (error) {
+        newErrors[field] = error;
+      }
+    });
+  }
+
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
+
+
   const handleNext = () => {
-    // if (validateStep()) {
+    setIsSubmitted(true); // 👈 
+
+    if (validateStep()) {
     if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
-    // }
+    } 
   };
   useEffect(() => {
     if (memberFormData.payin_at_onboard !== "Airpay") return; // only run for Airpay
@@ -180,7 +366,7 @@ export const MemberOnboardForm = () => {
     const credentialsData = midCredentials?.data || [];
     if (credentialsData.length > 0) {
       setAirpayMids(credentialsData);
-      console.log("✅ credentials loaded:", credentialsData);
+      // console.log("✅ credentials loaded:", credentialsData);
     } else {
       console.warn("⚠️ no credentials found yet");
       setAirpayMids([]);
@@ -203,18 +389,19 @@ export const MemberOnboardForm = () => {
     }));
   };
 
-  const handleDirectorChange = (index, e) => {
-    const { name, value, files } = e.target;
-    setMemberFormData((prev) => {
-      const updatedDirectors = [...prev.director_info];
-      updatedDirectors[index] = {
-        ...updatedDirectors[index],
-        [name]: files ? files[0] : value,
-      };
-      return { ...prev, director_info: updatedDirectors };
-    });
-    console.log(`Director ${index} ${name}:`, files ? files[0] : value);
-  };
+const handleDirectorChange = (index, e) => {
+  const { name, value, files } = e.target;
+  setMemberFormData((prev) => {
+    const updatedDirectors = [...prev.director_info];
+    updatedDirectors[index] = {
+      ...updatedDirectors[index],
+      [name]: files ? files[0] : value,
+    };
+    return { ...prev, director_info: updatedDirectors };
+  });
+  // console.log(`Director ${index} ${name}:`, files ? files[0] : value);
+};
+
 
   const addDirector = () => {
     setMemberFormData((prev) => ({
@@ -225,7 +412,7 @@ export const MemberOnboardForm = () => {
           director_name: "",
           director_gender: "",
           director_pan_no: "",
-
+         
           director_aadhar_no: "",
           user_pan_doc: null,
           user_addhar_doc: null,
@@ -241,87 +428,82 @@ export const MemberOnboardForm = () => {
       director_info: prev.director_info.filter((_, i) => i !== index),
     }));
   };
-  const handleCompanyFileChange = (e) => {
-    const { name, files } = e.target;
-    setMemberFormData((prev) => ({
-      ...prev,
-      [name]: files?.[0] || null, // only keep real file
-    }));
-    console.log(name, files?.[0]); // verify
-  };
+const handleCompanyFileChange = (e) => {
+  const { name, files } = e.target;
+  setMemberFormData((prev) => ({
+    ...prev,
+    [name]: files?.[0] || null, // only keep real file
+  }));
+  // console.log(name, files?.[0]); // verify
+};
 
-  const handleDirectorFileChange = (index, e) => {
-    const { name, files } = e.target;
-    setMemberFormData((prev) => {
-      const updatedDirectors = [...prev.director_info];
-      updatedDirectors[index][name] = files?.[0] || null;
-      return { ...prev, director_info: updatedDirectors };
+const handleDirectorFileChange = (index, e) => {
+  const { name, files } = e.target;
+  setMemberFormData((prev) => {
+    const updatedDirectors = [...prev.director_info];
+    updatedDirectors[index][name] = files?.[0] || null;
+    return { ...prev, director_info: updatedDirectors };
+  });
+  // console.log(`Director ${index} ${name}`, files?.[0]);
+};
+
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsSubmitted(true); // 👈 
+
+  if (!validateStep()) return;
+
+  try {
+    const formData = new FormData();
+
+    // console.log("===== Form Submission Start =====");
+
+    // Append text fields (excluding files and directors)
+    Object.keys(memberFormData).forEach((key) => {
+      if (!["director_info", "company_pan_no_doc", "company_gst_no_doc", "cancel_cheque_doc"].includes(key)) {
+        formData.append(key, memberFormData[key]);
+        // console.log(`[Text] ${key}:`, memberFormData[key]);
+      }
     });
-    console.log(`Director ${index} ${name}`, files?.[0]);
-  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+    // Append company files
+    ["company_pan_no_doc", "company_gst_no_doc", "cancel_cheque_doc"].forEach((fileKey) => {
+      if (memberFormData[fileKey] instanceof File) {
+        formData.append(fileKey, memberFormData[fileKey]);
+        // console.log(`[File] ${fileKey}:`, memberFormData[fileKey].name);
+      }
+    });
 
-    if (!validateStep()) return;
-
-    try {
-      const formData = new FormData();
-
-      console.log("===== Form Submission Start =====");
-
-      // Append text fields (excluding files and directors)
-      Object.keys(memberFormData).forEach((key) => {
-        if (
-          ![
-            "director_info",
-            "company_pan_no_doc",
-            "company_gst_no_doc",
-            "cancel_cheque_doc",
-          ].includes(key)
-        ) {
-          formData.append(key, memberFormData[key]);
-          console.log(`[Text] ${key}:`, memberFormData[key]);
+    // Append directors correctly
+    memberFormData.director_info.forEach((director, idx) => {
+      Object.keys(director).forEach((field) => {
+        const value = director[field];
+        if (value instanceof File) {
+          formData.append(`director_info[${idx}][${field}]`, value);
+          // console.log(`[File] director_info[${idx}][${field}]:`, value.name);
+        } else {
+          formData.append(`director_info[${idx}][${field}]`, value);
+          // console.log(`[Text] director_info[${idx}][${field}]:`, value);
         }
       });
+    });
 
-      // Append company files
-      ["company_pan_no_doc", "company_gst_no_doc", "cancel_cheque_doc"].forEach(
-        (fileKey) => {
-          if (memberFormData[fileKey] instanceof File) {
-            formData.append(fileKey, memberFormData[fileKey]);
-            console.log(`[File] ${fileKey}:`, memberFormData[fileKey].name);
-          }
-        }
-      );
+    // console.log("===== Form Submission End =====");
 
-      // Append directors correctly
-      memberFormData.director_info.forEach((director, idx) => {
-        Object.keys(director).forEach((field) => {
-          const value = director[field];
-          if (value instanceof File) {
-            formData.append(`director_info[${idx}][${field}]`, value);
-            console.log(`[File] director_info[${idx}][${field}]:`, value.name);
-          } else {
-            formData.append(`director_info[${idx}][${field}]`, value);
-            console.log(`[Text] director_info[${idx}][${field}]:`, value);
-          }
-        });
-      });
+    await executeMember(formData);
+    toast.success("Form submitted successfully!");
+    navigate("/member-list");
 
-      console.log("===== Form Submission End =====");
+  } catch (err) {
+    const errors = err?.response?.data?.errors;
+    const msg = errors
+      ? Object.values(errors)[0][0]
+      : err?.response?.data?.message || "Something went wrong";
+    toast.error(msg);
+  }
+};
 
-      await executeMember(formData);
-      toast.success("Form submitted successfully!");
-      navigate("/member-list");
-    } catch (err) {
-      const errors = err?.response?.data?.errors;
-      const msg = errors
-        ? Object.values(errors)[0][0]
-        : err?.response?.data?.message || "Something went wrong";
-      toast.error(msg);
-    }
-  };
 
   return (
     <>
@@ -660,17 +842,29 @@ export const MemberOnboardForm = () => {
                     <input
                       type="file"
                       name="company_pan_no_doc"
-                      className="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
+                      className={`block px-2.5 pb-2.5 pt-4 w-full text-sm bg-transparent rounded-lg border appearance-none peer
+                        ${
+                          isSubmitted && errors?.company_pan_no_doc
+                            ? "border-red-500"
+                            : isSubmitted && memberFormData.company_pan_no_doc instanceof File
+                            ? "border-green-500"
+                            : "border-gray-300"
+                        }`}
                       onChange={handleCompanyFileChange}
                     />
 
-                    <label
-                      htmlFor="floating_outlined_pan_doc"
-                      className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                    >
-                      Document Of Pan Card{" "}
-                      <span className="text-red-600">*</span>
+                    <label 
+                    for="floating_outlined_pan_doc"
+                    className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:text-blue-600 start-1"
+                    >  
+                      Document Of Pan Card <span className="text-red-600">*</span>
                     </label>
+
+                    {isSubmitted && errors?.company_pan_no_doc && (
+                      <span className="text-sm text-red-500">
+                        {errors.company_pan_no_doc}
+                      </span>
+                    )}
                   </div>
 
                   <div className="relative">
@@ -703,22 +897,36 @@ export const MemberOnboardForm = () => {
                       </span>
                     )}
                   </div>
+
                   <div className="relative">
                     <input
                       type="file"
                       name="company_gst_no_doc"
-                      className="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
+                      className={`block px-2.5 pb-2.5 pt-4 w-full text-sm bg-transparent rounded-lg border appearance-none peer
+                        ${
+                          isSubmitted && errors?.company_gst_no_doc
+                            ? "border-red-500"
+                            : isSubmitted && memberFormData.company_gst_no_doc instanceof File
+                            ? "border-green-500"
+                            : "border-gray-300"
+                        }`}
                       onChange={handleCompanyFileChange}
                     />
 
                     <label
-                      for="floating_outlined_gst_doc"
-                      className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                      htmlFor="floating_outlined_gst_doc"
+                      className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:text-blue-600 start-1"
                     >
-                      Document Of GST Number{" "}
-                      <span className="text-red-600">*</span>
+                      Document Of GST Number <span className="text-red-600">*</span>
                     </label>
+
+                    {isSubmitted && errors?.company_gst_no_doc && (
+                      <span className="text-sm text-red-500">
+                        {errors.company_gst_no_doc}
+                      </span>
+                    )}
                   </div>
+
                   <div className="relative">
                     <input
                       type="text"
@@ -763,7 +971,7 @@ export const MemberOnboardForm = () => {
                       name="company_type"
                       onChange={handleChange}
                       value={memberFormData.company_type}
-                      className={`bg-gray-50 border  text-gray-900 text-sm rounded-lg w-full p-2.5 ${
+                      className={`bg-gray-50 block px-3 pb-3.5 pt-4 border  text-gray-900 text-sm rounded-lg w-full p-2.5 ${
                         errors?.company_type
                           ? "border-red-500"
                           : "border-gray-300"
@@ -910,22 +1118,36 @@ export const MemberOnboardForm = () => {
                       </span>
                     )}
                   </div>
+
                   <div className="relative">
                     <input
                       type="file"
                       name="cancel_cheque_doc"
-                      className="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
+                      className={`block px-2.5 pb-2.5 pt-4 w-full text-sm bg-transparent rounded-lg border appearance-none peer
+                        ${
+                          isSubmitted && errors?.cancel_cheque_doc
+                            ? "border-red-500"
+                            : isSubmitted && memberFormData.cancel_cheque_doc instanceof File
+                            ? "border-green-500"
+                            : "border-gray-300"
+                        }`}
                       onChange={handleCompanyFileChange}
                     />
 
                     <label
-                      for="floating_outlined_cancel_doc"
-                      className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                      htmlFor="floating_outlined_cancel_doc"
+                      className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:text-blue-600 start-1"
                     >
-                      Document Of Cancel Cheque{" "}
-                      <span className="text-red-600">*</span>
+                      Document Of Cancel Cheque <span className="text-red-600">*</span>
                     </label>
+
+                    {isSubmitted && errors?.cancel_cheque_doc && (
+                      <span className="text-sm text-red-500">
+                        {errors.cancel_cheque_doc}
+                      </span>
+                    )}
                   </div>
+
                   <div className="relative">
                     <input
                       type="text"
@@ -1057,22 +1279,37 @@ export const MemberOnboardForm = () => {
                         </span>
                       )}
                     </div>
+
                     <div className="relative">
                       <input
                         type="file"
                         name="user_pan_doc"
-                        className="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
+                        className={`block px-2.5 pb-2.5 pt-4 w-full text-sm bg-transparent rounded-lg border appearance-none peer
+                          ${
+                            isSubmitted && errors?.director?.[index]?.user_pan_doc
+                              ? "border-red-500"
+                              : isSubmitted && director.user_pan_doc instanceof File
+                              ? "border-green-500"
+                              : "border-gray-300"
+                          }`}
                         onChange={(e) => handleDirectorFileChange(index, e)}
                       />
 
                       <label
-                        for="floating_outlined_director_pan_doc"
-                        className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                        htmlFor="floating_outlined_director_pan_doc"
+                        className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:text-blue-600 start-1"
                       >
-                        Document Of Pan Card{" "}
-                        <span className="text-red-600">*</span>
+                        Document Of PAN Card <span className="text-red-600">*</span>
                       </label>
+
+                      {isSubmitted && errors?.director?.[index]?.user_pan_doc && (
+                        <span className="text-sm text-red-500">
+                          {errors.director[index].user_pan_doc}
+                        </span>
+                      )}
                     </div>
+
+
                     <div className="relative">
                       <input
                         type="number"
@@ -1104,22 +1341,36 @@ export const MemberOnboardForm = () => {
                         </span>
                       )}
                     </div>
+
                     <div className="relative">
                       <input
                         type="file"
                         name="user_addhar_doc"
-                        className="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
+                        className={`block px-2.5 pb-2.5 pt-4 w-full text-sm bg-transparent rounded-lg border appearance-none peer
+                          ${
+                            isSubmitted && errors?.director?.[index]?.user_addhar_doc
+                              ? "border-red-500"
+                              : isSubmitted && director.user_addhar_doc instanceof File
+                              ? "border-green-500"
+                              : "border-gray-300"
+                          }`}
                         onChange={(e) => handleDirectorFileChange(index, e)}
                       />
 
                       <label
-                        for="floating_outlined_director_aadhar_doc"
-                        className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                        htmlFor="floating_outlined_director_aadhar_doc"
+                        className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 start-1"
                       >
-                        Document Of Aadhar Card{" "}
-                        <span className="text-red-600">*</span>
+                        Document Of Aadhaar Card <span className="text-red-600">*</span>
                       </label>
+
+                      {isSubmitted && errors?.director?.[index]?.user_addhar_doc && (
+                        <span className="text-sm text-red-500">
+                          {errors.director[index].user_addhar_doc}
+                        </span>
+                      )}
                     </div>
+
                     <div className="relative">
                       <input
                         type="date"
