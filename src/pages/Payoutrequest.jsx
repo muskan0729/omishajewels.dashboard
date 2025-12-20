@@ -14,6 +14,9 @@ const Payoutrequest = () => {
   const [amount, setAmount] = useState("");
   const [paymentMode, setPaymentMode] = useState("IMPS");
   const [isLoading, setIsLoading] = useState(false);
+// ===== TOKEN DROPDOWN =====
+const [tokens, setTokens] = useState([]);
+const [selectedToken, setSelectedToken] = useState("");
 
   const [amountError, setAmountError] = useState("");
   const [beneEmailError, setbeneEmailError] = useState("");
@@ -33,29 +36,51 @@ const Payoutrequest = () => {
 
   const { data, loading, error, refetch } = useGet("/beneficiary-List");
 
+  // ===== GET TOKEN LIST =====
+const {
+  data: tokenData,
+  loading: tokenLoading,
+  error: tokenError,
+} = useGet("/get-tokens");
+
   useEffect(() => {
     if (data?.data) {
       setbeneficiary(data.data);
     }
   }, [data]);
 
-  const { execute: payoutsend } = usePost("/dashboard-payou/request");
+  // ===== STORE TOKEN DATA =====
+useEffect(() => {
+  if (tokenData?.data) {
+    setTokens(tokenData.data);
+  }
+}, [tokenData]);
+
+
+  const { execute: payoutsend } = usePost("/payout/request");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     setIsLoading(true);
     if (!selectedUser) return;
+
+if (!selectedToken) {
+  toast.error("Please select token");
+  return;
+}
+
     try {
       const payload = {
         // token: "Pq4mPdo9AkdT2NkEw4MANTy5fw7kBY",
+         token: selectedToken,
         orderid: "DASH" + Date.now(),
-        email: selectedUser.beneficiary_email_id,
-        mobile: selectedUser.beneficiary_mobile_no,
+        beneficiary_email: selectedUser.beneficiary_email_id,
+        beneficiary_phone: selectedUser.beneficiary_mobile_no,
         amount,
-        account: selectedUser.account_no,
-        ifsc: selectedUser.ifsc_code,
-        name: selectedUser.beneficiary_name,
+        beneficiary_account_number: selectedUser.account_no,
+        beneficiary_ifsc: selectedUser.ifsc_code,
+        beneficiary_name: selectedUser.beneficiary_name,
         mode: paymentMode,
       };
 
@@ -314,6 +339,35 @@ const Payoutrequest = () => {
             {/* ✅ Modal Body */}
             <form className="p-6 space-y-4" onSubmit={handleSubmit}>
               <div className="grid grid-cols-2 gap-4">
+
+                {/* ===== TOKEN ID DROPDOWN ===== */}
+<div>
+  <label className="block mb-2 text-sm font-medium text-gray-900">
+    Token ID
+  </label>
+  <select
+    value={selectedToken}
+    onChange={(e) => setSelectedToken(e.target.value)}
+    className="w-full border border-gray-300 rounded-lg p-2 text-sm"
+  >
+    <option value="">
+      {tokenLoading ? "Loading..." : "-- Select Token --"}
+    </option>
+
+    {tokens.map((t, i) => (
+      <option key={i} value={t.token}>
+        {t.token}
+      </option>
+    ))}
+  </select>
+
+  {tokenError && (
+    <p className="text-red-600 text-sm mt-1">
+      Unable to load token list
+    </p>
+  )}
+</div>
+
                 {/* Amount */}
                 <div>
                   <label

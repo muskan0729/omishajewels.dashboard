@@ -20,6 +20,7 @@ const ApiSetting = () => {
   const { data: apiTokensData, refetch: refetchApiTokens } = useGet(endPoint);
   const initialDataOfTokens = apiTokensData?.data;
 
+  console.log("datamy",apiTokensData);
   useEffect(() => {
     const formattedMerchantData = initialDataOfTokens?.map((item, index) => ({
       sqno: index + 1,

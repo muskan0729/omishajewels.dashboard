@@ -135,6 +135,15 @@ function LoginForm() {
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
+<p className="text-center text-sm text-gray-500 mt-4">
+  Don’t have an account?{" "}
+  <span
+    onClick={() => navigate("/register")}
+    className="text-[#c7a43d] font-semibold cursor-pointer hover:underline"
+  >
+    Create one
+  </span>
+</p>
 
         </form>
       </div>

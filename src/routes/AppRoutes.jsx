@@ -5,6 +5,11 @@ import Loadwallet from "../pages/LoadWallet";
 import Payinsettlement from "../pages/PayinSettlement";
 import Payoutrequest from "../pages/Payoutrequest";
 import LoginForm from "../pages/LoginForm";
+import RegisterForm from "../pages/RegisterForm";
+import VerifyOtp from "../pages/VerifyOtp";
+import MerchantSuccess from "../pages/MerchantSuccess";
+
+import MemberUserForm from "../pages/MemberUserForm";
 import { MemberOnboardForm } from "../pages/MemberOnboardForm";
 import { Member } from "../pages/Member";
 import { Dashboard } from "../pages/Dashboard";
@@ -37,6 +42,11 @@ const AppRoutes = () => {
             <Route path="/spay-glide-pgcancel" element={ <SpayGlidePGCancel/> } />
             <Route path="/spay-glide-pgerror" element={ <SpayGlidePGError/> } />
             <Route path="/" element={<LoginForm />} />
+             <Route path="/register" element={<RegisterForm />} />
+             <Route path="/verify-otp" element={<VerifyOtp />} />
+            <Route path="/MemberUserForm" element={<MemberUserForm />} />
+            <Route path="/merchant-success" element={<MerchantSuccess />} />
+
             <Route element={<Layout />}>
                 <Route 
                     path="/profile" 
