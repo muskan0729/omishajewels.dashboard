@@ -33,7 +33,7 @@ export default function StatsCards({ inCard, outCard }) {
           </p>
           <i className={`fa-solid ${showTodayState ? iconToday : iconTotal} text-2xl`}></i>
         </div>
-        <div className="text-3xl font-bold text-[#4d443b]">
+        <div className="text-xl font-bold text-[#4d443b]">
           ₹ {showTodayState ? todayValue : totalValue}
         </div>
 

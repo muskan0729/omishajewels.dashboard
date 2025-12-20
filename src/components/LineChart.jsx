@@ -9,10 +9,10 @@ export const LineChart = ({ data }) => {
       return data.map((d) => Number(d.total) || 0);
     }
 
-    return [1200, 600, 900, 1500, 1700, 1400, 2000, 800, 1900];
+    return [1200, 600, 900, 1500, 1700, 1400, 2000, 800, 1900, 1000, 1100, 900];
   }, [data]);
 
-  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep"];
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   const total = chartData.reduce((a, b) => a + b, 0);
 
   useEffect(() => {
