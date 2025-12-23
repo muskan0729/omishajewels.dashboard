@@ -19,17 +19,31 @@ function LoginForm() {
     e.preventDefault();
     try {
       const response = await login(formData);
+console.log(response);
+     if (response) {
+    localStorage.setItem("token", response.token);
+    localStorage.setItem("email", response.user.email);
+    localStorage.setItem("role", btoa(response.user.role_type));
+    localStorage.setItem("user", JSON.stringify(response.user));
 
-      if (response) {
-        localStorage.setItem("token", response.token);
-        localStorage.setItem("email", response.user.email);
-        localStorage.setItem("role", btoa(response.user.role_type));
-        localStorage.setItem("user", JSON.stringify(response.user));
-        navigate("/dashboard", { replace: true });
-      }
-    } catch (err) {
-      console.log("Login failed:", err);
-    }
+    // Check KYC status
+if (response.user.kyc === 1) {
+  // Full KYC done → Dashboard
+  navigate("/dashboard", { replace: true });
+
+} else if (response.user.pre_kyc_status === 0) {
+  // Pre-KYC not done → Fill Member Form
+  navigate("/MemberUserForm", { replace: true });
+
+} else {
+  // Pre-KYC done but KYC pending
+  navigate("/merchant-success", { replace: true });
+}
+
+  }
+} catch (err) {
+  console.log("Login failed:", err);
+}
   };
 
   return (

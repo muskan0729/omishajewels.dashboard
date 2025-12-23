@@ -10,13 +10,29 @@ const [previewType, setPreviewType] = useState(""); // image | video
 
   const [step, setStep] = useState(1);
 
-  const [formData, setFormData] = useState({
-    name: "", mobile_no: "", email: "", business_mcc: "",
-    company_type: "", company_pan_no: "", company_gst_no: "",
-    cin_llpin: "", date_of_incorporation: "", website_url: "",
-    account_holder_name: "", bank_account_no: "", ifsc_code: "",
-    city: "", state: "", district: "", pin_code: "", address: "",
-  });
+const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+const [formData, setFormData] = useState({
+  name: user.name || "", 
+  mobile_no: user.mobile_no || "", 
+  email: user.email || "", 
+  business_mcc: "",
+  company_type: "",
+  company_pan_no: "",
+  company_gst_no: "",
+  cin_llpin: "",
+  date_of_incorporation: "",
+  website_url: "",
+  account_holder_name: "",
+  bank_account_no: "",
+  ifsc_code: "",
+  city: "",
+  state: "",
+  district: "",
+  pin_code: "",
+  address: "",
+});
+
 
   const [companyDocs, setCompanyDocs] = useState({
     company_pan_no_doc: null, company_gst_no_doc: null, cancel_cheque_doc: null,
@@ -128,7 +144,9 @@ const [previewType, setPreviewType] = useState(""); // image | video
   };
 
   const stepIndicator = ["Business","Bank","Address","Director","Video KYC","Review"];
-  const input="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400";
+  const input =
+  "w-full px-4 py-2.5 bg-white/80 border border-gray-300 rounded-xl text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#C9A23F] focus:border-[#C9A23F]";
+
 
   const renderFilePreview = (file) => {
   if (!file) return <span className="text-gray-500">Not uploaded</span>;
@@ -174,15 +192,32 @@ const renderVideoPreview = (file) => {
 
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
-      <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Merchant Registration</h1>
+   <div className="max-w-4xl mx-auto p-8 bg-gradient-to-br from-[#FFF8E1] to-white shadow-2xl rounded-2xl border border-[#E5E7EB]">
+ <h1 className="text-4xl font-extrabold mb-2 text-center text-[#9E7C19] tracking-wide">
+  Complete Your KYC
+</h1>
+<p className="text-center text-gray-600 mb-6">
+  Verify your business and personal details in a few simple steps
+</p>
+
+
 
       {/* Step Indicator */}
       <div className="flex justify-between mb-6">
         {stepIndicator.map((label,index)=>(
           <div key={index} className="flex-1">
-            <div className={`w-full h-2 rounded-full ${step-1>=index?'bg-blue-600':'bg-gray-300'}`}></div>
-            <p className="text-center text-sm mt-1">{label}</p>
+            <div
+  className={`w-full h-2 rounded-full transition-all duration-300 ${
+    step - 1 >= index
+      ? "bg-gradient-to-r from-[#C9A23F] to-[#9E7C19]"
+      : "bg-gray-200"
+  }`}
+></div>
+
+           <p className="text-center text-sm mt-1 font-medium text-gray-700">
+  {label}
+</p>
+
           </div>
         ))}
       </div>
@@ -190,25 +225,39 @@ const renderVideoPreview = (file) => {
       {/* Step Content */}
       {step===1 && (
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-blue-700 mb-2">🏢 Business Details</h2>
+          <h2 className="text-xl font-semibold text-[#9E7C19] mb-2">🏢 Business Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {["name","mobile_no","email","business_mcc","company_type","company_pan_no","company_gst_no","cin_llpin","date_of_incorporation","website_url"].map((key,index)=>(
-              <div key={index}>
-                <label className="block mb-1 font-medium">{key.replace(/_/g," ")} {key!=="website_url"?"*":""}</label>
-                {key==="company_type" ? (
-                  <select className={input} value={formData.company_type} onChange={e=>handleChange("company_type",e.target.value)}>
-                    <option value="">Select</option>
-                    <option value="private">Private</option>
-                    <option value="public">Public</option>
-                  </select>
-                ): key==="date_of_incorporation" ? (
-                  <input type="date" className={input} value={formData[key]} onChange={e=>handleChange(key,e.target.value)} />
-                ) : (
-                  <input className={input} value={formData[key]} onChange={e=>handleChange(key,e.target.value)} />
-                )}
-                {errors[key] && <p className="text-red-600 text-sm">{errors[key]}</p>}
-              </div>
-            ))}
+          {/* Locked fields from database */}
+{["name","mobile_no","email"].map((key,index)=>(
+  <div key={index}>
+    <label className="block mb-1 font-medium">{key.replace(/_/g," ")} *</label>
+    <input 
+      className={`${input} bg-gray-100 cursor-not-allowed`} 
+      value={formData[key]} 
+      readOnly 
+    />
+  </div>
+))}
+
+{/* Editable fields */}
+{["business_mcc","company_type","company_pan_no","company_gst_no","cin_llpin","date_of_incorporation","website_url"].map((key,index)=>(
+  <div key={index}>
+    <label className="block mb-1 font-medium">{key.replace(/_/g," ")} {key!=="website_url"?"*":""}</label>
+    {key==="company_type" ? (
+      <select className={input} value={formData.company_type} onChange={e=>handleChange("company_type",e.target.value)}>
+        <option value="">Select</option>
+        <option value="private">Private</option>
+        <option value="public">Public</option>
+      </select>
+    ): key==="date_of_incorporation" ? (
+      <input type="date" className={input} value={formData[key]} onChange={e=>handleChange(key,e.target.value)} />
+    ) : (
+      <input className={input} value={formData[key]} onChange={e=>handleChange(key,e.target.value)} />
+    )}
+    {errors[key] && <p className="text-red-600 text-sm">{errors[key]}</p>}
+  </div>
+))}
+
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
             {["company_pan_no_doc","company_gst_no_doc","cancel_cheque_doc"].map((key)=>
@@ -224,7 +273,7 @@ const renderVideoPreview = (file) => {
 
       {step===2 && (
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-blue-700 mb-2">💰 Bank Details</h2>
+          <h2 className="text-xl font-semibold text-[#9E7C19] mb-2">💰 Bank Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {["account_holder_name","bank_account_no","ifsc_code"].map((key)=>
               <div key={key}>
@@ -239,7 +288,7 @@ const renderVideoPreview = (file) => {
 
       {step===3 && (
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-blue-700 mb-2">📍 Address Details</h2>
+          <h2 className="text-xl font-semibold text-[#9E7C19] mb-2">📍 Address Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {["city","state","district","pin_code","address"].map((key)=>
               <div key={key}>
@@ -254,9 +303,9 @@ const renderVideoPreview = (file) => {
 
       {step===4 && (
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-blue-700 mb-2">👤 Director Information</h2>
+          <h2 className="text-xl font-semibold text-[#9E7C19] mb-2">👤 Director Information</h2>
           {directors.map((d,i)=>(
-            <div key={i} className="p-4 border rounded-lg bg-gray-50 space-y-3">
+            <div key={i} className="p-4 border rounded-lg bg-white border border-gray-200 shadow-sm rounded-xl space-y-3">
               <h3 className="font-semibold text-gray-800">Director {i+1}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {["director_name","director_pan_no","director_aadhar_no","director_gender","director_dob"].map((k)=>
@@ -285,26 +334,54 @@ const renderVideoPreview = (file) => {
               </div>
             </div>
           ))}
-          <button type="button" onClick={()=>setDirectors([...directors,{director_name:"", director_pan_no:"", director_aadhar_no:"", director_gender:"", director_dob:"", user_pan_doc:null, user_addhar_doc:null}])} className="bg-green-600 text-white px-4 py-2 rounded">+ Add Director</button>
+          <button type="button" onClick={()=>setDirectors([...directors,{director_name:"", director_pan_no:"", director_aadhar_no:"", director_gender:"", director_dob:"", user_pan_doc:null, user_addhar_doc:null}])} className="bg-[#1F2937] hover:bg-black shadow-md text-white px-4 py-2 rounded">+ Add Director</button>
         </div>
       )}
 
-      {step===5 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-blue-700 mb-2">🎥 Video KYC</h2>
-          <input type="file" className={input} onChange={e=>setVideoKYC(e.target.files[0])} />
-          {errors.videoKYC && <p className="text-red-600 text-sm">{errors.videoKYC}</p>}
-        </div>
-      )}
+    {step===5 && (
+  <div className="space-y-6">
+    <h2 className="text-xl font-semibold text-[#9E7C19] mb-2">🎥 Video KYC</h2>
+    
+    {/* Instructions */}
+    <div className="bg-yellow-50 border-l-4 border-[#9E7C19] p-4 rounded space-y-2">
+      <p className="font-medium">Please record a short video following these steps:</p>
+      <ol className="list-decimal list-inside text-gray-700 space-y-1">
+        <li>Hold your face in front of the camera and clearly say your full name.</li>
+        <li>Show your PAN card to the camera so it is clearly visible.</li>
+        <li>Optionally, show any other required documents if prompted.</li>
+      </ol>
+      <p className="text-sm text-gray-500">Ensure good lighting and no obstructions for clear verification.</p>
+    </div>
+
+    {/* File input */}
+    <input 
+      type="file" 
+      className={input} 
+      accept="video/*" 
+      onChange={e=>setVideoKYC(e.target.files[0])} 
+    />
+    {errors.videoKYC && <p className="text-red-600 text-sm">{errors.videoKYC}</p>}
+
+    {/* Preview */}
+    {videoKYC && (
+      <video 
+        src={URL.createObjectURL(videoKYC)} 
+        controls 
+        className="w-80 mt-2 rounded border"
+      />
+    )}
+  </div>
+)}
+
 
      {step === 6 && (
   <div className="space-y-6">
-    <h2 className="text-xl font-semibold text-blue-700 mb-4">
+    <h2 className="text-xl font-semibold text-[#9E7C19] mb-4">
       📝 Review Information
     </h2>
 
     {/* Business Details */}
-    <div className="border rounded-lg p-4 bg-gray-50">
+    <div className="border rounded-lg p-4 bg-white border border-gray-200 shadow-sm rounded-xl">
       <h3 className="font-semibold text-lg mb-2 text-gray-800">🏢 Business Details</h3>
       <p><b>Name:</b> {formData.name}</p>
       <p><b>Mobile:</b> {formData.mobile_no}</p>
@@ -319,7 +396,7 @@ const renderVideoPreview = (file) => {
     </div>
 
     {/* Bank Details */}
-    <div className="border rounded-lg p-4 bg-gray-50">
+    <div className="border rounded-lg p-4 bg-white border border-gray-200 shadow-sm rounded-xl">
       <h3 className="font-semibold text-lg mb-2 text-gray-800">💰 Bank Details</h3>
       <p><b>Account Holder:</b> {formData.account_holder_name}</p>
       <p><b>Account Number:</b> {formData.bank_account_no}</p>
@@ -327,7 +404,7 @@ const renderVideoPreview = (file) => {
     </div>
 
     {/* Address Details */}
-    <div className="border rounded-lg p-4 bg-gray-50">
+    <div className="border rounded-lg p-4 bg-white border border-gray-200 shadow-sm rounded-xl">
       <h3 className="font-semibold text-lg mb-2 text-gray-800">📍 Address Details</h3>
       <p><b>City:</b> {formData.city}</p>
       <p><b>State:</b> {formData.state}</p>
@@ -337,7 +414,7 @@ const renderVideoPreview = (file) => {
     </div>
 
     {/* Company Documents */}
-    <div className="border rounded-lg p-4 bg-gray-50">
+    <div className="border rounded-lg p-4 bg-white border border-gray-200 shadow-sm rounded-xl">
       <h3 className="font-semibold text-lg mb-2 text-gray-800">📄 Company Documents</h3>
      <div className="flex gap-6 flex-wrap">
   <div>
@@ -359,11 +436,11 @@ const renderVideoPreview = (file) => {
     </div>
 
     {/* Directors */}
-    <div className="border rounded-lg p-4 bg-gray-50">
+    <div className="border rounded-lg p-4 bg-white border border-gray-200 shadow-sm rounded-xl">
       <h3 className="font-semibold text-lg mb-2 text-gray-800">👤 Directors</h3>
 
       {directors.map((d, i) => (
-        <div key={i} className="border-l-4 border-blue-500 pl-3 mb-3">
+        <div key={i} className="border-l-4 border-[#C9A23F] pl-3 mb-3">
           <p><b>Director {i + 1}</b></p>
           <p>Name: {d.director_name}</p>
           <p>PAN: {d.director_pan_no}</p>
@@ -387,7 +464,7 @@ const renderVideoPreview = (file) => {
     </div>
 
     {/* Video KYC */}
-    <div className="border rounded-lg p-4 bg-gray-50">
+    <div className="border rounded-lg p-4 bg-white border border-gray-200 shadow-sm rounded-xl">
       <h3 className="font-semibold text-lg mb-2 text-gray-800">🎥 Video KYC</h3>
       <p>{renderVideoPreview(videoKYC)}</p>
     </div>
@@ -397,13 +474,13 @@ const renderVideoPreview = (file) => {
 
       {/* Navigation */}
       <div className="mt-6 flex justify-between">
-        {step>1 && <button type="button" onClick={handlePrev} className="px-4 py-2 bg-gray-500 text-white rounded">Previous</button>}
-        {step<6 && <button type="button" onClick={handleNext} className="px-4 py-2 bg-blue-600 text-white rounded">Next</button>}
-        {step===6 && <button type="button" onClick={handleSubmit} className="px-6 py-2 bg-green-600 text-white rounded">{loading?"Submitting...":"Submit"}</button>}
+        {step>1 && <button type="button" onClick={handlePrev} className="px-4 py-2 bg-white border border-gray-200 shadow-sm rounded-xl0 text-[#9E7C19] rounded">Previous</button>}
+        {step<6 && <button type="button" onClick={handleNext} className="px-4 py-2 bg-gradient-to-r from-[#C9A23F] to-[#9E7C19] hover:opacity-90 shadow-md text-white rounded">Next</button>}
+        {step===6 && <button type="button" onClick={handleSubmit} className="px-6 py-2 bg-[#1F2937] hover:bg-black shadow-md text-white rounded">{loading?"Submitting...":"Submit"}</button>}
       </div>
       {/* 🔍 Preview Modal */}
 {previewFile && (
-  <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+  <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
     <div className="bg-white rounded-lg p-4 max-w-3xl w-full relative">
       
       {/* ❌ Close Button */}
