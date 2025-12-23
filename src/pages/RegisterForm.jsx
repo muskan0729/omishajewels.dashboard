@@ -1,221 +1,319 @@
-import { useState } from "react";
-import logo from "../images/logo.png";
-import paymentGatewayBg from "../images/login-background.jpg";
-import { usePost } from "../hooks/usePost";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import logo from "../images/logo.png";
+import { usePost } from "../hooks/usePost";
 
-function RegisterForm() {
-  const navigate = useNavigate();
-  const { execute: register, error, loading } = usePost("/registernew");
+/* ================= OTP INPUT ================= */
+function OtpInput({ value, onChange }) {
+  const [otp, setOtp] = useState(Array(6).fill(""));
+  const refs = useRef([]);
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [passwordError, setPasswordError] = useState("");
+  useEffect(() => {
+    // update internal OTP if value prop changes (for clearing)
+    if (value === "") setOtp(Array(6).fill(""));
+  }, [value]);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    mobile_no: "",
-    password: "",
-    confirm_password: "",
-  });
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setPasswordError("");
+  const handleChange = (v, i) => {
+    if (!/^\d?$/.test(v)) return;
+    const arr = [...otp];
+    arr[i] = v;
+    setOtp(arr);
+    onChange(arr.join(""));
+    if (v && i < 5) refs.current[i + 1].focus();
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  return (
+    <div className="flex justify-between gap-2 mt-3">
+      {otp.map((d, i) => (
+        <input
+          key={i}
+          ref={(el) => (refs.current[i] = el)}
+          value={d}
+          maxLength={1}
+          onChange={(e) => handleChange(e.target.value, i)}
+          className="w-12 h-12 rounded-lg border border-gray-300 text-center text-lg
+                     focus:border-[#c7a43d] focus:ring-1 focus:ring-[#c7a43d] outline-none"
+        />
+      ))}
+    </div>
+  );
+}
 
-    if (formData.password !== formData.confirm_password) {
-      setPasswordError("Passwords do not match");
+/* ================= TIMER ================= */
+function useTimer(start) {
+  const [time, setTime] = useState(start);
+
+  useEffect(() => {
+    if (time <= 0) return;
+    const t = setTimeout(() => setTime(time - 1), 1000);
+    return () => clearTimeout(t);
+  }, [time]);
+
+  return [time, () => setTime(start)];
+}
+
+/* ================= MAIN ================= */
+export default function RegisterForm() {
+  const navigate = useNavigate();
+
+  const sendMobileOtp = usePost("/send-mobile-otp").execute;
+  const verifyMobileOtp = usePost("/verify-mobile-otp").execute;
+  const sendEmailOtp = usePost("/send-email-otp").execute;
+  const verifyEmailOtp = usePost("/verify-email-otp").execute;
+  const registerUser = usePost("/registernew").execute;
+
+  const [data, setData] = useState({ name: "", email: "", mobile_no: "" });
+  const [mobileOtp, setMobileOtp] = useState("");
+  const [emailOtp, setEmailOtp] = useState("");
+
+  const [mobileSent, setMobileSent] = useState(false);
+  const [mobileVerified, setMobileVerified] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
+
+  const [mobileTime, resetMobileTimer] = useTimer(15);
+  const [emailTime, resetEmailTimer] = useTimer(15);
+
+  const [mobileError, setMobileError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [error, setError] = useState("");
+
+  /* ================= HANDLERS ================= */
+  const sendMobile = async () => {
+    setMobileError("");
+    try {
+      await sendMobileOtp({ mobile_no: data.mobile_no });
+      setMobileSent(true);
+      resetMobileTimer();
+      setMobileOtp(""); // clear OTP inputs
+    } catch (err) {
+      setMobileError(err?.response?.data?.message || "Failed to send OTP");
+    }
+  };
+
+  const verifyMobile = async () => {
+    setMobileError("");
+    if (mobileTime <= 0) {
+      setMobileError("OTP expired. Please resend.");
+      setMobileOtp("");
       return;
     }
-
     try {
-      const response = await register({
-        name: formData.name,
-        email: formData.email,
-        mobile_no: formData.mobile_no,
-        password: formData.password,
-        password_confirmation: formData.confirm_password,
-      });
-
-      if (response) {
-        navigate("/verify-otp", {
-          state: {
-            email: formData.email,
-            mobile_no: formData.mobile_no,
-          },
-        });
+      const res = await verifyMobileOtp({ mobile_no: data.mobile_no, otp: mobileOtp });
+      if (res?.verified) {
+        setMobileVerified(true);
+      } else {
+        setMobileError("Invalid OTP");
       }
     } catch (err) {
-      console.error("Registration failed", err);
+      setMobileError(err?.response?.data?.message || "Invalid OTP");
+    }
+  };
+
+  const sendEmail = async () => {
+    setEmailError("");
+    try {
+      await sendEmailOtp({ email: data.email });
+      setEmailSent(true);
+      resetEmailTimer();
+      setEmailOtp("");
+    } catch (err) {
+      setEmailError(err?.response?.data?.message || "Failed to send OTP");
+    }
+  };
+
+  const verifyEmail = async () => {
+    setEmailError("");
+    if (emailTime <= 0) {
+      setEmailError("OTP expired. Please resend.");
+      setEmailOtp("");
+      return;
+    }
+    try {
+      const res = await verifyEmailOtp({ email: data.email, otp: emailOtp });
+      if (res?.verified) {
+        setEmailVerified(true);
+      } else {
+        setEmailError("Invalid OTP");
+      }
+    } catch (err) {
+      setEmailError(err?.response?.data?.message || "Invalid OTP");
+    }
+  };
+
+  const register = async () => {
+    try {
+      await registerUser({
+        ...data,
+        password: data.mobile_no,
+        password_confirmation: data.mobile_no,
+      });
+      navigate("/MemberUserForm");
+    } catch (err) {
+      setError(err?.response?.data?.message || "Failed to register");
     }
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center bg-gray-100 overflow-hidden">
+    <div className="min-h-screen flex justify-center items-center bg-gray-100">
+      <div className="bg-white w-full max-w-md p-8 rounded-3xl shadow-xl">
+        {/* Logo + Site Name (Side-by-side) */}
+              <div className="flex items-center justify-center gap-4 mb-2">
+                <img src={logo} alt="logo" className="w-25 h-auto" />
+      
+                <div className="flex flex-col">
+                  <h1 className="text-xl font-bold text-[#615141] tracking-wide leading-tight">
+                    Omisha<span className="text-[#c7a43d]">Jewels</span>
+                  </h1>
+                </div>
+              </div>
+                  <p className="text-sm text-gray-500 text-center mb-6">
+            Create an account
+        </p>
 
-      {/* Background */}
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${paymentGatewayBg})` }}
-      >
-        <div className="absolute inset-0 bg-black/50" />
-      </div>
+        {/* ================= NAME ================= */}
+        <FloatingInput
+          label="Full Name"
+          value={data.name}
+          onChange={(e) => setData({ ...data, name: e.target.value })}
+        />
 
-      {/* Card */}
-      <div className="relative w-full max-w-md bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-10 border border-gray-200">
+        {/* ================= MOBILE ================= */}
+        {!mobileVerified && (
+          <>
+            <FloatingInput
+              label="Mobile Number"
+              value={data.mobile_no}
+              onChange={(e) => setData({ ...data, mobile_no: e.target.value })}
+            />
 
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <img src={logo} alt="Omisha Jewels" className="w-30 h-22 object-contain" />
-          <div>
-            <h1 className="text-2xl font-bold tracking-wide text-[#615141]">
-              Omisha<span className="text-[#c7a43d]">Jewels</span>
-            </h1>
-            <p className="text-sm text-gray-500">Create your luxury account</p>
-          </div>
-        </div>
+            {!mobileSent ? (
+              <GoldBtn onClick={sendMobile}>Send Mobile OTP</GoldBtn>
+            ) : (
+              <>
+                <OtpInput value={mobileOtp} onChange={setMobileOtp} />
+                <GoldBtn onClick={verifyMobile}>Verify Mobile</GoldBtn>
+                {mobileError && <p className="text-red-500 text-xs mt-1">{mobileError}</p>}
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
+                {mobileTime > 0 ? (
+                  <p className="text-xs text-center mt-2">Resend in {mobileTime}s</p>
+                ) : (
+                  <p
+                    className="text-xs text-center mt-2 text-blue-600 cursor-pointer"
+                    onClick={sendMobile}
+                  >
+                    Resend OTP
+                  </p>
+                )}
+              </>
+            )}
+          </>
+        )}
 
-          <Input
-            label="Full Name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            error={error?.errors?.name}
-          />
+        {/* ================= EMAIL ================= */}
+        {mobileVerified && !emailVerified && (
+          <>
+            <Verified label="Mobile Verified" />
 
-          <Input
-            label="Email Address"
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            error={error?.errors?.email}
-          />
+            <FloatingInput
+              label="Email Address"
+              value={data.email}
+              onChange={(e) => setData({ ...data, email: e.target.value })}
+            />
 
-          <Input
-            label="Mobile Number"
-            type="tel"
-            name="mobile_no"
-            value={formData.mobile_no}
-            onChange={handleChange}
-            error={error?.errors?.mobile_no}
-          />
+            {!emailSent ? (
+              <BrownBtn onClick={sendEmail}>Send Email OTP</BrownBtn>
+            ) : (
+              <>
+                <OtpInput value={emailOtp} onChange={setEmailOtp} />
+                <BrownBtn onClick={verifyEmail}>Verify Email</BrownBtn>
+                {emailError && <p className="text-red-500 text-xs mt-1">{emailError}</p>}
 
-          <PasswordInput
-            label="Password"
-            name="password"
-            value={formData.password}
-            show={showPassword}
-            toggle={() => setShowPassword(!showPassword)}
-            onChange={handleChange}
-            error={error?.errors?.password}
-          />
+                {emailTime > 0 ? (
+                  <p className="text-xs text-center mt-2">Resend in {emailTime}s</p>
+                ) : (
+                  <p
+                    className="text-xs text-center mt-2 text-blue-600 cursor-pointer"
+                    onClick={sendEmail}
+                  >
+                    Resend OTP
+                  </p>
+                )}
+              </>
+            )}
+          </>
+        )}
 
-          <PasswordInput
-            label="Confirm Password"
-            name="confirm_password"
-            value={formData.confirm_password}
-            show={showConfirmPassword}
-            toggle={() => setShowConfirmPassword(!showConfirmPassword)}
-            onChange={handleChange}
-            error={passwordError}
-          />
+        {/* ================= FINAL SUMMARY ================= */}
+        {mobileVerified && emailVerified && (
+          <div className="mt-4">
+            <SummaryItem label="Name" value={data.name} />
+            <SummaryItem label="Mobile" value={data.mobile_no} verified />
+            <SummaryItem label="Email" value={data.email} verified />
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 mt-3 rounded-xl bg-gradient-to-r from-[#615141] to-[#c7a43d]
-                       text-white font-semibold shadow-lg hover:opacity-90 transition disabled:opacity-70"
-          >
-            {loading ? "Creating account..." : "Register"}
-          </button>
-
-          <p className="text-center text-sm text-gray-500 mt-4">
-            Already have an account?{" "}
-            <span
-              onClick={() => navigate("/")}
-              className="text-[#c7a43d] font-semibold cursor-pointer hover:underline"
+            <button
+              onClick={register}
+              className="w-full mt-6 py-3 rounded-xl
+                         bg-gradient-to-r from-[#615141] to-[#c7a43d]
+                         text-white font-semibold"
             >
-              Sign In
-            </span>
-          </p>
+              Register & Continue
+            </button>
+          </div>
+        )}
 
-        </form>
+        {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
       </div>
-    </section>
-  );
-}
-
-/* ---------- FIXED FLOATING INPUT ---------- */
-
-function Input({ label, type = "text", name, value, onChange, error }) {
-  return (
-    <div className="relative">
-      <input
-        type={type}
-        name={name}
-        value={value}
-        onChange={onChange}
-        required
-        className={`w-full px-3 py-3 text-sm bg-transparent border-b-2 focus:outline-none peer ${
-          error ? "border-red-500" : "border-gray-300"
-        }`}
-      />
-
-      <label
-        className={`absolute left-3 px-1 bg-white text-gray-500 transition-all
-        ${value ? "-top-2 text-xs text-[#c7a43d]" : "top-3 text-sm"}
-        peer-focus:-top-2 peer-focus:text-xs peer-focus:text-[#c7a43d]`}
-      >
-        {label}
-      </label>
-
-      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
     </div>
   );
 }
 
-function PasswordInput({ label, name, value, show, toggle, onChange, error }) {
+/* ================= UI COMPONENTS ================= */
+function FloatingInput({ label, value, onChange }) {
   return (
-    <div className="relative">
+    <div className="relative mt-5">
       <input
-        type={show ? "text" : "password"}
-        name={name}
         value={value}
         onChange={onChange}
-        required
-        className={`w-full px-3 py-3 text-sm bg-transparent border-b-2 focus:outline-none peer ${
-          error ? "border-red-500" : "border-gray-300"
-        }`}
+        className="w-full px-3 pt-5 pb-2 border-b-2 border-gray-300
+                   focus:outline-none focus:border-[#c7a43d] peer"
+        placeholder=" "
       />
-
-      <label
-        className={`absolute left-3 px-1 bg-white text-gray-500 transition-all
-        ${value ? "-top-2 text-xs text-[#c7a43d]" : "top-3 text-sm"}
-        peer-focus:-top-2 peer-focus:text-xs peer-focus:text-[#c7a43d]`}
-      >
+      <label className="absolute left-3 top-1 text-gray-400 text-sm
+                        transition-all duration-200 peer-placeholder-shown:top-5
+                        peer-placeholder-shown:text-gray-500 peer-placeholder-shown:text-base
+                        peer-focus:top-1 peer-focus:text-sm peer-focus:text-[#615141]">
         {label}
       </label>
-
-      <button
-        type="button"
-        onClick={toggle}
-        className="absolute right-3 top-3 text-gray-500 hover:text-gray-700"
-      >
-        {show ? "🙈" : "👁️"}
-      </button>
-
-      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
     </div>
   );
 }
 
-export default RegisterForm;
+const GoldBtn = ({ children, ...p }) => (
+  <button {...p} className="w-full mt-3 py-2 rounded-lg bg-[#c7a43d] text-white">
+    {children}
+  </button>
+);
+
+const BrownBtn = ({ children, ...p }) => (
+  <button {...p} className="w-full mt-3 py-2 rounded-lg bg-[#615141] text-white">
+    {children}
+  </button>
+);
+
+const Verified = ({ label }) => (
+  <div className="flex items-center gap-2 text-green-600 mt-4">
+    <span className="text-xl">✔</span>
+    <span className="font-medium">{label}</span>
+  </div>
+);
+
+const SummaryItem = ({ label, value, verified }) => (
+  <div className="flex justify-between items-center bg-gray-50 rounded-xl p-3 mt-2">
+    <div>
+      <p className="text-gray-600 text-sm">{label}</p>
+      <p className="font-medium text-gray-800">{value}</p>
+    </div>
+    {verified && <span className="text-green-600 text-2xl">✔</span>}
+  </div>
+);
