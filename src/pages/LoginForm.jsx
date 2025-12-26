@@ -61,7 +61,7 @@ if (response.user.kyc === 1) {
       <div className="relative w-full max-w-md bg-white/95 backdrop-blur-lg rounded-2xl shadow-xl p-10 border border-gray-200">
 
         {/* Logo + Site Name (Side-by-side) */}
-        <div className="flex items-center justify-center gap-4 mb-2">
+        <div className="flex items-center justify-center pr-10 mb-2">
           <img src={logo} alt="logo" className="w-40 h-auto" />
 
           <div className="flex flex-col">
