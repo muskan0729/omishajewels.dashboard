@@ -24,7 +24,6 @@ export function usePost(endpoint) {
       }
 
       const response = await axios.post(`${BASE_URL}${endpoint}`, body, {
-        withCredentials: true,
         headers,
       });
 

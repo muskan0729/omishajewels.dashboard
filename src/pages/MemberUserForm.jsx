@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePost } from "../hooks/usePost";
+import { useLocation } from "react-router-dom";
 import paymentGatewayBg from "../images/login-background.jpg";
 
 const MemberUserForm = () => {
@@ -11,12 +12,26 @@ const MemberUserForm = () => {
 
   const [step, setStep] = useState(1);
 
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const location = useLocation();
+  const {
+    id: user_id,
+    name = "",
+    mobile_no = "",
+    email = "",
+  } = location.state || {};
+
+  if (!location.state) {
+    console.warn("No navigation state found, redirecting.");
+    navigate("/", { replace: true });
+    return null;
+  }
 
   const [formData, setFormData] = useState({
-    name: user.name || "",
-    mobile_no: user.mobile_no || "",
-    email: user.email || "",
+    user_id, // 👈 VERY IMPORTANT
+    name,
+    mobile_no,
+    email,
+
     business_mcc: "",
     company_type: "",
     company_pan_no: "",
@@ -24,9 +39,11 @@ const MemberUserForm = () => {
     cin_llpin: "",
     date_of_incorporation: "",
     website_url: "",
+
     account_holder_name: "",
     bank_account_no: "",
     ifsc_code: "",
+
     city: "",
     state: "",
     district: "",
@@ -52,96 +69,318 @@ const MemberUserForm = () => {
     },
   ]);
 
+  const handleRemoveDirector = (index) => {
+    if (directors.length === 1) return; // safety: last director delete na ho
+    const updated = directors.filter((_, i) => i !== index);
+    setDirectors(updated);
+  };
+
+
   const [videoKYC, setVideoKYC] = useState(null);
   const [errors, setErrors] = useState({});
 
-  // --- Regex for basic validation ---
-  const phoneRegex = /^[0-9]{10}$/;
+  const stepRequiredFields = {
+    1: [
+      "name",
+      "mobile_no",
+      "email",
+      "business_mcc",
+      "website_url",
+      "company_type",
+      "company_pan_no",
+      "company_gst_no",
+      "cin_llpin",
+      "date_of_incorporation",
+
+      // ✅ ADD FILES HERE
+      "company_pan_no_doc",
+      "company_gst_no_doc",
+      "cancel_cheque_doc",
+    ],
+
+    2: ["account_holder_name", "bank_account_no", "ifsc_code"],
+
+    3: ["city", "district", "state", "pin_code", "address"],
+
+    4: [
+      "director_name",
+      "director_pan_no",
+      "director_aadhar_no",
+      "director_gender",
+      "director_dob",
+      "user_pan_doc",
+      "user_addhar_doc",
+    ],
+
+    5: ["video_kyc"],
+  };
+
+  const phoneRegex = /^(\+91[\-\s]?)?[0]?(91)?[6789]\d{9}$/;
   const nameRegex = /^[A-Za-z ]+$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const textNumberRegex = /^[A-Za-z0-9]+$/;
+  const numberRegex = /^[0-9]{4}$/;
   const pinnumberRegex = /^[0-9]{6}$/;
   const aadharRegex = /^[0-9]{12}$/;
+  const textRegex = /^[A-Za-z]+$/;
+  const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+  const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+  const websiteRegex =
+    /^(https?:\/\/)(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(\/.*)?$/;
+  const ifscRegex = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+  const cinRegex = /^[LU][0-9]{5}[A-Z]{2}[0-9]{4}[A-Z]{3}[0-9]{6}$/;
+
+  const validationRules = {
+    name: {
+      required: true,
+      pattern: nameRegex,
+      message: "Name is not valid",
+    },
+    email: {
+      required: true,
+      pattern: emailRegex,
+      message: "Email is not valid",
+    },
+    business_mcc: {
+      required: true,
+      pattern: numberRegex,
+      message: "Business MCC must be 4 digits",
+    },
+    city: {
+      required: true,
+      minLength: 2,
+      pattern: /^[A-Za-z ]+$/,
+      message: "Valid city name required",
+    },
+    state: {
+      required: true,
+      minLength: 2,
+      pattern: /^[A-Za-z ]+$/,
+      message: "Valid state name required",
+    },
+    district: {
+      required: true,
+      minLength: 2,
+      pattern: /^[A-Za-z ]+$/,
+      message: "Valid district name required",
+    },
+    address: {
+      required: true,
+      minLength: 10,
+      message: "Address must be at least 10 characters",
+    },
+
+    pin_code: {
+      required: true,
+      pattern: pinnumberRegex,
+      message: "Pin code must be 6 digits",
+    },
+    website_url: {
+      required: true,
+      pattern: websiteRegex,
+      message: "Website URL must be like https://example.com",
+    },
+
+    account_holder_name: {
+      required: true,
+      pattern: nameRegex,
+      message: "Account holder name is not valid",
+    },
+
+    bank_account_no: {
+      required: true,
+      pattern: /^[0-9]{9,18}$/,
+      message: "Bank account number must be 9–18 digits",
+    },
+
+    ifsc_code: {
+      required: true,
+      pattern: ifscRegex,
+      message: "IFSC is not valid (e.g. HDFC0001234)",
+    },
+
+    cin_llpin: {
+      required: true,
+      pattern: cinRegex,
+      message: "CIN is not valid (e.g. L12345MH2010PLC123456)",
+    },
+
+    company_pan_no: {
+      required: true,
+      pattern: panRegex,
+      message: "Company PAN is not valid (e.g. ABCDE1234F)",
+    },
+
+    company_gst_no: {
+      required: true,
+      pattern: gstRegex,
+      message: "GST is not valid (e.g. 27AAAPZ1234C1Z1)",
+    },
+
+    //input required
+    company_pan_no_doc: {
+      required: true,
+      message: "PAN document is required",
+    },
+
+    company_gst_no_doc: {
+      required: true,
+      message: "GST document is required",
+    },
+
+    cancel_cheque_doc: {
+      required: true,
+      message: "Cancelled cheque is required",
+    },
+
+    // 👤 Director
+    director_name: {
+      required: true,
+      pattern: nameRegex,
+      message: "Director name is not valid",
+    },
+
+    director_pan_no: {
+      required: true,
+      pattern: panRegex,
+      message: "Director PAN is not valid (e.g. ABCDE1234F)",
+    },
+
+    director_aadhar_no: {
+      required: true,
+      pattern: aadharRegex,
+      message: "Aadhaar must be 12 digits   ",
+    },
+    user_pan_doc: {
+      required: true,
+      message: "PAN document is required",
+    },
+
+    user_addhar_doc: {
+      required: true,
+      message: "Aadhaar document is required",
+    },
+    company_type: {
+      required: true,
+      message: "Please select company type",
+    },
+    date_of_incorporation: {
+      required: true,
+      message: "Date of incorporation is required",
+    },
+    director_gender: {
+      required: true,
+      message: "Please select gender",
+    },
+    director_dob: {
+      required: true,
+      message: "Date of birth is required",
+    },
+
+    // 🎥 Video KYC
+    video_kyc: {
+      required: true,
+      message: "Please upload your Video KYC recording",
+    },
+  };
+
+  const validateValue = (value, field) => {
+    const rules = validationRules[field];
+
+    // required check
+    if (
+      value === undefined ||
+      value === null ||
+      (typeof value === "string" && value.trim() === "")
+    ) {
+      return "This field is required";
+    }
+
+    // regex check (only if rule exists)
+    if (rules?.pattern && typeof value === "string") {
+      if (!rules.pattern.test(value.trim())) {
+        return rules.message || "Invalid format";
+      }
+    }
+
+    return null;
+  };
 
   // --- Validation per step ---
-  const validateStep = (currentStep) => {
+
+  const validateFilesOnly = (currentStep) => {
     const newErrors = {};
 
-    if (currentStep === 1) {
-      // Business details + files
-      [
-        "name",
-        "mobile_no",
-        "email",
-        "business_mcc",
-        "company_type",
-        "company_pan_no",
-        "company_gst_no",
-        "cin_llpin",
-        "date_of_incorporation",
-      ].forEach((f) => {
-        const val = formData[f];
-        if (!val) newErrors[f] = "This field is Required";
-        else {
-          if (f === "name" && !nameRegex.test(val))
-            newErrors[f] = "Invalid Name";
-          if (f === "mobile_no" && !phoneRegex.test(val))
-            newErrors[f] = "Invalid Mobile";
-          if (f === "email" && !emailRegex.test(val))
-            newErrors[f] = "Invalid Email";
-          if (f === "business_mcc" && !textNumberRegex.test(val))
-            newErrors[f] = "Invalid MCC";
-          if (f === "company_pan_no" && !textNumberRegex.test(val))
-            newErrors[f] = "Invalid PAN";
-          if (f === "company_gst_no" && !textNumberRegex.test(val))
-            newErrors[f] = "Invalid GST";
-          if (f === "cin_llpin" && !textNumberRegex.test(val))
-            newErrors[f] = "Invalid CIN/LLPIN";
-        }
-      });
-      ["company_pan_no_doc", "company_gst_no_doc", "cancel_cheque_doc"].forEach(
-        (f) => {
-          if (!companyDocs[f]) newErrors[f] = "File required";
-        }
-      );
+    // STEP 1 / 2 – Company documents
+    if (currentStep === 1 || currentStep === 2) {
+      if (!companyDocs.company_pan_no_doc)
+        newErrors.company_pan_no_doc = "PAN document is required";
+
+      if (!companyDocs.company_gst_no_doc)
+        newErrors.company_gst_no_doc = "GST document is required";
+
+      if (!companyDocs.cancel_cheque_doc)
+        newErrors.cancel_cheque_doc = "Cancelled cheque is required";
     }
 
-    if (currentStep === 2) {
-      ["account_holder_name", "bank_account_no"].forEach((f) => {
-        if (!formData[f]) newErrors[f] = "Required";
-      });
-    }
-
-    if (currentStep === 3) {
-      ["city", "state", "district", "pin_code", "address"].forEach((f) => {
-        const val = formData[f];
-        if (!val) newErrors[f] = "Required";
-        if (f === "pin_code" && val && !pinnumberRegex.test(val))
-          newErrors[f] = "Invalid Pincode";
-      });
-    }
-
+    // STEP 4 – Director documents
     if (currentStep === 4) {
       directors.forEach((d, i) => {
-        ["director_name", "director_pan_no", "director_aadhar_no"].forEach(
-          (f) => {
-            const val = d[f];
-            if (!val) newErrors[`${f}_${i}`] = "Required";
-            if (f === "director_name" && val && !nameRegex.test(val))
-              newErrors[`${f}_${i}`] = "Invalid Name";
-            if (f === "director_aadhar_no" && val && !aadharRegex.test(val))
-              newErrors[`${f}_${i}`] = "Invalid Aadhaar";
-          }
-        );
         if (!d.user_pan_doc)
-          newErrors[`user_pan_doc_${i}`] = "PAN File required";
+          newErrors[`user_pan_doc_${i}`] = "PAN document is required";
+
         if (!d.user_addhar_doc)
-          newErrors[`user_addhar_doc_${i}`] = "Aadhaar File required";
+          newErrors[`user_addhar_doc_${i}`] = "Aadhaar document is required";
       });
     }
 
+    // STEP 5 – Video KYC
     if (currentStep === 5) {
-      if (!videoKYC) newErrors.videoKYC = "Video KYC required";
+      if (!videoKYC) newErrors.videoKYC = "Video KYC is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validateStep = (currentStep) => {
+    const newErrors = {};
+    const fields = stepRequiredFields[currentStep];
+
+    // ✅ STEP 4 → Directors (array-based data)
+    if (currentStep === 4) {
+      directors.forEach((director, index) => {
+        fields.forEach((field) => {
+          const value = director[field];
+          const error = validateValue(value, field);
+
+          if (error) {
+            newErrors[`${field}_${index}`] = error;
+          }
+        });
+      });
+    }
+
+    // ✅ ALL OTHER STEPS (1,2,3,5)
+    else {
+      fields.forEach((field) => {
+        let value;
+
+        if (
+          field === "company_pan_no_doc" ||
+          field === "company_gst_no_doc" ||
+          field === "cancel_cheque_doc"
+        ) {
+          value = companyDocs[field];
+        } else if (field === "video_kyc") {
+          value = videoKYC;
+        } else {
+          value = formData[field];
+        }
+
+        const error = validateValue(value, field);
+        if (error) newErrors[field] = error;
+      });
     }
 
     setErrors(newErrors);
@@ -164,7 +403,8 @@ const MemberUserForm = () => {
   };
 
   const handleSubmit = async () => {
-    if (!validateStep(step)) return;
+    // if (!validateStep(step)) return;
+    if (step !== 6 && !validateStep(step)) return;
 
     const fd = new FormData();
     Object.keys(formData).forEach((k) => fd.append(k, formData[k]));
@@ -198,6 +438,8 @@ const MemberUserForm = () => {
   ];
   const input =
     "w-full px-3 py-3 text-sm bg-white border border-gray-300 rounded-xl text-gray-800 shadow-sm focus:outline-none focus:ring-0 focus:ring-[#C9A23F] focus:border-[#C9A23F]";
+  const disableinput =
+    "w-full px-3 py-3 text-sm bg-gray-200 text-gray-900 border-gray-300 cursor-not-allowed border border-gray-300 rounded-xl text-gray-800 shadow-sm focus:outline-none";
 
   const renderFilePreview = (file) => {
     if (!file) return <span className="text-gray-500">Not uploaded</span>;
@@ -242,14 +484,6 @@ const MemberUserForm = () => {
   };
 
   return (
-    // <div className="mt-10 mb-10 max-w-4xl mx-auto p-8 bg-gradient-to-br from-[#FFF8E1] to-white shadow-2xl rounded-2xl border border-[#E5E7EB]">
-    //   <h1 className="text-4xl font-extrabold mb-2 text-center text-[#9E7C19] tracking-wide">
-    //     Complete Your KYC
-    //   </h1>
-    //   <p className="text-center text-gray-600 mb-6">
-    //     Verify your business and personal details in a few simple steps
-    //   </p>
-
     <div className="relative min-h-screen flex items-start justify-center py-10">
       {/* Background */}
       <div
@@ -271,38 +505,18 @@ const MemberUserForm = () => {
             Verify your business and personal details
           </p>
 
-          {/* Step Indicator */}
-          {/* <div className="flex justify-between mb-12">
-            {stepIndicator.map((label, index) => (
-              <div key={index} className="flex-1">
-                <div
-                  className={`w-full h-2 rounded-full transition-all duration-300 ${
-                    step - 1 >= index
-                      ? "bg-gradient-to-r from-[#C9A23F] to-[#9E7C19]"
-                      : "bg-gray-200"
-                  }`}
-                ></div>
-
-                <p className="text-center text-sm mt-1 font-medium text-gray-700">
-                  {label}
-                </p>
-              </div>
-            ))}
-          </div> */}
-
           {/* ================= SIGNATURE STEP INDICATOR ================= */}
-<div className="mb-12 pl-5 pr-5">
+          <div className="mb-12 pl-5 pr-5">
+            {/* Step Labels */}
+            <div className="flex justify-between text-sm tracking-wide">
+              {stepIndicator.map((label, index) => {
+                const isActive = step === index + 1;
+                const isCompleted = step > index + 1;
 
-  {/* Step Labels */}
-  <div className="flex justify-between text-sm tracking-wide">
-    {stepIndicator.map((label, index) => {
-      const isActive = step === index + 1;
-      const isCompleted = step > index + 1;
-
-      return (
-        <div
-          key={index}
-          className={`
+                return (
+                  <div
+                    key={index}
+                    className={`
             relative flex-1 text-center pb-4 transition-all duration-300
             ${
               isActive
@@ -312,52 +526,55 @@ const MemberUserForm = () => {
                 : "text-gray-400"
             }
           `}
-        >
-          {label}
+                  >
+                    {label}
 
-          {/* Active Micro Marker */}
-          {/* {isActive && (
+                    {/* Active Micro Marker */}
+                    {/* {isActive && (
             <span className="absolute left-1/2 -bottom-1 w-2 h-1.5 rounded-2x2 bg-[#C9A23F] -translate-x-1/2 transition-all duration-500 ease-out" />
           )} */}
-        </div>
-      );
-    })}
-  </div>
+                  </div>
+                );
+              })}
+            </div>
 
-  {/* Progress Rail */}
-  <div className="relative mt-1">
-    {/* Base Thin Line */}
-    <div className="h-px bg-gray-300" />
+            {/* Progress Rail */}
+            <div className="relative mt-1">
+              {/* Base Thin Line */}
+              <div className="h-px bg-gray-300" />
 
-    {/* Completed Thick Line */}
-    <div
-      className="absolute top-0 left-0 h-0.5 bg-[#C9A23F] transition-all duration-500 ease-out"
-      style={{
-        // width: `${((step - 1) / (stepIndicator.length - 1)) * 100}%`,
-        width: `calc(${((step - 1) / (stepIndicator.length - 1)) * 100}% - 20px)`,
-      }}
-    />
-  </div>
-</div>
-
+              {/* Completed Thick Line */}
+              <div
+                className="absolute top-0 left-0 h-0.5 bg-[#C9A23F] transition-all duration-500 ease-out"
+                style={{
+                  // width: `${((step - 1) / (stepIndicator.length - 1)) * 100}%`,
+                  width: `calc(${
+                    ((step - 1) / (stepIndicator.length - 1)) * 100
+                  }% - 20px)`,
+                }}
+              />
+            </div>
+          </div>
 
           {/* Step Content */}
           {step === 1 && (
             <div className="space-y-4">
               <h2 className="text-xl font-semibold text-[#9E7C19] mb-2">
-                 Business Details
+                Business Details
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Locked fields from database */}
+
                 {["name", "mobile_no", "email"].map((key, index) => (
                   <div key={index}>
-                    <label className="block mb-1 pl-2 font-medium">
-                      {key.replace(/_/g, " ")} *
+                    <label className="block mb-1 pl-2 font-medium capitalize">
+                      {key.replace(/_/g, " ")}{" "}
+                      <span className="text-red-600">*</span>
                     </label>
+
                     <input
-                      // className={`${input} bg-gray-100 cursor-not-allowed`}
-                      className={`${input} bg-gray-300 text-gray-900 border-gray-300 cursor-not-allowed focus:border-gray-300 `}
-                      value={formData[key]}
+                      className={`${disableinput}`}
+                      value={formData[key] || ""}
                       readOnly
                     />
                   </div>
@@ -374,10 +591,11 @@ const MemberUserForm = () => {
                   "website_url",
                 ].map((key, index) => (
                   <div key={index}>
-                    <label className="block mb-1 pl-2 font-medium">
+                    <label className="block mb-1 pl-2 font-medium capitalize">
                       {key.replace(/_/g, " ")}{" "}
-                      {key !== "website_url" ? "*" : ""}
+                      <span className="text-red-600">*</span>
                     </label>
+
                     {key === "company_type" ? (
                       <select
                         className={input}
@@ -417,14 +635,32 @@ const MemberUserForm = () => {
                   "cancel_cheque_doc",
                 ].map((key) => (
                   <div key={key}>
-                    <label className="block mb-1 pl-2 font-medium">
-                      {key.replace(/_/g, " ").replace("doc", "").trim()} *
+                    <label className="block mb-1 pl-2 font-medium capitalize">
+                      {key.replace(/_/g, " ")}{" "}
+                      <span className="text-red-600">*</span>
                     </label>
-                    <input
-                      type="file"
-                      className={input}
-                      onChange={(e) => handleFileChange(key, e.target.files[0])}
-                    />
+                    <div className="relative">
+                      <input
+                        type="text"
+                        readOnly
+                        value={companyDocs[key]?.name || ""}
+                        placeholder="Choose file"
+                        className={`${input} cursor-pointer`}
+                        onClick={() =>
+                          document.getElementById(`file-${key}`).click()
+                        }
+                      />
+
+                      <input
+                        id={`file-${key}`}
+                        type="file"
+                        className="hidden"
+                        onChange={(e) =>
+                          handleFileChange(key, e.target.files[0])
+                        }
+                      />
+                    </div>
+
                     {errors[key] && (
                       <p className="text-red-600 text-sm">{errors[key]}</p>
                     )}
@@ -437,16 +673,17 @@ const MemberUserForm = () => {
           {step === 2 && (
             <div className="space-y-4">
               <h2 className="text-xl font-semibold text-[#9E7C19] mb-2">
-                 Bank Details
+                Bank Details
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {["Account_holder_name", "Bank_account_no", "ifsc_code"].map(
+                {["account_holder_name", "bank_account_no", "ifsc_code"].map(
                   (key) => (
                     <div key={key}>
                       <label className="block mb-1 pl-2 font-medium">
                         {key.replace(/_/g, " ")}{" "}
-                        {key !== "ifsc_code" ? "*" : ""}
+                        <span className="text-red-600">*</span>
                       </label>
+
                       <input
                         className={input}
                         value={formData[key]}
@@ -465,14 +702,15 @@ const MemberUserForm = () => {
           {step === 3 && (
             <div className="space-y-4">
               <h2 className="text-xl font-semibold text-[#9E7C19] mb-2">
-                 Address Details
+                Address Details
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {["City", "State", "District", "Pin_code", "address"].map(
+                {["city", "state", "district", "pin_code", "address"].map(
                   (key) => (
                     <div key={key}>
-                      <label className="block mb-1 font-medium">
-                        {key.replace(/_/g, " ")} *
+                      <label className="block mb-1 pl-2 font-medium">
+                        {key.replace(/_/g, " ")}{" "}
+                        <span className="text-red-600">*</span>
                       </label>
                       <input
                         className={input}
@@ -492,16 +730,43 @@ const MemberUserForm = () => {
           {step === 4 && (
             <div className="space-y-4">
               <h2 className="text-xl font-semibold text-[#9E7C19] mb-2">
-                 Director Information
+                Director Information
               </h2>
               {directors.map((d, i) => (
                 <div
                   key={i}
                   className="p-4 border rounded-lg bg-white border border-gray-200 shadow-sm rounded-xl space-y-3"
                 >
-                  <h3 className="font-semibold text-gray-800">
+                  {/* <h3 className="font-semibold text-gray-800">
                     Director {i + 1}
-                  </h3>
+                  </h3> */}
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-gray-800">
+                      Director {i + 1}
+                    </h3>
+
+                    {/* ❌ Delete Director (not for first director) */}
+                    {i > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveDirector(i)}
+                        className="
+                          flex items-center gap-1
+                          px-3 py-1.5
+                          text-xs font-semibold
+                          text-red-600
+                          border border-red-200
+                          rounded-full
+                          bg-red-50
+                          hover:bg-red-100
+                          hover:border-red-300
+                          transition-all
+                        "
+                      >
+                        <i class="fa-solid fa-trash"></i> Delete
+                      </button>
+                    )}
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {[
                       "director_name",
@@ -551,21 +816,52 @@ const MemberUserForm = () => {
                       </div>
                     ))}
                     {["user_pan_doc", "user_addhar_doc"].map((k) => (
-                      <div key={k}>
+                      <div key={k} className="relative">
                         <input
+                          type="text"
+                          readOnly
+                          placeholder={
+                            k === "user_pan_doc"
+                              ? "Upload PAN Document"
+                              : "Upload Aadhaar Document"
+                          }
+                          value={d[k]?.name || ""}
+                          className={`${input} cursor-pointer`}
+                          onClick={() =>
+                            document
+                              .getElementById(`director-${i}-${k}`)
+                              .click()
+                          }
+                        />
+
+                        <input
+                          id={`director-${i}-${k}`}
                           type="file"
-                          className={input}
+                          className="hidden"
                           onChange={(e) =>
                             handleDirectorChange(i, k, e.target.files[0])
                           }
                         />
+
                         {errors[`${k}_${i}`] && (
-                          <p className="text-red-600 text-sm">
+                          <p className="text-red-600 text-sm mt-1">
                             {errors[`${k}_${i}`]}
                           </p>
                         )}
                       </div>
                     ))}
+                    {/* ❌ Delete Director Button (not for first director) */}
+                    {/* {i > 0 && (
+                      <div className="flex justify-end mt-3">
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveDirector(i)}
+                          className="text-red-600 hover:text-red-800 text-sm font-medium"
+                        >
+                          🗑 Delete Director
+                        </button>
+                      </div>
+                    )} */}
                   </div>
                 </div>
               ))}
@@ -622,14 +918,31 @@ const MemberUserForm = () => {
               </div>
 
               {/* File input */}
-              <input
-                type="file"
-                className={input}
-                accept="video/*"
-                onChange={(e) => setVideoKYC(e.target.files[0])}
-              />
-              {errors.videoKYC && (
-                <p className="text-red-600 text-sm">{errors.videoKYC}</p>
+              <div className="relative">
+                {/* Fake visible input */}
+                <input
+                  type="text"
+                  readOnly
+                  placeholder="Upload Video KYC"
+                  value={videoKYC?.name || ""}
+                  className={`${input} cursor-pointer`}
+                  onClick={() =>
+                    document.getElementById("video-kyc-input").click()
+                  }
+                />
+
+                {/* Real hidden file input */}
+                <input
+                  id="video-kyc-input"
+                  type="file"
+                  accept="video/*"
+                  className="hidden"
+                  onChange={(e) => setVideoKYC(e.target.files[0])}
+                />
+              </div>
+
+              {errors.video_kyc && (
+                <p className="text-red-600 text-sm">{errors.video_kyc}</p>
               )}
 
               {/* Preview */}
@@ -797,7 +1110,7 @@ const MemberUserForm = () => {
               <button
                 type="button"
                 onClick={handlePrev}
-                className="px-4 py-2 bg-white border border-gray-200 shadow-sm rounded-xl0 text-[#9E7C19] rounded"
+                className="px-4 py-2 bg-white cursor-pointer border border-gray-200 shadow-sm rounded-xl0 text-[#9E7C19] rounded"
               >
                 Previous
               </button>
@@ -806,7 +1119,7 @@ const MemberUserForm = () => {
               <button
                 type="button"
                 onClick={handleNext}
-                className="px-4 py-2 bg-gradient-to-r from-[#C9A23F] to-[#9E7C19] hover:opacity-90 shadow-md text-white rounded"
+                className="px-4 py-2 cursor-pointer bg-gradient-to-r from-[#C9A23F] to-[#9E7C19] hover:opacity-90 shadow-md text-white rounded"
               >
                 Next
               </button>
@@ -815,7 +1128,7 @@ const MemberUserForm = () => {
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="px-6 py-2 bg-[#1F2937] hover:bg-black shadow-md text-white rounded"
+                className="px-6 py-2 cursor-pointer bg-[#1F2937] hover:bg-black shadow-md text-white rounded"
               >
                 {loading ? "Submitting..." : "Submit"}
               </button>
@@ -831,7 +1144,7 @@ const MemberUserForm = () => {
                     setPreviewFile(null);
                     setPreviewType("");
                   }}
-                  className="absolute top-2 right-2 text-white bg-red-600 hover:bg-red-700 rounded-full w-8 h-8 flex items-center justify-center"
+                  className="absolute top-2 right-2 text-white bg-red-600 hover:bg-red-700 rounded-full w-8 h-8 flex items-center justify-center cursor-pointer"
                 >
                   ✕
                 </button>

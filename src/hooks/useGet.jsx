@@ -14,7 +14,7 @@ export function useGet(endpoint) {
     setError(null);
     try {
       const response = await axios.get(`${BASE_URL}${endpoint}`, {
-        withCredentials: true, // ✅ Sends HTTP-only cookies automatically
+          // ✅ Sends HTTP-only cookies automatically
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer " + localStorage.getItem("token")

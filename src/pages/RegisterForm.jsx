@@ -23,6 +23,12 @@ function OtpInput({ value, onChange }) {
     if (v && i < 5) refs.current[i + 1].focus();
   };
 
+  const handleKeyDown = (e, i) => {
+  if (e.key === "Backspace" && !otp[i] && i > 0) {
+    refs.current[i - 1].focus();
+  }
+  };
+
   return (
     <div className="flex justify-between gap-2 mt-3">
       {otp.map((d, i) => (
@@ -32,6 +38,7 @@ function OtpInput({ value, onChange }) {
           value={d}
           maxLength={1}
           onChange={(e) => handleChange(e.target.value, i)}
+          onKeyDown={(e) => handleKeyDown(e, i)}
           className="w-12 h-12 rounded-lg border border-gray-300 text-center text-lg
                      focus:border-[#c7a43d] focus:ring-1 focus:ring-[#c7a43d] outline-none"
         />
@@ -173,18 +180,41 @@ export default function RegisterForm() {
     }
   };
 
+  // const register = async () => {
+  //   try {
+  //     await registerUser({
+  //       ...data,
+  //       password: data.mobile_no,
+  //       password_confirmation: data.mobile_no,
+  //     });
+  //     navigate("/MemberUserForm");
+  //   } catch (err) {
+  //     setError(err?.response?.data?.message || "Failed to register");
+  //   }
+  // };
+
   const register = async () => {
-    try {
-      await registerUser({
-        ...data,
-        password: data.mobile_no,
-        password_confirmation: data.mobile_no,
-      });
-      navigate("/MemberUserForm");
-    } catch (err) {
-      setError(err?.response?.data?.message || "Failed to register");
-    }
-  };
+  try {
+    const res = await registerUser({
+      ...data,
+      password: data.mobile_no,
+      password_confirmation: data.mobile_no,
+    });
+
+    // 👇 response se id le rahe hain
+    navigate("/MemberUserForm", {
+      state: {
+        id: res.id,
+        name: data.name,
+        mobile_no: data.mobile_no,
+        email: data.email,
+      },
+    });
+  } catch (err) {
+    setError(err?.response?.data?.message || "Failed to register");
+  }
+};
+
 
   return (
     <div className="relative min-h-screen overflow-hidden flex items-center justify-center">
@@ -199,7 +229,7 @@ export default function RegisterForm() {
 
       {/* ================= MAIN CONTENT ================= */}
       <div className="relative z-10 w-full flex items-center justify-center px-4">
-        <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl px-8 py-6">
+        <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl px-10 py-10">
           
           {/* ================= BRAND ================= */}
           {/* <div className="flex flex-col items-center mb-8">
@@ -224,48 +254,48 @@ export default function RegisterForm() {
           </div>
   
           <p className="text-sm text-gray-500 text-center">
-            Create an account
+            Create Your Account
           </p>
 
           {/* ================= FORM ================= */}
           <div className="space-y-5">
             
             {/* NAME */}
-            {/* <FloatingInput
-              id="full-name"
-              label="Full Name"
-              value={data.name}
-              onChange={(e) =>  setData({ ...data, name: e.target.value })}
-            /> */}
-            <FloatingInput
-              id="name"
-              label="Full Name"
-              value={data.name}
-              error={nameError}
-              onChange={(e) => {
-                setData({ ...data, name: e.target.value });
-                setNameError("");
-              }}
-            />
+            {!(mobileVerified && emailVerified) && (
+              // <FloatingInput
+              //   id="name"
+              //   label="Full Name"
+              //   value={data.name}
+              //   error={nameError}
+              //   onChange={(e) => {
+              //     setData({ ...data, name: e.target.value });
+              //     setNameError("");
+              //   }}
+              // />
+              <FloatingInput
+                id="name"
+                label="Full Name"
+                value={data.name}
+                error={nameError}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/[^a-zA-Z\s]/g, ""); // ✅ only letters & spaces
+                  setData({ ...data, name: value });
+                  setNameError("");
+                }}
+              />
+            )}
 
             {/* ================= MOBILE ================= */}
             {!mobileVerified && (
               <div className="space-y-4">
-                {/* <FloatingInput
-                  id="mobile-number"
-                  label="Mobile Number"
-                  value={data.mobile_no}
-                  onChange={(e) =>
-                    setData({ ...data, mobile_no: e.target.value })
-                  }
-                /> */}
                 <FloatingInput
                   id="mobile"
                   label="Mobile Number"
                   value={data.mobile_no}
                   error={mobileError}
                   onChange={(e) => {
-                    setData({ ...data, mobile_no: e.target.value });
+                    const value = e.target.value.replace(/\D/g, "").slice(0, 10); // ✅ only digits, max 10
+                    setData({ ...data, mobile_no: value });
                     setMobileError("");
                   }}
                 />
@@ -308,14 +338,7 @@ export default function RegisterForm() {
             {/* ================= EMAIL ================= */}
             {mobileVerified && !emailVerified && (
               <div className="space-y-4">
-                <Verified label="Mobile Verified" />
-
-                {/* <FloatingInput
-                  id= "email-address"
-                  label="Email Address"
-                  value={data.email}
-                  onChange={(e) => setData({ ...data, email: e.target.value })}
-                /> */}
+                {/* <Verified label="Mobile Verified" /> */}
                 <FloatingInput
                   id="email"
                   label="Email Address"
@@ -386,6 +409,15 @@ export default function RegisterForm() {
               <p className="text-red-500 text-xs text-center mt-2">{error}</p>
             )}
           </div>
+          <p className="text-center text-sm text-gray-500 mt-11">
+            Already have an account?{" "}
+            <span
+              onClick={() => navigate("/")}
+              className="text-[#c7a43d] font-semibold cursor-pointer hover:underline"
+            >
+              Log in
+            </span>
+          </p>
         </div>
       </div>
     </div>
@@ -394,33 +426,6 @@ export default function RegisterForm() {
 }
 
 /* ================= UI COMPONENTS ================= */
-// function FloatingInput({ label, value, onChange, id }) {
-//   return (
-//     <div className="relative mt-5">
-//       <input
-//         id={id}
-//         value={value}
-//         onChange={onChange}
-//         className="w-full px-3 pt-5 pb-2 border-b-2 border-gray-300
-//                    focus:outline-none focus:border-[#c7a43d] peer"
-//         placeholder=" "
-//       />
-//       <label
-//         htmlFor={id}
-//         className="absolute left-3 top-1 text-gray-400 text-sm
-//                    transition-all duration-200 cursor-text
-//                    peer-placeholder-shown:top-5
-//                    peer-placeholder-shown:text-gray-500
-//                    peer-placeholder-shown:text-base
-//                    peer-focus:top-1
-//                    peer-focus:text-sm
-//                    peer-focus:text-[#615141]"
-//       >
-//         {label}
-//       </label>
-//     </div>
-//   );
-// }
 function FloatingInput({ id, label, value, onChange, error }) {
   return (
     <div className="relative mt-4">
@@ -430,7 +435,7 @@ function FloatingInput({ id, label, value, onChange, error }) {
         onChange={onChange}
         placeholder=" "
         className={`
-          w-full px-3 pt-4 pb-1.5 
+          w-full px-3 pt-5 pb-1.5 
           border-b-2
           ${error ? "border-red-500" : "border-gray-300"}
           focus:outline-none focus:border-[#c7a43d]
@@ -480,12 +485,51 @@ const Verified = ({ label }) => (
   </div>
 );
 
+// const SummaryItem = ({ label, value, verified }) => (
+//   <div className="flex justify-between items-center bg-gray-50 rounded-xl p-3 mt-2">
+//     <div>
+//       <p className="text-gray-600 text-sm">{label}</p>
+//       <p className="font-medium text-gray-800">{value}</p>
+//     </div>
+//     {verified && <span className="text-green-600 text-2xl">✔</span>}
+//   </div>
+// );
+
 const SummaryItem = ({ label, value, verified }) => (
-  <div className="flex justify-between items-center bg-gray-50 rounded-xl p-3 mt-2">
+  <div
+    className={`
+      flex justify-between items-center rounded-xl p-4 mt-2 border
+      ${
+        verified
+          ? "bg-green-50 border-green-200"
+          : "bg-gray-50 border-gray-200"
+      }
+    `}
+  >
     <div>
-      <p className="text-gray-600 text-sm">{label}</p>
-      <p className="font-medium text-gray-800">{value}</p>
+      <p
+        className={`
+          text-xs font-medium tracking-wide uppercase
+          ${verified ? "text-green-700" : "text-gray-500"}
+        `}
+      >
+        {label}
+      </p>
+
+      <p
+        className={`
+          text-sm font-semibold mt-0.5
+          ${verified ? "text-green-900" : "text-gray-800"}
+        `}
+      >
+        {value}
+      </p>
     </div>
-    {verified && <span className="text-green-600 text-2xl">✔</span>}
+
+    {verified && (
+      <span className="text-green-700 text-xs font-semibold tracking-wide">
+        <i className="fa-solid fa-check-circle"></i>
+      </span>
+    )}
   </div>
 );

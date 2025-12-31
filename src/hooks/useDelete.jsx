@@ -14,7 +14,7 @@ export function usePut(endpoint) {
 
     try {
       const response = await axios.delete(`${BASE_URL}${endpoint}`, body, {
-        withCredentials: true,
+         
         headers: {
           "Content-Type": "application/json",
         },

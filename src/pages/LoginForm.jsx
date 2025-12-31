@@ -19,36 +19,32 @@ function LoginForm() {
     e.preventDefault();
     try {
       const response = await login(formData);
-console.log(response);
-     if (response) {
-    localStorage.setItem("token", response.token);
-    localStorage.setItem("email", response.user.email);
-    localStorage.setItem("role", btoa(response.user.role_type));
-    localStorage.setItem("user", JSON.stringify(response.user));
+      console.log(response);
+      if (response) {
+        localStorage.setItem("token", response.token);
+        localStorage.setItem("email", response.user.email);
+        localStorage.setItem("role", btoa(response.user.role_type));
+        localStorage.setItem("user", JSON.stringify(response.user));
 
-    // Check KYC status
-if (response.user.kyc === 1) {
-  // Full KYC done → Dashboard
-  navigate("/dashboard", { replace: true });
-
-} else if (response.user.pre_kyc_status === 0) {
-  // Pre-KYC not done → Fill Member Form
-  navigate("/MemberUserForm", { replace: true });
-
-} else {
-  // Pre-KYC done but KYC pending
-  navigate("/merchant-success", { replace: true });
-}
-
-  }
-} catch (err) {
-  console.log("Login failed:", err);
-}
+        // Check KYC status
+        if (response.user.kyc === 1) {
+          // Full KYC done → Dashboard
+          navigate("/dashboard", { replace: true });
+        } else if (response.user.pre_kyc_status === 0) {
+          // Pre-KYC not done → Fill Member Form
+          navigate("/MemberUserForm", { replace: true });
+        } else {
+          // Pre-KYC done but KYC pending
+          navigate("/merchant-success", { replace: true });
+        }
+      }
+    } catch (err) {
+      console.log("Login failed:", err);
+    }
   };
 
   return (
     <section className="relative min-h-screen flex items-center justify-center bg-gray-100 overflow-hidden">
-
       {/* Background Image */}
       <div
         className="absolute inset-0 bg-no-repeat bg-center bg-cover"
@@ -58,8 +54,7 @@ if (response.user.kyc === 1) {
       </div>
 
       {/* Login Card */}
-      <div className="relative w-full max-w-md bg-white/95 backdrop-blur-lg rounded-2xl shadow-xl p-10 border border-gray-200">
-
+      <div className="relative w-full max-w-md bg-white/95 rounded-2xl shadow-xl p-10 border border-gray-200">
         {/* Logo + Site Name (Side-by-side) */}
         <div className="flex items-center justify-center pr-10 mb-2">
           <img src={logo} alt="logo" className="w-40 h-auto" />
@@ -76,7 +71,6 @@ if (response.user.kyc === 1) {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-
           {/* Email */}
           <div className="relative z-0">
             <input
@@ -137,7 +131,9 @@ if (response.user.kyc === 1) {
             </button>
 
             {error?.errors?.password && (
-              <p className="text-sm text-red-500 mt-1">{error.errors.password}</p>
+              <p className="text-sm text-red-500 mt-1">
+                {error.errors.password}
+              </p>
             )}
           </div>
 
@@ -149,16 +145,15 @@ if (response.user.kyc === 1) {
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
-<p className="text-center text-sm text-gray-500 mt-4">
-  Don’t have an account?{" "}
-  <span
-    onClick={() => navigate("/register")}
-    className="text-[#c7a43d] font-semibold cursor-pointer hover:underline"
-  >
-    Create one
-  </span>
-</p>
-
+          <p className="text-center text-sm text-gray-500 mt-4">
+            Don’t have an account?{" "}
+            <span
+              onClick={() => navigate("/register")}
+              className="text-[#c7a43d] font-semibold cursor-pointer hover:underline"
+            >
+              Create one
+            </span>
+          </p>
         </form>
       </div>
     </section>

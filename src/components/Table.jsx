@@ -100,9 +100,19 @@ const Table = ({
 
   const filteredData = useMemo(() => {
     return data?.filter((row) => {
-      const matchesSearch = Object.values(row).some((val) =>
-        String(val).toLowerCase().includes(search.toLowerCase())
-      );
+      // const matchesSearch = Object.values(row).some((val) =>
+      //   String(val).toLowerCase().includes(search.toLowerCase())
+      // );
+      const matchesSearch = (() => {
+        const searchText = search.toLowerCase();
+
+        return (
+          row.id?.toString().toLowerCase().includes(searchText) ||
+          row.user_id?.toString().toLowerCase().includes(searchText) ||
+          row.merchant_details?.toLowerCase().includes(searchText)
+        );
+      })();
+
 
       const matchesStatus =
         !statusFilter ||

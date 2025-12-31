@@ -12,16 +12,14 @@ import { useGet } from "../hooks/useGet";
 import { usePost } from "../hooks/usePost";
 import { useToast } from "../contexts/ToastContext";
 
-
-
 export const Member = () => {
   const toast = useToast();
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
   const memberDetails = useNavigate();
+  const memberVerify = useNavigate();
   const [merchantData, setMerchantData] = useState([]);
   const [initialLoad, setInitialLoad] = useState(true);
-
 
   const { executePut: updateSingle } = usePut("/update-user-statuses");
   const { executePut: updateAll } = usePut("/payin-payout-statuses");
@@ -41,14 +39,19 @@ export const Member = () => {
     }
   };
 
-  const { data: dataOfMerchants, refetch: refetchOfMerchants, loading: merchantLoading } =
-    useAutoFetch("/get-merchants", 20000);
+  const {
+    data: dataOfMerchants,
+    refetch: refetchOfMerchants,
+    loading: merchantLoading,
+  } = useAutoFetch("/get-merchants", 20000);
 
-    console.log("payoutdata", dataOfMerchants);
+  console.log("payoutdata", dataOfMerchants);
   const { data: credentialsData } = useGet("/credentials");
 
-
-  const initialDataOfMerchants = useMemo(() => dataOfMerchants?.data ?? [], [dataOfMerchants]);
+  const initialDataOfMerchants = useMemo(
+    () => dataOfMerchants?.data ?? [],
+    [dataOfMerchants]
+  );
 
   useEffect(() => {
     if (!merchantLoading && dataOfMerchants) setInitialLoad(false);
@@ -56,7 +59,8 @@ export const Member = () => {
 
   const handlePayinToggle = async (v, rowId, accountStatus) => {
     try {
-      if (accountStatus) await updateSingle({ user_id: rowId, payin_status: v });
+      if (accountStatus)
+        await updateSingle({ user_id: rowId, payin_status: v });
     } catch (err) {
       console.log("Payin Toggle Failed: ", err);
     }
@@ -64,7 +68,8 @@ export const Member = () => {
 
   const handlePayoutToggle = async (v, rowId, accountStatus) => {
     try {
-      if (accountStatus) await updateSingle({ user_id: rowId, payout_status: v });
+      if (accountStatus)
+        await updateSingle({ user_id: rowId, payout_status: v });
     } catch (err) {
       console.log("Payout Toggle Failed: ", err);
     }
@@ -85,7 +90,6 @@ export const Member = () => {
   };
 
   const handleAllPayinToggle = async (v) => {
-
     try {
       const x = v ? 1 : 0;
       const response = await updateAll({ payin_status: x });
@@ -101,7 +105,6 @@ export const Member = () => {
   };
 
   const handleAllPayoutToggle = async (v) => {
-
     try {
       const x = v ? 1 : 0;
       const response = await updateAll({ payout_status: x });
@@ -116,15 +119,17 @@ export const Member = () => {
     }
   };
 
-
-
   useEffect(() => {
     if (!initialDataOfMerchants || !credentialsData) return;
 
-    const credentialsList = Array.isArray(credentialsData) ? credentialsData : credentialsData.data || [];
+    const credentialsList = Array.isArray(credentialsData)
+      ? credentialsData
+      : credentialsData.data || [];
 
     const formattedMerchantData = initialDataOfMerchants.map((item, index) => {
-      const credential = credentialsList.find((cred) => cred.id === item.credentials_id);
+      const credential = credentialsList.find(
+        (cred) => cred.id === item.credentials_id
+      );
 
       const payinBank =
         item.payin_at_onboard === "Airpay" ? (
@@ -147,32 +152,91 @@ export const Member = () => {
           item.payin_at_onboard
         );
 
-      return {
-        sqno: index + 1,
+    //   return {
+    //     sqno: index + 1,
+    //     id: item.id,
+    //     // name: item.name,
+    //     name: (
+    //       <span
+    //         className="text-blue-600 cursor-pointer"
+    //         onClick={() => {
+    //           localStorage.setItem("merchantId", item.id);
+    //           memberDetails(`/MerchantDetails/${item.id}`);
+    //         }}
+    //       >
+    //         {item.name}
+    //       </span>
+    //     ),
+    //     payin_bank: payinBank,
+    //     payin: item.payin_status,
+
+    //     payout: item.payout_status,
+    //     payincharge: Number(item.total_charge?.UPI || 0).toFixed(2),
+    //     payoutcharge: Number(item.total_charge?.payout || 0).toFixed(2),
+    //     cryptocharge: Number(item.total_charge?.CRYPTO || 0).toFixed(2),
+
+    //     totalwalletpayin: Number(item.total_amount?.UPI || 0).toFixed(2),
+    //     totalwalletpayout: Number(item.total_amount?.payout || 0).toFixed(2),
+    //     totalwallet: Number(item.total_payout || 0).toFixed(2),
+    //     account: item.account_status,
+
+    //     walletpayin: item.payin_wallet,
+    //     walletpayout: item.payout_wallet,
+    //     date:
+    //       new Date(item.created_at).getDate() +
+    //       " " +
+    //       MONTH_NAMES[new Date(item.created_at).getMonth()] +
+    //       " " +
+    //       new Date(item.created_at).getFullYear(),
+    //   };
+    // });
+
+    return {
+        sqno: item.id,
         id: item.id,
         // name: item.name,
-        name:(
-        <span className="text-blue-600 cursor-pointer" 
-        
-        onClick={() => {
-          localStorage.setItem("merchantId", item.id);
-          memberDetails(`/MerchantDetails/${item.id}`) 
-        }}>
-        
-          {item.name}
-        </span>
+        name: (
+          <span
+            className="text-blue-600 cursor-pointer w-100"
+            onClick={() => {
+              localStorage.setItem("merchantId", item.id);
+              memberDetails(`/MerchantDetails/${item.id}`);
+            }}
+          >
+            {item.name}
+          </span>
         ),
+        kyc:
+          item.kyc === 1 ? (
+            <span className="px-3 py-1 text-sm font-semibold text-green-700 bg-green-100 rounded-full">
+              Verified
+            </span>
+          ) : item.kyc_rejected === 1 ? (
+            <span className="px-3 py-1 text-sm font-semibold text-red-700 bg-red-100 rounded-full">
+              Rejected
+            </span>
+          ) : (
+            <button
+              className="px-3 py-1 text-sm font-semibold text-orange-700 bg-orange-100 rounded-full hover:bg-orange-200 cursor-pointer transition"
+              onClick={() => {
+                localStorage.setItem("merchantId", item.id);
+                memberVerify(`/VerifyMerchant/${item.id}`);
+              }}
+            >
+              Verify
+            </button>
+          ),
         payin_bank: payinBank,
         payin: item.payin_status,
-       
-        payout: item.payout_status,
-     payincharge: Number(item.total_charge?.UPI || 0).toFixed(2),
-payoutcharge: Number(item.total_charge?.payout || 0).toFixed(2),
-cryptocharge: Number(item.total_charge?.CRYPTO || 0).toFixed(2),
 
-  totalwalletpayin: Number(item.total_amount?.UPI || 0).toFixed(2),
-totalwalletpayout: Number(item.total_amount?.payout || 0).toFixed(2),
-totalwallet: Number(item.total_payout || 0).toFixed(2),
+        payout: item.payout_status,
+        payincharge: Number(item.total_charge?.UPI || 0).toFixed(2),
+        payoutcharge: Number(item.total_charge?.payout || 0).toFixed(2),
+        cryptocharge: Number(item.total_charge?.CRYPTO || 0).toFixed(2),
+
+        totalwalletpayin: Number(item.total_amount?.UPI || 0).toFixed(2),
+        totalwalletpayout: Number(item.total_amount?.payout || 0).toFixed(2),
+        totalwallet: Number(item.total_payout || 0).toFixed(2),
         account: item.account_status,
 
         walletpayin: item.payin_wallet,
@@ -192,18 +256,18 @@ totalwallet: Number(item.total_payout || 0).toFixed(2),
   const memberColumns = [
     { header: "SQNo", accessor: "sqno" },
     { header: "Name", accessor: "name" },
+    { header: "KYC", accessor: "kyc" },
     { header: "Payin", accessor: "payin" },
- 
+
     { header: "Payout", accessor: "payout" },
-    
+
     { header: "Payin Wallet", accessor: "walletpayin" },
     { header: "Payout Wallet", accessor: "walletpayout" },
     { header: "Total Payin Wallet", accessor: "totalwalletpayin" },
-         { header: "Payin Charge", accessor: "payincharge" },
-      { header: "Total Payout Wallet", accessor: "totalwalletpayout" },
-         { header: "Payout Charge", accessor: "payoutcharge" },
-      { header: "Total Wallet", accessor: "totalwallet" },
-
+    { header: "Payin Charge", accessor: "payincharge" },
+    { header: "Total Payout Wallet", accessor: "totalwalletpayout" },
+    { header: "Payout Charge", accessor: "payoutcharge" },
+    { header: "Total Wallet", accessor: "totalwallet" },
 
     { header: "Payin Onboarded Bank", accessor: "payin_bank" },
   ];
@@ -232,7 +296,9 @@ totalwallet: Number(item.total_payout || 0).toFixed(2),
           onChange={(v) => handleAccountToggle(v, row.id)}
           className="mt-1"
         />
-        <span className="text-xs text-blue-400 font-semibold mt-1">{row.date}</span>
+        <span className="text-xs text-blue-400 font-semibold mt-1">
+          {row.date}
+        </span>
       </div>
     ),
   }));
@@ -242,29 +308,29 @@ totalwallet: Number(item.total_payout || 0).toFixed(2),
       {/* Header */}
       <div className="bg-gradient-to-t from-[#b58351] to-[#b6916d]  rounded-lg flex justify-between items-center p-4 shadow-md">
         <h4 className="font-bold text-white text-xl">Member List</h4>
-         <div className="flex items-center space-x-2">
-  <span className="font-bold text-white">All Payin ON/OFF</span>
-  <Toggle
-    key={merchantData.map(m => m.payin).join("")} // force re-render when data changes
-    defaultChecked={
-      merchantData.length > 0 &&
-      merchantData.every(item => item.account && item.payin)
-    }
-    onChange={handleAllPayinToggle}
-  />
-</div>
+        <div className="flex items-center space-x-2">
+          <span className="font-bold text-white">All Payin ON/OFF</span>
+          <Toggle
+            key={merchantData.map((m) => m.payin).join("")} // force re-render when data changes
+            defaultChecked={
+              merchantData.length > 0 &&
+              merchantData.every((item) => item.account && item.payin)
+            }
+            onChange={handleAllPayinToggle}
+          />
+        </div>
 
-<div className="flex items-center space-x-2">
-  <span className="font-bold text-white">All Payout ON/OFF</span>
-  <Toggle
-    key={merchantData.map(m => m.payout).join("")} // force re-render when data changes
-    defaultChecked={
-      merchantData.length > 0 &&
-      merchantData.every(item => item.account && item.payout)
-    }
-    onChange={handleAllPayoutToggle}
-  />
-</div>
+        <div className="flex items-center space-x-2">
+          <span className="font-bold text-white">All Payout ON/OFF</span>
+          <Toggle
+            key={merchantData.map((m) => m.payout).join("")} // force re-render when data changes
+            defaultChecked={
+              merchantData.length > 0 &&
+              merchantData.every((item) => item.account && item.payout)
+            }
+            onChange={handleAllPayoutToggle}
+          />
+        </div>
 
         <Button
           onClick={() => navigate("/member-create")}
@@ -272,7 +338,6 @@ totalwallet: Number(item.total_payout || 0).toFixed(2),
         >
           + Create New
         </Button>
-
       </div>
 
       {/* Table */}
@@ -284,7 +349,9 @@ totalwallet: Number(item.total_payout || 0).toFixed(2),
           data={tableDataWithActions}
           className="shadow-lg rounded-lg overflow-hidden border border-gray-200"
           rowClassName={(rowIndex) =>
-            rowIndex % 2 === 0 ? "bg-white hover:bg-blue-50" : "bg-gray-50 hover:bg-blue-50"
+            rowIndex % 2 === 0
+              ? "bg-white hover:bg-blue-50"
+              : "bg-gray-50 hover:bg-blue-50"
           }
           paginationClassName="flex justify-end gap-2 mt-4"
           previousClassName="bg-[#b58351] hover:bg-[#615141] text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
@@ -294,7 +361,10 @@ totalwallet: Number(item.total_payout || 0).toFixed(2),
         />
       )}
 
-      <SchemeModal showModal={showModal} handleModal={() => setShowModal(!showModal)} />
+      <SchemeModal
+        showModal={showModal}
+        handleModal={() => setShowModal(!showModal)}
+      />
     </div>
   );
 };

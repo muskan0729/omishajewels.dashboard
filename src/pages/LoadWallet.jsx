@@ -202,7 +202,7 @@ const LoadWallet = () => {
                     ? handleSubmitLoadWallet
                     : handleSubmitReverseTopup
                 }
-                className="w-full bg-[#615141] hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-lg shadow-md transition"
+                className="w-full bg-[#615141] hover:bg-[#b58351] text-white font-medium px-5 py-2 rounded-lg shadow-md transition"
               >
                 Submit
               </Button>
