@@ -75,7 +75,6 @@ const MemberUserForm = () => {
     setDirectors(updated);
   };
 
-
   const [videoKYC, setVideoKYC] = useState(null);
   const [errors, setErrors] = useState({});
 
@@ -394,8 +393,92 @@ const MemberUserForm = () => {
 
   const handleChange = (key, value) =>
     setFormData((prev) => ({ ...prev, [key]: value }));
-  const handleFileChange = (key, file) =>
-    setCompanyDocs((prev) => ({ ...prev, [key]: file }));
+  // const handleFileChange = (key, file) =>
+  //   setCompanyDocs((prev) => ({ ...prev, [key]: file }));
+
+  const handleFileChange = (key, file) => {
+    if (!file) return;
+
+    // ✅ Allow IMAGE + PDF
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "application/pdf",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      setErrors((prev) => ({
+        ...prev,
+        [key]: "Only JPG, PNG, WEBP images or PDF files are allowed",
+      }));
+      return;
+    }
+
+    // ✅ Optional: size limit (5MB)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setErrors((prev) => ({
+        ...prev,
+        [key]: "File size must be under 5MB",
+      }));
+      return;
+    }
+
+    // ✅ Clear error + save file
+    setErrors((prev) => ({ ...prev, [key]: null }));
+    setCompanyDocs((prev) => ({
+      ...prev,
+      [key]: file,
+    }));
+  };
+
+
+  const handleDirectorFileChange = (index, key, file) => {
+    if (!file) return;
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "application/pdf",
+    ];
+
+    // ❌ Wrong file type
+    if (!allowedTypes.includes(file.type)) {
+      setErrors((prev) => ({
+        ...prev,
+        [`${key}_${index}`]:
+          "Only JPG, PNG, WEBP images or PDF files are allowed",
+      }));
+      return;
+    }
+
+    // ❌ Size limit (5MB)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setErrors((prev) => ({
+        ...prev,
+        [`${key}_${index}`]:
+          "File size must be under 5MB",
+      }));
+      return;
+    }
+
+    // ✅ Clear error
+    setErrors((prev) => ({
+      ...prev,
+      [`${key}_${index}`]: null,
+    }));
+
+    // ✅ Save file in correct director
+    setDirectors((prev) =>
+      prev.map((dir, i) =>
+        i === index ? { ...dir, [key]: file } : dir
+      )
+    );
+  };
+
   const handleDirectorChange = (i, key, value) => {
     const updated = [...directors];
     updated[i][key] = value;
@@ -506,8 +589,7 @@ const MemberUserForm = () => {
           </p>
 
           {/* ================= SIGNATURE STEP INDICATOR ================= */}
-          <div className="mb-12 pl-5 pr-5">
-            {/* Step Labels */}
+          <div className="mb-12 px-5">
             <div className="flex justify-between text-sm tracking-wide">
               {stepIndicator.map((label, index) => {
                 const isActive = step === index + 1;
@@ -517,42 +599,44 @@ const MemberUserForm = () => {
                   <div
                     key={index}
                     className={`
-            relative flex-1 text-center pb-4 transition-all duration-300
-            ${
-              isActive
-                ? "text-gray-900 font-semibold"
-                : isCompleted
-                ? "text-gray-700"
-                : "text-gray-400"
-            }
-          `}
+                      flex-1 text-center transition-all duration-300
+                      ${
+                        isActive
+                          ? "text-gray-900 font-semibold"
+                          : isCompleted
+                          ? "text-gray-700"
+                          : "text-gray-400"
+                      }
+                    `}
                   >
                     {label}
-
-                    {/* Active Micro Marker */}
-                    {/* {isActive && (
-            <span className="absolute left-1/2 -bottom-1 w-2 h-1.5 rounded-2x2 bg-[#C9A23F] -translate-x-1/2 transition-all duration-500 ease-out" />
-          )} */}
                   </div>
                 );
               })}
             </div>
 
-            {/* Progress Rail */}
-            <div className="relative mt-1">
-              {/* Base Thin Line */}
+            <div className="relative mt-3">
               <div className="h-px bg-gray-300" />
 
-              {/* Completed Thick Line */}
               <div
                 className="absolute top-0 left-0 h-0.5 bg-[#C9A23F] transition-all duration-500 ease-out"
                 style={{
-                  // width: `${((step - 1) / (stepIndicator.length - 1)) * 100}%`,
-                  width: `calc(${
-                    ((step - 1) / (stepIndicator.length - 1)) * 100
-                  }% - 20px)`,
+                  width: `${((step - 1) / (stepIndicator.length - 1)) * 100}%`,
                 }}
               />
+
+              <div
+                className="absolute -top-[6px] transition-all duration-500 ease-out"
+                style={{
+                  left: `calc(${
+                    ((step - 1) / (stepIndicator.length - 1)) * 100
+                  }% - 7px)`,
+                }}
+              >
+                <span className="w-4 h-4 rounded-full bg-[#C9A23F] flex items-center justify-center shadow-sm">
+                  <span className="w-2 h-2 rounded-full bg-white" />
+                </span>
+              </div>
             </div>
           </div>
 
@@ -562,18 +646,19 @@ const MemberUserForm = () => {
               <h2 className="text-xl font-semibold text-[#9E7C19] mb-2">
                 Business Details
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Locked fields from database */}
 
-                {["name", "mobile_no", "email"].map((key, index) => (
-                  <div key={index}>
-                    <label className="block mb-1 pl-2 font-medium capitalize">
+              {/* ===== Basic Details ===== */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Locked fields */}
+                {["name", "mobile_no", "email"].map((key) => (
+                  <div key={key}>
+                    <label className="block mb-1 text-xs font-semibold text-gray-600 tracking-wide capitalize ml-2">
                       {key.replace(/_/g, " ")}{" "}
                       <span className="text-red-600">*</span>
                     </label>
 
                     <input
-                      className={`${disableinput}`}
+                      className={disableinput}
                       value={formData[key] || ""}
                       readOnly
                     />
@@ -589,9 +674,9 @@ const MemberUserForm = () => {
                   "cin_llpin",
                   "date_of_incorporation",
                   "website_url",
-                ].map((key, index) => (
-                  <div key={index}>
-                    <label className="block mb-1 pl-2 font-medium capitalize">
+                ].map((key) => (
+                  <div key={key}>
+                    <label className="block mb-1 text-xs font-semibold text-gray-600 tracking-wide capitalize ml-2">
                       {key.replace(/_/g, " ")}{" "}
                       <span className="text-red-600">*</span>
                     </label>
@@ -622,12 +707,15 @@ const MemberUserForm = () => {
                         onChange={(e) => handleChange(key, e.target.value)}
                       />
                     )}
+
                     {errors[key] && (
-                      <p className="text-red-600 text-sm">{errors[key]}</p>
+                      <p className="text-red-600 text-xs mt-1">{errors[key]}</p>
                     )}
                   </div>
                 ))}
               </div>
+
+              {/* ===== Documents ===== */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                 {[
                   "company_pan_no_doc",
@@ -635,34 +723,38 @@ const MemberUserForm = () => {
                   "cancel_cheque_doc",
                 ].map((key) => (
                   <div key={key}>
-                    <label className="block mb-1 pl-2 font-medium capitalize">
+                    <label className="block mb-1 text-xs font-semibold text-gray-600 tracking-wide capitalize ml-2">
                       {key.replace(/_/g, " ")}{" "}
                       <span className="text-red-600">*</span>
                     </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        readOnly
-                        value={companyDocs[key]?.name || ""}
-                        placeholder="Choose file"
-                        className={`${input} cursor-pointer`}
-                        onClick={() =>
-                          document.getElementById(`file-${key}`).click()
-                        }
-                      />
 
-                      <input
-                        id={`file-${key}`}
-                        type="file"
-                        className="hidden"
-                        onChange={(e) =>
-                          handleFileChange(key, e.target.files[0])
-                        }
-                      />
-                    </div>
+                    {/* Fake visible input */}
+                    <input
+                      type="text"
+                      readOnly
+                      value={companyDocs[key]?.name || ""}
+                      placeholder="Upload image or PDF"
+                      className={`${input} cursor-pointer`}
+                      onClick={() =>
+                        document.getElementById(`file-${key}`).click()
+                      }
+                    />
+
+                    {/* Real file input – IMAGE + PDF */}
+                    <input
+                      id={`file-${key}`}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,application/pdf"
+                      className="hidden"
+                      onChange={(e) =>
+                        handleFileChange(key, e.target.files[0])
+                      }
+                    />
 
                     {errors[key] && (
-                      <p className="text-red-600 text-sm">{errors[key]}</p>
+                      <p className="text-red-600 text-xs mt-1">
+                        {errors[key]}
+                      </p>
                     )}
                   </div>
                 ))}
@@ -675,22 +767,29 @@ const MemberUserForm = () => {
               <h2 className="text-xl font-semibold text-[#9E7C19] mb-2">
                 Bank Details
               </h2>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {["account_holder_name", "bank_account_no", "ifsc_code"].map(
                   (key) => (
                     <div key={key}>
-                      <label className="block mb-1 pl-2 font-medium">
+                      {/* Label */}
+                      <label className="block mb-1 text-xs font-semibold text-gray-600 tracking-wide capitalize ml-2">
                         {key.replace(/_/g, " ")}{" "}
                         <span className="text-red-600">*</span>
                       </label>
 
+                      {/* Input */}
                       <input
                         className={input}
                         value={formData[key]}
                         onChange={(e) => handleChange(key, e.target.value)}
                       />
+
+                      {/* Error */}
                       {errors[key] && (
-                        <p className="text-red-600 text-sm">{errors[key]}</p>
+                        <p className="text-red-600 text-xs mt-1">
+                          {errors[key]}
+                        </p>
                       )}
                     </div>
                   )
@@ -704,21 +803,29 @@ const MemberUserForm = () => {
               <h2 className="text-xl font-semibold text-[#9E7C19] mb-2">
                 Address Details
               </h2>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {["city", "state", "district", "pin_code", "address"].map(
                   (key) => (
                     <div key={key}>
-                      <label className="block mb-1 pl-2 font-medium">
+                      {/* Label */}
+                      <label className="block mb-1 text-xs font-semibold text-gray-600 tracking-wide capitalize ml-2">
                         {key.replace(/_/g, " ")}{" "}
                         <span className="text-red-600">*</span>
                       </label>
+
+                      {/* Input */}
                       <input
                         className={input}
                         value={formData[key]}
                         onChange={(e) => handleChange(key, e.target.value)}
                       />
+
+                      {/* Error */}
                       {errors[key] && (
-                        <p className="text-red-600 text-sm">{errors[key]}</p>
+                        <p className="text-red-600 text-xs mt-1">
+                          {errors[key]}
+                        </p>
                       )}
                     </div>
                   )
@@ -732,20 +839,26 @@ const MemberUserForm = () => {
               <h2 className="text-xl font-semibold text-[#9E7C19] mb-2">
                 Director Information
               </h2>
+
               {directors.map((d, i) => (
                 <div
                   key={i}
-                  className="p-4 border rounded-lg bg-white border border-gray-200 shadow-sm rounded-xl space-y-3"
+                  className="
+                    bg-white
+                    border border-gray-200
+                    rounded-2xl
+                    shadow-sm
+                    px-6 py-5
+                    space-y-4
+                  "
                 >
-                  {/* <h3 className="font-semibold text-gray-800">
-                    Director {i + 1}
-                  </h3> */}
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-800">
+                  {/* ===== Header ===== */}
+                  <div className="flex items-center justify-between border-b pb-3">
+                    <h3 className="text-base md:text-lg font-semibold text-gray-900 tracking-wide">
                       Director {i + 1}
                     </h3>
 
-                    {/* ❌ Delete Director (not for first director) */}
+                    {/* Delete (not for first director) */}
                     {i > 0 && (
                       <button
                         type="button"
@@ -754,19 +867,22 @@ const MemberUserForm = () => {
                           flex items-center gap-1
                           px-3 py-1.5
                           text-xs font-semibold
-                          text-red-600
-                          border border-red-200
+                          text-[#9E7C19]
+                          border border-[#9E7C19]/30
                           rounded-full
-                          bg-red-50
-                          hover:bg-red-100
-                          hover:border-red-300
+                          bg-[#FFF8E1]
+                          hover:bg-[#9E7C19]
+                          hover:text-white
                           transition-all
                         "
                       >
-                        <i class="fa-solid fa-trash"></i> Delete
+                        <i className="fa-solid fa-trash"></i>
+                        Delete
                       </button>
                     )}
                   </div>
+
+                  {/* ===== Fields ===== */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {[
                       "director_name",
@@ -776,6 +892,13 @@ const MemberUserForm = () => {
                       "director_dob",
                     ].map((k) => (
                       <div key={k}>
+                        {/* Label */}
+                        <label className="block mb-1 text-xs font-semibold text-gray-600 tracking-wide capitalize ml-2">
+                          {k.replace(/_/g, " ")}{" "}
+                          <span className="text-red-600">*</span>
+                        </label>
+
+                        {/* Input */}
                         {k === "director_gender" ? (
                           <select
                             className={input}
@@ -784,7 +907,7 @@ const MemberUserForm = () => {
                               handleDirectorChange(i, k, e.target.value)
                             }
                           >
-                            <option value="">Gender</option>
+                            <option value="">Select</option>
                             <option value="male">Male</option>
                             <option value="female">Female</option>
                             <option value="other">Other</option>
@@ -800,7 +923,6 @@ const MemberUserForm = () => {
                           />
                         ) : (
                           <input
-                            placeholder={k.replace(/_/g, " ")}
                             className={input}
                             value={d[k]}
                             onChange={(e) =>
@@ -808,63 +930,65 @@ const MemberUserForm = () => {
                             }
                           />
                         )}
+
+                        {/* Error */}
                         {errors[`${k}_${i}`] && (
-                          <p className="text-red-600 text-sm">
+                          <p className="text-red-600 text-xs mt-1">
                             {errors[`${k}_${i}`]}
                           </p>
                         )}
                       </div>
                     ))}
+
+                    {/* ===== Documents ===== */}
                     {["user_pan_doc", "user_addhar_doc"].map((k) => (
-                      <div key={k} className="relative">
+                      <div key={k}>
+                        <label className="block mb-1 text-xs font-semibold text-gray-600 tracking-wide ml-2">
+                          {k === "user_pan_doc" ? "PAN Document" : "Aadhaar Document"}{" "}
+                          <span className="text-red-600">*</span>
+                        </label>
+
+                        {/* Fake visible input */}
                         <input
                           type="text"
                           readOnly
+                          value={d[k]?.name || ""}
                           placeholder={
                             k === "user_pan_doc"
                               ? "Upload PAN Document"
                               : "Upload Aadhaar Document"
                           }
-                          value={d[k]?.name || ""}
                           className={`${input} cursor-pointer`}
                           onClick={() =>
-                            document
-                              .getElementById(`director-${i}-${k}`)
-                              .click()
+                            document.getElementById(`director-${i}-${k}`).click()
                           }
                         />
 
+                        {/* Real file input – IMAGE + PDF */}
                         <input
                           id={`director-${i}-${k}`}
                           type="file"
+                          accept="image/jpeg,image/png,image/webp,application/pdf"
                           className="hidden"
                           onChange={(e) =>
-                            handleDirectorChange(i, k, e.target.files[0])
+                            handleDirectorFileChange(i, k, e.target.files[0])
                           }
                         />
 
                         {errors[`${k}_${i}`] && (
-                          <p className="text-red-600 text-sm mt-1">
+                          <p className="text-red-600 text-xs mt-1">
                             {errors[`${k}_${i}`]}
                           </p>
                         )}
                       </div>
                     ))}
-                    {/* ❌ Delete Director Button (not for first director) */}
-                    {/* {i > 0 && (
-                      <div className="flex justify-end mt-3">
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveDirector(i)}
-                          className="text-red-600 hover:text-red-800 text-sm font-medium"
-                        >
-                          🗑 Delete Director
-                        </button>
-                      </div>
-                    )} */}
+
+
                   </div>
                 </div>
               ))}
+
+              {/* ===== Add Director ===== */}
               <button
                 type="button"
                 onClick={() =>
@@ -889,17 +1013,18 @@ const MemberUserForm = () => {
           )}
 
           {step === 5 && (
-            <div className="space-y-6">
+            <div className="space-y-5">
               <h2 className="text-xl font-semibold text-[#9E7C19] mb-2">
                 🎥 Video KYC
               </h2>
 
               {/* Instructions */}
-              <div className="bg-yellow-50 border-l-4 border-[#9E7C19] p-4 rounded space-y-2">
-                <p className="font-medium">
+              <div className="bg-[#FFF8E1] border border-[#9E7C19]/30 rounded-2xl px-5 py-4 space-y-4">
+                <p className="text-sm font-semibold text-gray-800">
                   Please record a short video following these steps:
                 </p>
-                <ol className="list-decimal list-inside text-gray-700 space-y-1">
+
+                <ol className="list-decimal list-inside text-sm text-gray-700 space-y-1">
                   <li>
                     Hold your face in front of the camera and clearly say your
                     full name.
@@ -911,19 +1036,24 @@ const MemberUserForm = () => {
                     Optionally, show any other required documents if prompted.
                   </li>
                 </ol>
-                <p className="text-sm text-gray-500">
+
+                <p className="text-xs text-gray-500">
                   Ensure good lighting and no obstructions for clear
                   verification.
                 </p>
               </div>
 
-              {/* File input */}
-              <div className="relative">
-                {/* Fake visible input */}
+              {/* Upload */}
+              <div>
+                <label className="block mb-1 text-xs font-semibold text-gray-600 tracking-wide ml-2">
+                  Upload Video KYC <span className="text-red-600">*</span>
+                </label>
+
+                {/* Visible input */}
                 <input
                   type="text"
                   readOnly
-                  placeholder="Upload Video KYC"
+                  placeholder="Choose video file"
                   value={videoKYC?.name || ""}
                   className={`${input} cursor-pointer`}
                   onClick={() =>
@@ -931,7 +1061,7 @@ const MemberUserForm = () => {
                   }
                 />
 
-                {/* Real hidden file input */}
+                {/* Hidden file input */}
                 <input
                   id="video-kyc-input"
                   type="file"
@@ -939,19 +1069,23 @@ const MemberUserForm = () => {
                   className="hidden"
                   onChange={(e) => setVideoKYC(e.target.files[0])}
                 />
-              </div>
 
-              {errors.video_kyc && (
-                <p className="text-red-600 text-sm">{errors.video_kyc}</p>
-              )}
+                {errors.video_kyc && (
+                  <p className="text-red-600 text-xs mt-1">
+                    {errors.video_kyc}
+                  </p>
+                )}
+              </div>
 
               {/* Preview */}
               {videoKYC && (
-                <video
-                  src={URL.createObjectURL(videoKYC)}
-                  controls
-                  className="w-80 mt-2 rounded border"
-                />
+                <div className="mt-2">
+                  <video
+                    src={URL.createObjectURL(videoKYC)}
+                    controls
+                    className="w-72 rounded-xl border shadow-sm"
+                  />
+                </div>
               )}
             </div>
           )}
@@ -962,7 +1096,6 @@ const MemberUserForm = () => {
                 📝 Review Information
               </h2>
 
-              {/* Business Details */}
               <div className="border rounded-lg p-4 bg-white border border-gray-200 shadow-sm rounded-xl">
                 <h3 className="font-semibold text-lg mb-2 text-gray-800">
                   🏢 Business Details
@@ -999,7 +1132,6 @@ const MemberUserForm = () => {
                 </p>
               </div>
 
-              {/* Bank Details */}
               <div className="border rounded-lg p-4 bg-white border border-gray-200 shadow-sm rounded-xl">
                 <h3 className="font-semibold text-lg mb-2 text-gray-800">
                   💰 Bank Details
@@ -1015,7 +1147,6 @@ const MemberUserForm = () => {
                 </p>
               </div>
 
-              {/* Address Details */}
               <div className="border rounded-lg p-4 bg-white border border-gray-200 shadow-sm rounded-xl">
                 <h3 className="font-semibold text-lg mb-2 text-gray-800">
                   📍 Address Details
@@ -1037,7 +1168,6 @@ const MemberUserForm = () => {
                 </p>
               </div>
 
-              {/* Company Documents */}
               <div className="border rounded-lg p-4 bg-white border border-gray-200 shadow-sm rounded-xl">
                 <h3 className="font-semibold text-lg mb-2 text-gray-800">
                   📄 Company Documents
@@ -1060,7 +1190,6 @@ const MemberUserForm = () => {
                 </div>
               </div>
 
-              {/* Directors */}
               <div className="border rounded-lg p-4 bg-white border border-gray-200 shadow-sm rounded-xl">
                 <h3 className="font-semibold text-lg mb-2 text-gray-800">
                   👤 Directors
@@ -1094,7 +1223,6 @@ const MemberUserForm = () => {
                 ))}
               </div>
 
-              {/* Video KYC */}
               <div className="border rounded-lg p-4 bg-white border border-gray-200 shadow-sm rounded-xl">
                 <h3 className="font-semibold text-lg mb-2 text-gray-800">
                   🎥 Video KYC
