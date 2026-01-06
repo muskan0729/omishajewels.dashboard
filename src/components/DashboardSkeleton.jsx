@@ -1,6 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
+
 
 const DashboardSkeleton = () => {
+
+  const [role] = useState(atob(localStorage.getItem("role")) || "admin");
+  
   return (
     <div className="flex min-h-screen bg-[#fefcf9]">
       <div className="flex-1 p-6 lg:p-10 animate-pulse">
@@ -26,6 +30,7 @@ const DashboardSkeleton = () => {
         </div>
 
         {/* ================= CHART SECTION ================= */}
+        {role === "admin" && (
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-12">
 
           {/* Left Flip Card Skeleton */}
@@ -50,6 +55,7 @@ const DashboardSkeleton = () => {
             <div className="h-64 bg-[#f0ebe6] rounded" />
           </div>
         </div>
+        )}
 
         {/* ================= TABLE SECTION ================= */}
         <div

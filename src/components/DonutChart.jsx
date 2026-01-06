@@ -1,13 +1,51 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 export const DonutChart = ({ data }) => {
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
 
-  const pending = Number(data?.pending) || 0;
-  const success = Number(data?.success) || 0;
-  const failed = Number(data?.failed) || 0;
-  const total = pending + success + failed;
+  // 🔁 Toggle between modes
+  const [mode, setMode] = useState("UPI");
+
+  // 🔥 API-proof logic (IMPORTANT)
+  const getChartData = () => {
+    const transactionData = data?.[mode] || {};
+
+    const pending =
+      "pending" in transactionData ? Number(transactionData.pending) || 0 : 0;
+
+    const success = Number(transactionData.success) || 0;
+    const failed = Number(transactionData.failed) || 0;
+
+    const series = [];
+    const labels = [];
+    const colors = [];
+
+    if (pending > 0) {
+      series.push(pending);
+      labels.push("Pending");
+      colors.push("#ddbea9");
+    }
+
+    if (success > 0) {
+      series.push(success);
+      labels.push("Success");
+      colors.push("#cb997e");
+    }
+
+    if (failed > 0) {
+      series.push(failed);
+      labels.push("Failed");
+      colors.push("#f3d8c7");
+    }
+
+    const total = pending + success + failed;
+    const isEmpty = series.length === 0;
+
+    return { series, labels, colors, total, isEmpty };
+  };
+
+  const { series, labels, colors, total, isEmpty } = getChartData();
 
   useEffect(() => {
     if (!chartRef.current || typeof ApexCharts === "undefined") return;
@@ -17,11 +55,10 @@ export const DonutChart = ({ data }) => {
       chartInstance.current = null;
     }
 
-    const seriesData = total > 0 ? [pending, success, failed] : [0, 0, 0];
-
     const options = {
-      series: seriesData,
-      colors: ["#ddbea9", "#cb997e", "#f3d8c7"],
+      series: isEmpty ? [1] : series,
+      labels: isEmpty ? ["No Transactions"] : labels,
+      colors: isEmpty ? ["#e5e7eb"] : colors,
 
       chart: {
         height: 340,
@@ -30,8 +67,6 @@ export const DonutChart = ({ data }) => {
           enabled: true,
           easing: "easeinout",
           speed: 900,
-          animateGradually: { enabled: true, delay: 120 },
-          dynamicAnimation: { enabled: true, speed: 500 },
         },
       },
 
@@ -42,76 +77,47 @@ export const DonutChart = ({ data }) => {
             labels: {
               show: true,
               name: {
-                show: true,
+                show: !isEmpty,
                 fontSize: "16px",
                 offsetY: 20,
-                color: "#555",
               },
               value: {
-                show: true,
+                show: !isEmpty,
                 fontSize: "28px",
                 fontWeight: 700,
                 offsetY: -10,
-                color: "#111",
-                formatter: (val) => val,
               },
               total: {
                 show: true,
-                label: "Total",
-                color: "#888",
+                label: isEmpty ? "No Transactions" : "Total",
                 fontSize: "14px",
-                formatter: () => total,
+                formatter: () => (isEmpty ? 0 : total),
               },
             },
           },
-          expandOnClick: true,
         },
       },
-
-      stroke: {
-        colors: ["#fff"],
-        width: 2,
-      },
-
-      labels: ["Pending", "Success", "Failed"],
 
       dataLabels: { enabled: false },
 
       legend: {
         position: "bottom",
-        fontSize: "12px",
-        horizontalAlign: "",
-        markers: { width: 10, height: 10, radius: 10 },
-        itemMargin: { horizontal: 6 },
         formatter: function (seriesName, opts) {
+          if (isEmpty) return seriesName;
           const value = opts.w.globals.series[opts.seriesIndex];
           return `
-            <div style="
-              display:flex;
-              flex-direction:column;
-              align-items:center;
-              line-height:16px;
-            ">
-              <div style="font-size:18px; font-weight:600; color:#111;">${value}</div>
-              <div style="font-size:12px; color:#777;">${seriesName}</div>
+            <div style="display:flex; flex-direction:column; align-items:center; line-height:16px">
+              <div style="font-size:18px; font-weight:600; color:#111">${value}</div>
+              <div style="font-size:12px; color:#777">${seriesName}</div>
             </div>
           `;
-        }
+        },
       },
 
       tooltip: {
-        theme: "light",
+        enabled: !isEmpty,
         y: {
-          formatter: (value) => `${value} transactions`,
-        },
-      },
-
-      states: {
-        hover: {
-          filter: { type: "darken", value: 0.8 },
-        },
-        active: {
-          filter: { type: "none" },
+          formatter: (val) => `${val} transactions`,
         },
       },
     };
@@ -121,14 +127,30 @@ export const DonutChart = ({ data }) => {
     chartInstance.current.render();
 
     return () => chartInstance.current?.destroy();
-  }, [pending, success, failed, total]);
+  }, [mode, JSON.stringify(series)]);
 
   return (
-    <div className="border border-orange-200 max-w-sm w-full bg-white rounded-xl shadow-md p-5 transition-all duration-300 hover:shadow-lg">
-      <h5 className="text-xl font-semibold text-gray-800">Transactions</h5>
-      <p className="text-sm text-gray-500">Overview breakdown</p>
+    <div
+      className="border border-orange-200 max-w-sm w-full bg-white rounded-xl
+                  shadow-md p-4 overflow-hidden
+                  transition-all duration-300 hover:shadow-lg"
+    >
+      <div className="flex justify-between items-center">
+        <div>
+          <h5 className="text-xl font-semibold text-gray-800">Transactions</h5>
+          <p className="text-sm text-gray-500">Overview breakdown</p>
+        </div>
 
-      <div className="py-6" ref={chartRef}></div>
+        <button
+          onClick={() => setMode(mode === "UPI" ? "payout" : "UPI")}
+          className="px-3 py-1 rounded-lg text-white text-sm font-semibold"
+          style={{ background: "linear-gradient(0deg, #cb997eff, #cb997eff)" }}
+        >
+          {mode === "UPI" ? "Payin" : "Payout"}
+        </button>
+      </div>
+
+      <div className="py-6 overflow-hidden" ref={chartRef}></div>
     </div>
   );
 };

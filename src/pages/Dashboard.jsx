@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from "react";
 import { DonutChart } from "../components/DonutChart";
 import { LineChart } from "../components/LineChart";
@@ -29,13 +28,14 @@ export const Dashboard = () => {
   const { data: tableData } = useAutoFetch(
     "/reportrecords-List?status=success"
   );
+  console.log("wfwewewefwef ::",cardData);
   const { data: cryptotableData } = useAutoFetch(
     "/crypto-reportrecords-list?status=success"
   );
 
   const initialDataOfTransactions = tableData?.data;
   const cryptoinitialDataOfTransactions = cryptotableData?.data;
-
+  
   // Process table data
   const processTableData = useMemo(() => {
     if (!initialDataOfTransactions) return [];
@@ -156,115 +156,144 @@ export const Dashboard = () => {
     [largeTransactionData]
   );
 
-  const currentLeaderboard =
-    leaderboardByTab[activeLeaderboardTab] || [];
+  const currentLeaderboard = leaderboardByTab[activeLeaderboardTab] || [];
 
   const rankColors = ["#FFD700", "#567585", "#CD7F32"];
-return (
-  <>
-    {initialLoad ? (
-      <DashboardSkeleton />
-    ) : (
-      <div className="flex min-h-screen bg-[#fefcf9] transition-all duration-500">
+  return (
+    <>
+      {initialLoad ? (
+        <DashboardSkeleton />
+      ) : (
+        <div className="flex min-h-screen bg-[#fefcf9] transition-all duration-500">
+          {/* ================= MAIN CONTENT ================= */}
+          <div className="flex-1 p-6 lg:p-10">
+            {/* =================== TOP 4 KPI CARDS =================== */}
+            <StatsCards inCard={inCard} outCard={outCard} />
 
-        {/* ================= MAIN CONTENT ================= */}
-        <div className="flex-1 p-6 lg:p-10">
+            {/* =================== CHART SECTION =================== */}
+            {role === "admin" && (
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-2 mb-12">
+              <FlipCard
+                frontContent={
+                  <div className="flex flex-col items-center justify-center flex-1">
+                    <DonutChart data={cardData?.transactionStatusCounts} />
+                  </div>
+                }
+                backContent={
+                  <div className="flex flex-col flex-1 overflow-auto space-y-3">
+                    {currentLeaderboard.length > 0 ? (
+                      currentLeaderboard.map((item, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-4 p-4 rounded-xl border"
+                          style={{
+                            borderColor: "#f0ebe6",
+                            background: "#fefcf9",
+                          }}
+                        >
+                          {/* Rank Badge (No Background) */}
+                          <div
+                            className="w-12 h-12 flex items-center justify-center border-2 rounded-full"
+                            style={{
+                              borderColor:
+                                i === 0
+                                  ? "#cd7f32"
+                                  : i === 1
+                                  ? "#e8b864"
+                                  : i === 2
+                                  ? "#edc98a"
+                                  : "#f2dfbd",
+                            }}
+                          >
+                            <span
+                              className="text-xl font-semibold"
+                              style={{
+                                color: i < 3 ? "#FFD700" : "#4d443b", // Gold for top 3, dark color for others
+                              }}
+                            >
+                              {/* Font Awesome Icon for Rank */}
+                              {i === 0 ? (
+                                <i
+                                  className="fas fa-medal"
+                                  style={{ color: "#cd7f32" }}
+                                ></i>
+                              ) : i === 1 ? (
+                                <i
+                                  className="fas fa-medal"
+                                  style={{ color: "#e8b864" }}
+                                ></i>
+                              ) : i === 2 ? (
+                                <i
+                                  className="fas fa-medal"
+                                  style={{ color: "#edc98a" }}
+                                ></i>
+                              ) : (
+                                <i
+                                  className="fas fa-trophy"
+                                  style={{ color: "#f2dfbd" }}
+                                ></i>
+                              )}
+                            </span>
+                          </div>
 
-          {/* =================== TOP 4 KPI CARDS =================== */}
-   <StatsCards inCard={inCard} outCard={outCard} />
+                          {/* Name and Amount */}
+                          <div className="flex flex-col flex-1">
+                            <p
+                              className="text-sm font-medium"
+                              style={{ color: "#4d443b" }}
+                            >
+                              {item.name}
+                            </p>
+                            <p
+                              className="font-semibold text-sm"
+                              style={{ color: "#7a7167" }}
+                            >
+                              ₹{item.amount}
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p
+                        className="text-center text-sm py-4"
+                        style={{ color: "#7a7167" }}
+                      >
+                        No Transactions
+                      </p>
+                    )}
+                  </div>
+                }
+                width="w-full xl:col-span-1"
+                // you can tweak this height to fit your layout perfectly
+              />
 
+              {/* Monthly Line Chart */}
+              <div
+                className="xl:col-span-2 p-3 rounded-2xl border shadow-sm"
+                style={{ background: "#fff", borderColor: "#e6ded4" }}
+              >
+                <h3
+                  className="text-xl font-semibold"
+                  style={{ color: "#4d443b" }}
+                >
+                  Monthly Revenue
+                </h3>
+                <LineChart
+                  data={
+                    cardData?.monthWiseStatusCounts?.length > 0
+                      ? cardData.monthWiseStatusCounts
+                      : [
+                          { month: "Jan", count: 0 },
+                          { month: "Feb", count: 0 },
+                          { month: "Mar", count: 0 },
+                          { month: "Apr", count: 0 },
+                        ]
+                  }
+                />
+              </div>
+            </div>
+            )}
 
-
-
-          {/* =================== CHART SECTION =================== */}
-<div className="grid grid-cols-1 xl:grid-cols-3 gap-2 mb-12">
-  <FlipCard
-    frontContent={
-      <div className="flex flex-col items-center justify-center flex-1">
-      
-        <DonutChart data={cardData?.transactionStatusCounts} />
-      </div>
-    }
-    backContent={
-<div className="flex flex-col flex-1 overflow-auto space-y-3">
-  {currentLeaderboard.length > 0 ? (
-    currentLeaderboard.map((item, i) => (
-      <div
-        key={i}
-        className="flex items-center gap-4 p-4 rounded-xl border"
-        style={{ borderColor: "#f0ebe6", background: "#fefcf9" }}
-      >
-        {/* Rank Badge (No Background) */}
-        <div
-          className="w-12 h-12 flex items-center justify-center border-2 rounded-full"
-          style={{
-            borderColor: i === 0 ? '#cd7f32' : i === 1 ? '#e8b864' : i === 2 ?  '#edc98a' : '#f2dfbd',
-          }}
-        >
-          <span
-            className="text-xl font-semibold"
-            style={{
-              color: i < 3 ? '#FFD700' : '#4d443b', // Gold for top 3, dark color for others
-            }}
-          >
-            {/* Font Awesome Icon for Rank */}
-            {i === 0
-              ? <i className="fas fa-medal" style={{ color: '#cd7f32' }}></i> 
-              : i === 1
-              ? <i className="fas fa-medal" style={{ color:  '#e8b864' }}></i> 
-              : i === 2
-              ? <i className="fas fa-medal" style={{ color: '#edc98a' }}></i> 
-              : <i className="fas fa-trophy" style={{ color: '#f2dfbd' }}></i>} 
-          </span>
-        </div>
-
-        {/* Name and Amount */}
-        <div className="flex flex-col flex-1">
-          <p className="text-sm font-medium" style={{ color: "#4d443b" }}>
-            {item.name}
-          </p>
-          <p className="font-semibold text-sm" style={{ color: "#7a7167" }}>
-            ₹{item.amount}
-          </p>
-        </div>
-      </div>
-    ))
-  ) : (
-    <p className="text-center text-sm py-4" style={{ color: "#7a7167" }}>
-      No Transactions
-    </p>
-  )}
-</div>
-
-    }
-    width="w-full xl:col-span-1"
-    // you can tweak this height to fit your layout perfectly
-  />
-
-  {/* Monthly Line Chart */}
-  <div className="xl:col-span-2 p-3 rounded-2xl border shadow-sm" style={{ background: "#fff", borderColor: "#e6ded4" }}>
-      <h3 className="text-xl font-semibold" style={{ color: "#4d443b" }}>
-      Monthly Revenue
-    </h3>
-    <LineChart
-      data={
-        cardData?.monthWiseStatusCounts?.length > 0
-          ? cardData.monthWiseStatusCounts
-          : [
-              { month: "Jan", count: 0 },
-              { month: "Feb", count: 0 },
-              { month: "Mar", count: 0 },
-              { month: "Apr", count: 0 },
-            ]
-      }
-      
-    />
-  </div>
-</div>
-
-
-
-  
             {/* =================== NEW PREMIUM TABLE DESIGN =================== */}
             <div
               className="xl:col-span-2 p-0 rounded-2xl border shadow-sm overflow-hidden"
@@ -295,12 +324,9 @@ return (
                 />
               </div>
             </div>
-          
+          </div>
         </div>
-      </div>
-    )}
-  </>
-);
-
-
+      )}
+    </>
+  );
 };
