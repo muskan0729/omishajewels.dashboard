@@ -98,44 +98,85 @@ const Table = ({
     }
   };
 
+  // const filteredData = useMemo(() => {
+  //   return data?.filter((row) => {
+  //     // const matchesSearch = Object.values(row).some((val) =>
+  //     //   String(val).toLowerCase().includes(search.toLowerCase())
+  //     // );
+  //     const matchesSearch = (() => {
+  //       const searchText = search.toLowerCase();
+
+  //       return (
+  //         row.id?.toString().toLowerCase().includes(searchText) ||
+  //         row.user_id?.toString().toLowerCase().includes(searchText) ||
+  //         row.merchant_details?.toLowerCase().includes(searchText)
+  //       );
+  //     })();
+
+
+  //     const matchesStatus =
+  //       !statusFilter ||
+  //       statusFilter === "all" ||
+  //       String(row.status).toLowerCase() === statusFilter.toLowerCase();
+
+  //     const rowDate = new Date(row.date?.split("-")[0]);
+  //     const matchesDate =
+  //       (!startDate || rowDate >= startDate) &&
+  //       (!endDate || rowDate <= endDate);
+
+  //     const matchesMerchant =
+  //       !selectedMerchant || row.user_id === selectedMerchant.value;
+
+  //     setCurrentPage(1);
+  //     return (
+  //       matchesSearch &&
+  //       matchesStatus &&
+  //       matchesDate &&
+  //       matchesMerchant
+  //     );
+  //   });
+  // }, [search, statusFilter, startDate, endDate, selectedMerchant, data]);
+
   const filteredData = useMemo(() => {
-    return data?.filter((row) => {
-      // const matchesSearch = Object.values(row).some((val) =>
-      //   String(val).toLowerCase().includes(search.toLowerCase())
-      // );
-      const matchesSearch = (() => {
-        const searchText = search.toLowerCase();
+  // 🟢 DASHBOARD MODE (jab koi filter visible hi nahi hai)
+  if (
+    !showSearch &&
+    !showStatusFilter &&
+    !showDateFilter &&
+    !showSelectUserFilter
+  ) {
+    return data || [];
+  }
 
-        return (
-          row.id?.toString().toLowerCase().includes(searchText) ||
-          row.user_id?.toString().toLowerCase().includes(searchText) ||
-          row.merchant_details?.toLowerCase().includes(searchText)
-        );
-      })();
+  // 🔵 NORMAL MODE (Admin / Reports pages)
+  return data?.filter((row) => {
+    const searchText = search.toLowerCase();
 
-
-      const matchesStatus =
-        !statusFilter ||
-        statusFilter === "all" ||
-        String(row.status).toLowerCase() === statusFilter.toLowerCase();
-
-      const rowDate = new Date(row.date?.split("-")[0]);
-      const matchesDate =
-        (!startDate || rowDate >= startDate) &&
-        (!endDate || rowDate <= endDate);
-
-      const matchesMerchant =
-        !selectedMerchant || row.user_id === selectedMerchant.value;
-
-      setCurrentPage(1);
-      return (
-        matchesSearch &&
-        matchesStatus &&
-        matchesDate &&
-        matchesMerchant
+    const matchesSearch =
+      !search ||
+      Object.values(row).some((val) =>
+        String(val).toLowerCase().includes(searchText)
       );
-    });
-  }, [search, statusFilter, startDate, endDate, selectedMerchant, data]);
+
+    const matchesStatus =
+      !statusFilter ||
+      statusFilter === "all" ||
+      String(row.status).toLowerCase() === statusFilter.toLowerCase();
+
+    setCurrentPage(1);
+
+    return matchesSearch && matchesStatus;
+  });
+}, [
+  data,
+  search,
+  statusFilter,
+  showSearch,
+  showStatusFilter,
+  showDateFilter,
+  showSelectUserFilter,
+]);
+
 
   const totalSuccessAmount = useMemo(() => {
     if (!filteredData?.length) return 0;
