@@ -143,7 +143,7 @@ export const DonutChart = ({ data }) => {
 
         <button
           onClick={() => setMode(mode === "UPI" ? "payout" : "UPI")}
-          className="px-3 py-1 rounded-lg text-white text-sm font-semibold"
+          className="px-3 py-1 rounded-lg text-white text-sm font-semibold cursor-pointer"
           style={{ background: "linear-gradient(0deg, #cb997eff, #cb997eff)" }}
         >
           {mode === "UPI" ? "Payin" : "Payout"}
