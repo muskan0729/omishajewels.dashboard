@@ -32,73 +32,75 @@ const PayoutStatement = () => {
       refunded: "bg-gray-100 text-gray-800",
     };
 
-    if (data?.data) {
-      const formattedData = data.data.map((item, index) => ({
-        sqno: (
-          <div className="flex flex-col text-left">
-            <span><b>{index + 1}</b></span>
-            <span>
-              {new Date(item.created_at).getDate()}{" "}
-              {MONTH_NAMES[new Date(item.created_at).getMonth()]}{" "}
-              {new Date(item.created_at).getFullYear()} -{" "}
-              {new Date(item.created_at).toLocaleTimeString()}
-            </span>
-          </div>
-        ),
-        id: item.id,
-        user_id: item.user_id,
+    // Safely access nested data array
+    const records = Array.isArray(data?.data?.data) ? data.data.data : [];
 
-        product_type: item.product ?? "N/A",
-        merchant_details: item.user.name ?? "N/A",
-
-        txnid: (
-          <div className="flex flex-col text-left">
-            <span>Payment Mode: <b>{item.payout_mode ?? "null"}</b></span>
-            <span>Account: <b>{item.payer_acc_no}</b></span>
-            <span>Holder: <b>{item.payer_name}</b></span>
-            <span>IFSC: <b>{item.payer_ifsc}</b></span>
-            <span>UPI Id: <b>{item.payer_upi ?? "N/A"}</b></span>
-            <span>Mobile: <b>{item.payer_mobile}</b></span>
-          </div>
-        ),
-
-        reference_details: (
-          <div className="flex flex-col text-left">
-            <span>Ref No: <b>{item.refno ?? "null"}</b></span>
-            <span>Order ID: <b>{item.mytxnid}</b></span>
-            <span>Txnid: <br /><b>{item.txnid}</b></span>
-          </div>
-        ),
-
-        amount: (
-          <div className="flex flex-col text-left">
-            <span>Opening Wallet Amount: <b>{item.payout_opening_balance ?? "0"}</b></span>
-            <span>Pay Amount: <b>{item.payout_amount}</b></span>
-            <span>Total Charges: <b>{item.payer_charges ?? 0}</b></span>
-            <span>Total Debited Amount: <b>{item.total_debit ?? 0}</b></span>
-            <span>Closing Wallet Amount: <b>{item.payout_closing_balance ?? 0}</b></span>
-            <span>Note: <b>{item.note ?? "-"}</b></span>
-          </div>
-        ),
-
-        numericAmount: parseFloat(item.payout_amount) || 0,
-
-        // FIXED DATE FORMAT
-        date: formatDateLikeTopup(item.created_at),
-
-        status: item.status,
-
-        showstatus: (
-          <span
-            className={`px-2 py-1 rounded-full text-sm font-medium ${statusClasses[item.status] ?? "bg-gray-100 text-gray-800"}`}
-          >
-            {item.status ? item.status.charAt(0).toUpperCase() + item.status.slice(1) : "N/A"}
+    const formattedData = records.map((item, index) => ({
+      sqno: (
+        <div className="flex flex-col text-left">
+          <span><b>{index + 1}</b></span>
+          <span>
+            {new Date(item.created_at).getDate()}{" "}
+            {MONTH_NAMES[new Date(item.created_at).getMonth()]}{" "}
+            {new Date(item.created_at).getFullYear()} -{" "}
+            {new Date(item.created_at).toLocaleTimeString()}
           </span>
-        ),
-      }));
+        </div>
+      ),
+      id: item.id,
+      user_id: item.user_id,
 
-      setPayoutData(formattedData);
-    }
+      product_type: item.product ?? "N/A",
+      merchant_details: item.user?.name ?? "N/A",
+
+      txnid: (
+        <div className="flex flex-col text-left">
+          <span>Payment Mode: <b>{item.payout_mode ?? "N/A"}</b></span>
+          <span>Account: <b>{item.payer_acc_no ?? "N/A"}</b></span>
+          <span>Holder: <b>{item.payer_name ?? "N/A"}</b></span>
+          <span>IFSC: <b>{item.payer_ifsc ?? "N/A"}</b></span>
+          <span>UPI Id: <b>{item.payer_upi ?? "N/A"}</b></span>
+          <span>Mobile: <b>{item.payer_mobile ?? "N/A"}</b></span>
+        </div>
+      ),
+
+      reference_details: (
+        <div className="flex flex-col text-left">
+          <span>Ref No: <b>{item.refno ?? "N/A"}</b></span>
+          <span>Order ID: <b>{item.mytxnid ?? "N/A"}</b></span>
+          <span>Txnid: <br /><b>{item.txnid ?? "N/A"}</b></span>
+        </div>
+      ),
+
+      amount: (
+        <div className="flex flex-col text-left">
+          <span>Opening Wallet Amount: <b>{item.payout_opening_balance ?? "0"}</b></span>
+          <span>Pay Amount: <b>{item.payout_amount ?? 0}</b></span>
+          <span>Total Charges: <b>{item.payer_charges ?? 0}</b></span>
+          <span>Total Debited Amount: <b>{item.total_debit ?? 0}</b></span>
+          <span>Closing Wallet Amount: <b>{item.payout_closing_balance ?? 0}</b></span>
+          <span>Note: <b>{item.note ?? "-"}</b></span>
+        </div>
+      ),
+
+      numericAmount: parseFloat(item.payout_amount) || 0,
+
+      date: formatDateLikeTopup(item.created_at),
+
+      status: item.status,
+
+      showstatus: (
+        <span
+          className={`px-2 py-1 rounded-full text-sm font-medium ${
+            statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
+          }`}
+        >
+          {item.status ? item.status.charAt(0).toUpperCase() + item.status.slice(1) : "N/A"}
+        </span>
+      ),
+    }));
+
+    setPayoutData(formattedData);
   }, [data]);
 
   const upiColumn = [

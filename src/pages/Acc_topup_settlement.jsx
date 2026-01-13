@@ -7,11 +7,9 @@ import { TableSkeleton } from "../components/TableSkeleton";
 const Acc_topup_settlement = () => {
   const [topupPayoutData, setTopupPayoutData] = useState([]);
 
-
   const { data, loading, error } = useGet(
     "/reportrecords-List?product[]=topup_payout&product[]=take_back_from_wallet"
   );
-
 
   useEffect(() => {
     const statusClasses = {
@@ -24,41 +22,43 @@ const Acc_topup_settlement = () => {
       refunded: "bg-gray-100 text-gray-800",
     };
 
-    if (data?.data) {
-      const formattedData = data.data.map((item, index) => ({
-        sqno: index + 1,
-        id: item.id,
-        user_id: item.user_id,
-        product_type: item.product ?? "N/A",
-        merchant_details: item.user.name ?? "N/A",
-        txnid: item.txnid,
-        date:
-          new Date(item.created_at).getDate() +
-          " " +
-          MONTH_NAMES[new Date(item.created_at).getMonth()] +
-          " " +
-          new Date(item.created_at).getFullYear() +
-          " - " +
-          new Date(item.created_at).toLocaleTimeString(),
-        amount: item.amount ?? "N/A",
-        numericAmount: parseFloat(item.amount) || 0, // ✅ for calculations
-        status: item.status,
-        payout_closing_balance: item.payout_closing_balance ?? "0.0",
-        payout_opening_balance: item.payout_opening_balance ?? "0.0",
-        showstatus: (
-          <span
-            className={`px-2 py-1 rounded-full text-sm font-medium ${statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
-              }`}
-          >
-            {item?.status
-              ? item.status.charAt(0).toUpperCase() + item.status.slice(1)
-              : "N/A"}
-          </span>
-        ),
-      }));
-      setTopupPayoutData(formattedData);
-    }
+    // Safely get the nested data array
+    const records = Array.isArray(data?.data?.data) ? data.data.data : [];
 
+    const formattedData = records.map((item, index) => ({
+      sqno: index + 1,
+      id: item.id,
+      user_id: item.user_id,
+      product_type: item.product ?? "N/A",
+      merchant_details: item.user?.name ?? "N/A",
+      txnid: item.txnid,
+      date:
+        new Date(item.created_at).getDate() +
+        " " +
+        MONTH_NAMES[new Date(item.created_at).getMonth()] +
+        " " +
+        new Date(item.created_at).getFullYear() +
+        " - " +
+        new Date(item.created_at).toLocaleTimeString(),
+      amount: item.amount ?? "N/A",
+      numericAmount: parseFloat(item.amount) || 0, // ✅ for calculations
+      status: item.status,
+      payout_closing_balance: item.payout_closing_balance ?? "0.0",
+      payout_opening_balance: item.payout_opening_balance ?? "0.0",
+      showstatus: (
+        <span
+          className={`px-2 py-1 rounded-full text-sm font-medium ${
+            statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
+          }`}
+        >
+          {item?.status
+            ? item.status.charAt(0).toUpperCase() + item.status.slice(1)
+            : "N/A"}
+        </span>
+      ),
+    }));
+
+    setTopupPayoutData(formattedData);
   }, [data]);
 
   const topupPayoutColumn = [
@@ -98,7 +98,7 @@ const Acc_topup_settlement = () => {
           showSearch={false}
           showSelectUserFilter={true}
           showDeleteColumn={false}
-          statusList={REPORT_STATUSES}  
+          statusList={REPORT_STATUSES}
           className="shadow-lg rounded-lg overflow-hidden"
         />
       )}
