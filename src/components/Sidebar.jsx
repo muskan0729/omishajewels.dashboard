@@ -15,7 +15,7 @@ export const Sidebar = ({ open, setOpen }) => {
   };
 
   const menu = [
-    { label: "Dashboard", icon: "fa-chart-pie", link: "/dashboard" },
+    { label: "Dashboard", icon: "fa-chart-pie", link: "/dashboardmain" },
 
     ...(role === "admin"
       ? [
@@ -193,7 +193,7 @@ export const Sidebar = ({ open, setOpen }) => {
             className="text-xl font-semibold text-[#b58351] select-none cursor-pointer"
             style={{ letterSpacing: "0.03em" }}
             onClick={() => {
-              window.location.href = "/dashboard"; // dashboard route
+              window.location.href = "/dashboardmain"; // dashboard route
             }}
           >
             Omisha Jewels

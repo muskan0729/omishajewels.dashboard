@@ -25,7 +25,7 @@ export const useLogin = () => {
         localStorage.setItem("user", JSON.stringify(response.user));
 
         if (response.user.kyc === 1) {
-          navigate("/dashboard", { replace: true });
+          navigate("/dashboardmain", { replace: true });
         } else if (response.user.pre_kyc_status === 0) {
           navigate("/MemberUserForm", { replace: true });
         } else {
