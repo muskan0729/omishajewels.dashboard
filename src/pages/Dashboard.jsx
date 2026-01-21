@@ -18,7 +18,7 @@ export const Dashboard = () => {
     useAutoFetch("/collection-record");
 
   const { data: tableData } = useAutoFetch(
-    "/reportrecords-List?status=success"
+    "/reportrecords-List?status=success",
   );
 
   // ✅ PAGINATION SAFE
@@ -28,7 +28,7 @@ export const Dashboard = () => {
   const sortedTransactions = useMemo(() => {
     if (!Array.isArray(initialDataOfTransactions)) return [];
     return [...initialDataOfTransactions].sort(
-      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      (a, b) => new Date(b.created_at) - new Date(a.created_at),
     );
   }, [initialDataOfTransactions]);
 
@@ -38,7 +38,7 @@ export const Dashboard = () => {
     return [...initialDataOfTransactions]
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 4)
-      .map(item => ({
+      .map((item) => ({
         id: item.id,
         name: item.user?.name ?? "-",
         amount: item.amount,
@@ -110,6 +110,17 @@ export const Dashboard = () => {
     changePercent: 3.2,
   };
 
+  const totalCards = {
+    title: "Total Collection",
+    icon: "fa-arrow-trend-up",
+    total:
+      Number(cardData?.total_payout_amount ?? 0) +
+      Number(cardData?.total_payin_amount ?? 0),
+    today:
+      Number(cardData?.today_payin ?? 0) + Number(cardData?.today_payout ?? 0),
+    changePercent: 3.2,
+  };
+
   const leaderboardByTab = {
     Today: largeTransactionData,
     monthly: largeTransactionData,
@@ -127,7 +138,11 @@ export const Dashboard = () => {
         <div className="flex min-h-screen bg-[#fefcf9]">
           <div className="flex-1 p-6 lg:p-10">
             {/* KPI */}
-            <StatsCards inCard={inCard} outCard={outCard} />
+            <StatsCards
+              inCard={inCard}
+              outCard={outCard}
+              totalCards={totalCards}
+            />
 
             {/* Charts */}
             {role === "admin" && (
@@ -137,19 +152,60 @@ export const Dashboard = () => {
                     <DonutChart data={cardData?.transactionStatusCounts} />
                   }
                   backContent={
-                    <div className="space-y-3">
+                    <div
+                      className="rounded-xl p-4 space-y-3"
+                      style={{
+                        background: "linear-gradient(140deg, #F2DBBC, #FAF3E7)",
+                      }}
+                    >
                       {currentLeaderboard.length ? (
-                        currentLeaderboard.map(item => (
-                          <div
-                            key={item.id}
-                            className="flex justify-between border p-3 rounded-lg"
-                          >
-                            <span>{item.name}</span>
-                            <span>₹{item.amount}</span>
-                          </div>
-                        ))
+                        currentLeaderboard.map((item, index) => {
+                          const medalColor =
+                            index === 0
+                              ? "text-yellow-500"
+                              : index === 1
+                                ? "text-gray-400"
+                                : index === 2
+                                  ? "text-amber-700"
+                                  : "text-[#5c3d2e]";
+
+                          return (
+                            <div
+                              key={item.id}
+                              className="flex items-start justify-between gap-3
+                       rounded-lg bg-white/80 px-4 py-3
+                       shadow-sm hover:bg-white transition"
+                            >
+                              {/* Left: Medal + Name */}
+                              <div className="flex items-start gap-3 flex-1">
+                                <i
+                                  className={`fa-solid fa-medal mt-0.5 ${medalColor}`}
+                                  aria-hidden="true"
+                                />
+
+                                <span
+                                  className="text-sm font-medium text-[#3f2a20]
+                           break-words leading-snug"
+                                >
+                                  {item.name}
+                                </span>
+                              </div>
+
+                              {/* Right: Amount */}
+                              <span
+                                className="text-sm font-semibold text-[#3f2a20]
+                         whitespace-nowrap"
+                              >
+                                ₹{Number(item.amount).toLocaleString("en-IN")}
+                              </span>
+                            </div>
+                          );
+                        })
                       ) : (
-                        <div className="text-center text-sm">
+                        <div
+                          className="rounded-lg bg-white/70 py-6
+                   text-center text-sm font-medium text-[#5c3d2e]"
+                        >
                           No Transactions
                         </div>
                       )}
@@ -161,17 +217,17 @@ export const Dashboard = () => {
                   <h3 className="text-xl font-semibold mb-3">
                     Monthly Revenue
                   </h3>
-                  <LineChart
-                    data={cardData?.monthWiseStatusCounts ?? []}
-                  />
+                  <LineChart data={cardData?.monthWiseStatusCounts ?? []} />
                 </div>
               </div>
             )}
 
             {/* Table */}
             <div className=" rounded-xl bg-white">
-              <div className="px-6 py-4 border-b">
-                <h3 className="text-lg font-semibold">Transactions Table</h3>
+              <div className="px-6 py-4 border-b border-[#CA935C]">
+                <h3 className="text-lg font-semibold text-[#3f2a20]">
+                  Transactions Table
+                </h3>
               </div>
 
               <div className="p-6">

@@ -1,7 +1,7 @@
 // components/StatsCards.jsx
 import { useState } from "react";
 
-export default function StatsCards({ inCard, outCard }) {
+export default function StatsCards({ inCard, outCard, totalCards }) {
   const [showToday, setShowToday] = useState(false);
 
   // Reusable card component
@@ -16,7 +16,7 @@ export default function StatsCards({ inCard, outCard }) {
     gradientTo,
     showButton = false,
     onToggle,
-    showTodayState
+    showTodayState,
   }) => {
     return (
       <div
@@ -31,7 +31,9 @@ export default function StatsCards({ inCard, outCard }) {
           <p className="text-sm font-semibold text-[#6e5e50]">
             {showTodayState ? `Today ${title}` : `Total ${title}`}
           </p>
-          <i className={`fa-solid ${showTodayState ? iconToday : iconTotal} text-2xl`}></i>
+          <i
+            className={`fa-solid ${showTodayState ? iconToday : iconTotal} text-2xl`}
+          ></i>
         </div>
         <div className="text-xl font-bold text-[#4d443b]">
           ₹ {showTodayState ? todayValue : totalValue}
@@ -39,15 +41,14 @@ export default function StatsCards({ inCard, outCard }) {
 
         {/* Show toggle button inside the first card */}
         {showButton && (
-      <div className="flex justify-center mt-4">
-  <span
-    onClick={onToggle}
-    className="text-[#b58351] hover:text-[#b58351] cursor-pointer font-medium transition-colors"
-  >
-    Show {showTodayState ? "Total" : "Today"}
-  </span>
-</div>
-
+          <div className="flex justify-center mt-4">
+            <span
+              onClick={onToggle}
+              className="text-[#b58351] hover:text-[#b58351] cursor-pointer font-medium transition-colors"
+            >
+              Show {showTodayState ? "Total" : "Today"}
+            </span>
+          </div>
         )}
       </div>
     );
@@ -59,16 +60,16 @@ export default function StatsCards({ inCard, outCard }) {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
         <StatCard
           title="Collection"
-          totalValue={inCard.total}
-          todayValue={inCard.today}
+          totalValue={totalCards.total}
+          todayValue={totalCards.today}
           iconTotal="fa-wallet text-[#b58351]"
           iconToday="fa-arrow-trend-up text-green-600"
           gradientFrom="#f1d9b7"
           gradientVia="#f4e4cf"
           gradientTo="#e7d8c2"
-          showButton={true}              // show toggle button
+          showButton={true} // show toggle button
           onToggle={() => setShowToday(!showToday)} // toggle function
-          showTodayState={showToday}     // current state
+          showTodayState={showToday} // current state
         />
 
         <StatCard
