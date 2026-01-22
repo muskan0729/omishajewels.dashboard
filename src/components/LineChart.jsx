@@ -200,14 +200,14 @@ export const LineChart = ({ data }) => {
         </div>
 
         {/* LEFT: TOTAL */}
-        <div>
+        {/* <div>
           <h1 className="text-2xl font-bold text-[#4d443b] leading-tight">
             ₹{Number(totalAmount).toLocaleString("en-IN")}
           </h1>
           <p className="text-sm text-green-600 font-medium md:text-right mr-6">
             Cumulative Revenue
           </p>
-        </div>
+        </div> */}
       </div>
 
       {/* CHART */}
