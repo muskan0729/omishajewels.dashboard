@@ -283,7 +283,6 @@ export const Header = ({
           </div>
 
           {/* SPACER – 70px like before */}
-          {/* <div className="h-[240px] shrink-0" /> */}
           <div className="h-[240px] shrink-0 flex items-center justify-center">
             <img
               src={Logo}
@@ -294,7 +293,7 @@ export const Header = ({
                 select-none
                 pointer-events-none
                 -rotate-15
-                -translate-x-[-10px]
+                -translate-x-[-1px]
                 -translate-y-[-25px]
                 drop-shadow-[0_10px_18px_rgba(203,153,126,0.35)]
               "
