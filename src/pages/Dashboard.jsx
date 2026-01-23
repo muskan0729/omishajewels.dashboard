@@ -234,7 +234,12 @@ export const Dashboard = () => {
                 <Table
                   columns={transactioncolumn}
                   data={transactionData}
+                  showSearch={true}
                   showPagination={true}
+                  showExport={false}
+                  showStatusFilter={true}
+                  showDeleteColumn={false}
+                  showDateFilter={false}
                 />
               </div>
             </div>
