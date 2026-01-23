@@ -288,7 +288,7 @@ export const Header = ({
               src={Logo}
               alt="Omisha Jewels"
               className="
-                w-200
+                w-200 
                 opacity-40
                 select-none
                 pointer-events-none

@@ -16,7 +16,7 @@ export const ViewComplain = () => {
   const [showImageModal, setShowImageModal] = useState(false);
   const [ticketData, setTicketData] = useState([]);
   const [editData, setEditData] = useState(null);
- 
+
   const toast = useToast();
   const navigate = useNavigate();
   const { execute: executeTicket, loading: creating } =
@@ -33,7 +33,7 @@ export const ViewComplain = () => {
   // ✅ Use your hook to fetch schemes
   const { data, loading, error, refetch } = useGet("/get-tickets");
   const { execute: updateTicket, loading: updating } = usePost(
-    editData ? `/update-ticket/${editData.id}` : ""
+    editData ? `/update-ticket/${editData.id}` : "",
   );
 
   console.log("Ticket Data:", data);
@@ -54,7 +54,7 @@ export const ViewComplain = () => {
   useEffect(() => {
     if (data?.data) {
       const formattedData = data.data.map((item) => ({
-        id:item.id ?? "N/A",
+        id: item.id ?? "N/A",
         ticket_id: item.ticket_id ?? "N/A",
         user_name: item.user?.name ?? "N/A",
         subject: item.subject ?? "N/A",
@@ -104,7 +104,6 @@ export const ViewComplain = () => {
   // document.body.style.overflow = showModal ? "hidden" : "auto";
   // }, [showModal]);
 
-
   const handleEdit = (ticket) => {
     console.log("Editing:", ticket);
     setEditData(ticket);
@@ -139,8 +138,8 @@ export const ViewComplain = () => {
             prev.map((item) =>
               item.ticket_id === row.ticket_id
                 ? { ...item, status: newStatus }
-                : item
-            )
+                : item,
+            ),
           );
         }}
       >
@@ -162,8 +161,8 @@ export const ViewComplain = () => {
             prev.map((item) =>
               item.ticket_id === row.ticket_id
                 ? { ...item, priority: newPriority }
-                : item
-            )
+                : item,
+            ),
           );
         }}
       >
@@ -223,7 +222,7 @@ export const ViewComplain = () => {
       toast.success(
         editData
           ? "Complaint updated successfully!"
-          : "Ticket submitted successfully!"
+          : "Ticket submitted successfully!",
       );
       if (res) {
         setTicketFormData({
@@ -240,7 +239,7 @@ export const ViewComplain = () => {
     } catch (err) {
       console.error("Error submitting ticket:", err);
       toast.error(
-        Object.values(err?.errors || { error: ["Something went wrong"] })[0][0]
+        Object.values(err?.errors || { error: ["Something went wrong"] })[0][0],
       );
     }
   };
@@ -284,14 +283,11 @@ export const ViewComplain = () => {
               onClick={() => {
                 setEditData(null);
                 setShowModal(true);
-              }}  
-              className="bg-white border border-sky-200 text-sky-800 font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200"
+              }}
+              className="bg-[#e8bb6e] border border-[#b5895c] text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-[#ebaa69] hover:border-[#b5895c] transition-all duration-200 cursor-pointer"
             >
               Raise Complain
             </Button>
-
-
-
           </div>
 
           <Table
@@ -301,22 +297,19 @@ export const ViewComplain = () => {
             endPoint="/delete-ticket"
             setData={setTicketData}
           />
-
-
         </div>
       </div>
 
       {/* -------- MODALS -------- */}
-      
 
       {showModal && (
-      <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-2"
-        onClick={() => setShowModal(false)}
-      >
-        {/* Modal Box */}
         <div
-          className="
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-2"
+          onClick={() => setShowModal(false)}
+        >
+          {/* Modal Box */}
+          <div
+            className="
             bg-white rounded-lg shadow-xl w-full
             max-w-[90%]
             sm:max-w-lg
@@ -327,113 +320,113 @@ export const ViewComplain = () => {
             overflow-y-auto
             p-4 sm:p-6
           "
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div className="flex justify-between items-center bg-gradient-to-r from-[#f4e1c1] to-[#e6b35a] px-5 py-3 rounded-t-lg">
-            <h4 className="font-bold text-white text-base sm:text-lg">
-              {editData ? "Edit Complaint" : "Register Complaint"}
-            </h4>
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex justify-between items-center bg-gradient-to-r from-[#f4e1c1] to-[#e6b35a] px-5 py-3 rounded-t-lg">
+              <h4 className="font-bold text-white text-base sm:text-lg">
+                {editData ? "Edit Complaint" : "Register Complaint"}
+              </h4>
 
-            <Button
-              onClick={() => setShowModal(false)}
-              className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-red-500 hover:bg-red-500 hover:text-white transition"
-            >
-              ✕
-            </Button>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="mt-4">
-            <div className="grid grid-cols-1 gap-4 sm:gap-5 px-2">
-              {/* User Id */}
-              <input
-                type="text"
-                name="user_id"
-                value={ticketFormData.user_id}
-                onChange={handleChange}
-                placeholder="User Id"
-                className={`w-full text-sm px-3 py-2 rounded-lg border ${
-                  errors?.user_id ? "border-red-500" : "border-gray-300"
-                }`}
-                required
-              />
-
-              {/* Subject */}
-              <input
-                type="text"
-                name="subject"
-                value={ticketFormData.subject}
-                onChange={handleChange}
-                placeholder="Subject"
-                className={`w-full text-sm px-3 py-2 rounded-lg border ${
-                  errors?.subject ? "border-red-500" : "border-gray-300"
-                }`}
-                required
-              />
-
-              {/* Description */}
-              <textarea
-                name="description"
-                value={ticketFormData.description}
-                onChange={handleChange}
-                placeholder="Description"
-                rows={4}
-                className={`w-full text-sm px-3 py-2 rounded-lg border resize-none ${
-                  errors?.description ? "border-red-500" : "border-gray-300"
-                }`}
-                required
-              />
-
-              {/* Attachment */}
-              <input
-                type="file"
-                name="attachment"
-                onChange={handleChange}
-                className={`w-full text-sm px-3 py-2 rounded-lg border ${
-                  errors?.attachment ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-
-              {/* Assigned To */}
-              <input
-                type="text"
-                name="assigned_to"
-                value={ticketFormData.assigned_to}
-                onChange={handleChange}
-                placeholder="Assigned To"
-                className={`w-full text-sm px-3 py-2 rounded-lg border ${
-                  errors?.assigned_to ? "border-red-500" : "border-gray-300"
-                }`}
-                required
-              />
+              <Button
+                onClick={() => setShowModal(false)}
+                className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-red-500 hover:bg-red-500 hover:text-white transition"
+              >
+                ✕
+              </Button>
             </div>
 
-            {/* Submit Button */}
-            <div className="flex justify-center mt-6">
-              <Button
-                type="submit"
-                disabled={creating || updating}
-                className="
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="mt-4">
+              <div className="grid grid-cols-1 gap-4 sm:gap-5 px-2">
+                {/* User Id */}
+                <input
+                  type="text"
+                  name="user_id"
+                  value={ticketFormData.user_id}
+                  onChange={handleChange}
+                  placeholder="User Id"
+                  className={`w-full text-sm px-3 py-2 rounded-lg border ${
+                    errors?.user_id ? "border-red-500" : "border-gray-300"
+                  }`}
+                  required
+                />
+
+                {/* Subject */}
+                <input
+                  type="text"
+                  name="subject"
+                  value={ticketFormData.subject}
+                  onChange={handleChange}
+                  placeholder="Subject"
+                  className={`w-full text-sm px-3 py-2 rounded-lg border ${
+                    errors?.subject ? "border-red-500" : "border-gray-300"
+                  }`}
+                  required
+                />
+
+                {/* Description */}
+                <textarea
+                  name="description"
+                  value={ticketFormData.description}
+                  onChange={handleChange}
+                  placeholder="Description"
+                  rows={4}
+                  className={`w-full text-sm px-3 py-2 rounded-lg border resize-none ${
+                    errors?.description ? "border-red-500" : "border-gray-300"
+                  }`}
+                  required
+                />
+
+                {/* Attachment */}
+                <input
+                  type="file"
+                  name="attachment"
+                  onChange={handleChange}
+                  className={`w-full text-sm px-3 py-2 rounded-lg border ${
+                    errors?.attachment ? "border-red-500" : "border-gray-300"
+                  }`}
+                />
+
+                {/* Assigned To */}
+                <input
+                  type="text"
+                  name="assigned_to"
+                  value={ticketFormData.assigned_to}
+                  onChange={handleChange}
+                  placeholder="Assigned To"
+                  className={`w-full text-sm px-3 py-2 rounded-lg border ${
+                    errors?.assigned_to ? "border-red-500" : "border-gray-300"
+                  }`}
+                  required
+                />
+              </div>
+
+              {/* Submit Button */}
+              <div className="flex justify-center mt-6">
+                <Button
+                  type="submit"
+                  disabled={creating || updating}
+                  className="
                   cursor-pointer w-full sm:w-auto sm:min-w-[150px]
                   bg-gradient-to-r from-[#b58351] to-[#d7a874]
                   text-white rounded-lg px-6 py-2.5 text-sm
                   focus:ring-6 focus:outline-none focus:ring-yellow-100 font-medium
                   hover:brightness-110 focus:ring-6 focus:outline-none focus:ring-yellow-100 font-medium 
                   "
-              >
-                {editData
-                  ? updating
-                    ? "Updating..."
-                    : "Update"
-                  : creating
-                  ? "Submitting..."
-                  : "Submit"}
-              </Button>
-            </div>
-          </form>
+                >
+                  {editData
+                    ? updating
+                      ? "Updating..."
+                      : "Update"
+                    : creating
+                      ? "Submitting..."
+                      : "Submit"}
+                </Button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
       )}
 
       {showViewMessageModal && (

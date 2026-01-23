@@ -9,7 +9,7 @@ export const FlipCard = ({ frontContent, backContent, width = "w-full", height =
       <div className="flex border-b border-[#e6ded4] rounded-t-xl overflow-hidden select-none">
         <button
           onClick={() => setIsFront(true)}
-          className={`flex-1 py-3 text-center text-sm font-semibold f-6 transition-colors ${
+          className={`flex-1 py-3 text-center text-sm font-semibold f-6 transition-colors cursor-pointer ${
             isFront ? "bg-[#f7f3ee] text-[#4d443b]" : "bg-white text-[#a39c90] hover:bg-[#f7f3ee]"
           }`}
         >
@@ -17,7 +17,7 @@ export const FlipCard = ({ frontContent, backContent, width = "w-full", height =
         </button>
         <button
           onClick={() => setIsFront(false)}
-          className={`flex-1 py-3 text-center text-sm font-semibold transition-colors ${
+          className={`flex-1 py-3 text-center text-sm font-semibold transition-colors cursor-pointer ${
             !isFront ? "bg-[#f7f3ee] text-[#4d443b]" : "bg-white text-[#a39c90] hover:bg-[#f7f3ee]"
           }`}
         >

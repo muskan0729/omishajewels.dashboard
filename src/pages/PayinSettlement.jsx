@@ -46,7 +46,7 @@ const PayinSettlement = () => {
           setSelectedUser(row);
           setShowModal(true);
         }}
-        className="bg-[#615141] hover:bg-[#b58351] text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all"
+        className="bg-[#615141] hover:bg-[#b58351] text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all cursor-pointer"
       >
         Payin Settlement
       </Button>

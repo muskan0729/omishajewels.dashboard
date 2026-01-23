@@ -97,7 +97,7 @@ const LoadWallet = () => {
         setModalType("load");
         setShowModal(true);
       }}
-      className="bg-[#615141] hover:bg-[#b58351] text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all"
+      className="bg-[#615141] hover:bg-[#b58351] text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all cursor-pointer"
     >
       Load Wallet
     </Button>
@@ -107,7 +107,7 @@ const LoadWallet = () => {
         setModalType("reverse");
         setShowModal(true);
       }}
-      className="bg-[#b58351] hover:bg-[#615141] text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all"
+      className="bg-[#b58351] hover:bg-[#615141] text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all cursor-pointer"
     >
       Reverse Top-up
     </Button>

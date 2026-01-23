@@ -254,7 +254,7 @@ const Table = ({
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-3 py-2 border border-[#d7c4a8] rounded-xl bg-white shadow-sm text-[#4d443b] focus:ring-2 focus:ring-[#b58351]"
+                  className="px-3 py-2 border border-[#d7c4a8] rounded-xl bg-white shadow-sm text-[#4d443b] focus:ring-2 focus:ring-[#b58351] cursor-pointer"
                 >
                   <option value="all">All</option>
                   {statusList.map((item) => (
@@ -270,7 +270,7 @@ const Table = ({
                 <div className="relative" ref={exportRef}>
                   <button
                     onClick={() => setOpenExport(!openExport)}
-                    className="bg-gradient-to-r from-[#b58351] to-[#d7a874] text-white px-4 py-2 rounded-xl shadow-lg hover:brightness-110 flex items-center gap-2 min-w-[110px] h-[42px]"
+                    className="bg-gradient-to-r from-[#b58351] to-[#d7a874] text-white px-4 py-2 rounded-xl shadow-lg hover:brightness-110 flex items-center gap-2 min-w-[110px] h-[42px] cursor-pointer"
                   >
                     <i className="fa-solid fa-download"></i> Export
                   </button>
@@ -286,7 +286,7 @@ const Table = ({
               )}
 
               <Button
-                className="bg-[#f1d9b7] text-[#4d443b] px-4 py-2 rounded-xl shadow-md hover:bg-[#e9cdaa] transition min-w-[110px] h-[42px]"
+                className="bg-[#f1d9b7] text-[#4d443b] px-4 py-2 rounded-xl shadow-md hover:bg-[#e9cdaa] transition min-w-[110px] h-[42px] cursor-pointer"
                 onClick={() => {
                   setSearch(""); setStatusFilter("all"); setSelectedMerchant(null); setStartDate(null); setEndDate(null);
                 }}
@@ -346,7 +346,7 @@ const Table = ({
             <select
               value={entriesPerPage}
               onChange={(e) => {setEntriesPerPage(Number(e.target.value)); setCurrentPage(1);}}
-              className="border border-[#d7c4a8] rounded-lg px-2 py-1 bg-white text-[#4d443b] shadow-sm"
+              className="border border-[#d7c4a8] rounded-lg px-2 py-1 bg-white text-[#4d443b] shadow-sm cursor-pointer"
             >
               <option value={5}>5</option>
               <option value={10}>10</option>
@@ -363,13 +363,13 @@ const Table = ({
             <Button
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className={`px-4 py-1 rounded-xl text-sm transition ${currentPage === 1 ? "bg-gray-200 text-gray-500" : "bg-gradient-to-r from-[#f1d9b7] to-[#b58351] text-white hover:brightness-110"}`}
+              className={`px-4 py-1 rounded-xl text-sm transition cursor-pointer ${currentPage === 1 ? "bg-gray-200 text-gray-500" : "bg-gradient-to-r from-[#f1d9b7] to-[#b58351] text-white hover:brightness-110"}`}
             >Prev</Button>
             <span className="text-[#4d443b]">Page <strong>{currentPage}</strong></span>
             <Button
               onClick={() => setCurrentPage((prev) => prev < Math.ceil(filteredData.length / entriesPerPage) ? prev + 1 : prev)}
               disabled={currentPage === Math.ceil(filteredData.length / entriesPerPage)}
-              className={`px-4 py-1 rounded-xl text-sm transition ${currentPage === Math.ceil(filteredData.length / entriesPerPage) ? "bg-gray-200 text-gray-500" : "bg-gradient-to-r from-[#f1d9b7] to-[#b58351] text-white hover:brightness-110"}`}
+              className={`px-4 py-1 rounded-xl text-sm transition cursor-pointer ${currentPage === Math.ceil(filteredData.length / entriesPerPage) ? "bg-gray-200 text-gray-500" : "bg-gradient-to-r from-[#f1d9b7] to-[#b58351] text-white hover:brightness-110"}`}
             >Next</Button>
           </div>
         </div>

@@ -105,7 +105,7 @@ const OnboardBank = () => {
       <div className="bg-gradient-to-t from-[#b58351] to-[#b6916d]  rounded-lg flex justify-between items-center p-4 shadow-md">
         <h4 className="font-bold text-white text-xl">Onboard Bank</h4>
         <Button
-         className="bg-[#e8bb6e] border border-[#b5895c] text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-[#ebaa69] hover:border-[#b5895c] transition-all duration-200"
+         className="bg-[#e8bb6e] border border-[#b5895c] text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-[#ebaa69] hover:border-[#b5895c] transition-all duration-200 cursor-pointer"
           onClick={handleModal}
         >
           ADD BANK
@@ -118,7 +118,7 @@ const OnboardBank = () => {
         <Button
           className={`px-4 py-2 rounded-lg font-medium ${activeTab === "payin"
               ? "bg-[#ebc8a6] text-[#615141] shadow-md"
-              : "bg-white text-gray-600 hover:bg-blue-50 transition"
+              : "bg-white text-gray-600 hover:bg-blue-50 transition cursor-pointer"
             }`}
           onClick={() => setActiveTab("payin")}
         >
@@ -127,7 +127,7 @@ const OnboardBank = () => {
         <Button
           className={`px-4 py-2 rounded-lg font-medium ${activeTab === "payout"
               ? "bg-[#ebc8a6] text-[#615141] shadow-md"
-              : "bg-white text-gray-600 hover:bg-blue-50 transition"
+              : "bg-white text-gray-600 hover:bg-blue-50 transition cursor-pointer"
             }`}
           onClick={() => setActiveTab("payout")}
         >

@@ -20,9 +20,10 @@ const Scheme = () => {
     const handleChange = (checked) => {
       if (onToggle) onToggle(id, sqno, checked);
     };
-    return <Toggle defaultChecked={value === "Active"} onChange={handleChange} />;
+    return (
+      <Toggle defaultChecked={value === "Active"} onChange={handleChange} />
+    );
   };
-
 
   useEffect(() => {
     if (data?.data) {
@@ -61,8 +62,8 @@ const Scheme = () => {
         prev.map((item) =>
           item.sqno === sqno
             ? { ...item, status: checked ? "Active" : "Inactive" }
-            : item
-        )
+            : item,
+        ),
       );
     }
   };
@@ -90,15 +91,12 @@ const Scheme = () => {
       {/* Header */}
       <div className="bg-gradient-to-t from-[#b58351] to-[#b6916d] rounded-lg flex justify-between items-center p-4 shadow-md">
         <h4 className="font-bold text-white text-xl">Scheme Manager</h4>
-      <Button
-     className="bg-[#e8bb6e] border border-[#b5895c] text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-[#ebaa69] hover:border-[#b5895c] transition-all duration-200"
-          
-  onClick={handleModal}
->
-  ADD NEW
-</Button>
-
-
+        <Button
+          className="bg-[#e8bb6e] border border-[#b5895c] text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-[#ebaa69] hover:border-[#b5895c] transition-all duration-200 cursor-pointer"
+          onClick={handleModal}
+        >
+          ADD NEW
+        </Button>
       </div>
 
       <SchemeModal
@@ -119,7 +117,9 @@ const Scheme = () => {
           data={schemedata}
           className="shadow-lg rounded-lg overflow-hidden border border-gray-200"
           rowClassName={(rowIndex) =>
-            rowIndex % 2 === 0 ? "bg-white hover:bg-blue-50" : "bg-gray-50 hover:bg-blue-50"
+            rowIndex % 2 === 0
+              ? "bg-white hover:bg-blue-50"
+              : "bg-gray-50 hover:bg-blue-50"
           }
           paginationClassName="flex justify-end gap-2 mt-4"
           previousClassName="bg-[#b58351] hover:bg-[#615141] text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
