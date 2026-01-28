@@ -17,35 +17,97 @@ const STATUS_LIST = [
   "complete",
   "initiated",
 ];
+
 export const Dashboard = () => {
   const [role] = useState(atob(localStorage.getItem("role")) || "admin");
   const [initialLoad, setInitialLoad] = useState(true);
- const [statusFilter, setStatusFilter] = useState("success");
-  // ================= API CALLS =================
+  const [statusFilter, setStatusFilter] = useState("success");
+
+  // ================= KPI / CHART =================
   const { data: cardData, loading: recordLoading } =
     useAutoFetch("/collection-record");
 
-  // ⚠️ IMPORTANT: LIMIT DATA FOR PERFORMANCE
-  const { data: tableData, loading: tableLoading } = useAutoFetch(
-    `/reportrecords-list?status=${statusFilter}`
-  );
+  // ================= CURSOR STATES =================
+  const [rawData, setRawData] = useState([]);
+  const [cursor, setCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [tableLoading, setTableLoading] = useState(false);
+  const [tableError, setTableError] = useState(null);
 
+  // ================= FETCH (NO STATUS IN URL) =================
+  const fetchTransactions = async () => {
+    if (!hasMore || tableLoading) return;
 
-  // ✅ FIX: correct response path
-  const initialDataOfTransactions = useMemo(() => {
-    return Array.isArray(tableData?.data) ? tableData.data : [];
-  }, [tableData]);
+    setTableLoading(true);
+    setTableError(null);
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const query = new URLSearchParams({
+        per_page: 2000,
+        ...(cursor && { cursor }),
+      }).toString();
+
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/reportrecords-list?${query}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const json = await res.json();
+
+      if (json?.status) {
+        setRawData((prev) => [...prev, ...(json.data || [])]);
+        setCursor(json.next_cursor);
+
+        if (!json.next_cursor) {
+          setHasMore(false);
+        }
+      } else {
+        throw new Error("Invalid API response");
+      }
+    } catch (err) {
+      console.error(err);
+      setTableError("Failed to load transactions");
+    } finally {
+      setTableLoading(false);
+    }
+  };
+
+  // ================= INITIAL LOAD =================
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
+
+  // ================= AUTO CURSOR =================
+  useEffect(() => {
+    if (cursor) fetchTransactions();
+  }, [cursor]);
 
   // ================= SORT =================
   const sortedTransactions = useMemo(() => {
-    return [...initialDataOfTransactions].sort(
+    return [...rawData].sort(
       (a, b) => new Date(b.created_at) - new Date(a.created_at)
     );
-  }, [initialDataOfTransactions]);
+  }, [rawData]);
+
+  // ================= FRONTEND STATUS FILTER =================
+  const filteredTransactions = useMemo(() => {
+    if (statusFilter === "all") return sortedTransactions;
+
+    return sortedTransactions.filter(
+      (item) =>
+        item.status?.toLowerCase() === statusFilter.toLowerCase()
+    );
+  }, [sortedTransactions, statusFilter]);
 
   // ================= TOP TRANSACTIONS =================
   const largeTransactionData = useMemo(() => {
-    return [...initialDataOfTransactions]
+    return [...rawData]
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 4)
       .map((item) => ({
@@ -53,11 +115,11 @@ export const Dashboard = () => {
         name: item.user?.name ?? "-",
         amount: item.amount,
       }));
-  }, [initialDataOfTransactions]);
+  }, [rawData]);
 
   // ================= TABLE DATA =================
   const transactionData = useMemo(() => {
-    return sortedTransactions.map((item, index) => {
+    return filteredTransactions.map((item, index) => {
       const date = new Date(item.created_at);
 
       return {
@@ -83,9 +145,9 @@ export const Dashboard = () => {
         ),
       };
     });
-  }, [sortedTransactions]);
+  }, [filteredTransactions]);
 
-  // ================= TABLE COLUMNS =================
+  // ================= COLUMNS =================
   const transactioncolumn = [
     { header: "SQ No.", accessor: "sqno" },
     { header: "TXN Id", accessor: "txnid" },
@@ -96,7 +158,7 @@ export const Dashboard = () => {
     { header: "Date / Time", accessor: "time" },
   ];
 
-  // ================= INITIAL LOAD =================
+  // ================= INITIAL SKELETON =================
   useEffect(() => {
     if (!recordLoading && cardData) {
       setInitialLoad(false);
@@ -143,14 +205,12 @@ export const Dashboard = () => {
       ) : (
         <div className="min-h-screen bg-[#FEFCF9]">
           <div className="p-6 lg:p-10 space-y-10">
-            {/* KPI */}
             <StatsCards
               inCard={inCard}
               outCard={outCard}
               totalCards={totalCards}
             />
 
-            {/* Charts */}
             {role === "admin" && (
               <div className="flex flex-col lg:flex-row gap-6">
                 <div className="lg:w-2/3 p-6 rounded-xl bg-white shadow-md">
@@ -171,20 +231,16 @@ export const Dashboard = () => {
                           largeTransactionData.map((item) => (
                             <div
                               key={item.id}
-                              className="flex justify-between items-center bg-white rounded-lg px-4 py-3 shadow-md"
+                              className="flex justify-between bg-white rounded-lg px-4 py-3 shadow-md"
                             >
-                              <span className="text-sm font-medium text-[#3F2A20]">
-                                {item.name}
-                              </span>
-                              <span className="text-sm font-semibold text-[#7A5A2B]">
+                              <span>{item.name}</span>
+                              <span className="font-semibold">
                                 ₹{Number(item.amount).toLocaleString("en-IN")}
                               </span>
                             </div>
                           ))
                         ) : (
-                          <div className="text-center text-[#7A5A2B] font-medium">
-                            No Transactions
-                          </div>
+                          <div className="text-center">No Transactions</div>
                         )}
                       </div>
                     }
@@ -195,43 +251,39 @@ export const Dashboard = () => {
 
             {/* TABLE */}
             <div className="rounded-xl bg-white shadow-sm">
-            <div className="px-6 py-4 border-b border-[#E2D2AA] flex items-center justify-between">
-  <h3 className="text-lg font-semibold text-[#3F2A20]">
-    Transactions Table
-  </h3>
+              <div className="px-6 py-4 border-b flex justify-between">
+                <h3 className="text-lg font-semibold">Transactions Table</h3>
 
-  <div className="flex items-center gap-2">
-    <span className="text-sm font-medium text-[#7A5A2B]">
-      Status:
-    </span>
-    <select
-      value={statusFilter}
-      onChange={(e) => setStatusFilter(e.target.value)}
-      className="px-3 py-2 rounded-lg border border-[#E2D2AA]"
-    >
-      <option value="all">All</option>
-      {STATUS_LIST.map((s) => (
-        <option key={s} value={s}>
-          {s.toUpperCase()}
-        </option>
-      ))}
-    </select>
-  </div>
-</div>
-
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="px-3 py-2 border rounded-lg"
+                >
+                  <option value="all">All</option>
+                  {STATUS_LIST.map((s) => (
+                    <option key={s} value={s}>
+                      {s.toUpperCase()}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
               <div className="p-6">
-                <Table
-                  columns={transactioncolumn}
-                  data={transactionData}
-                  loading={tableLoading}
-                  showSearch
-                  showPagination
-                  showExport={false}
-                  showStatusFilter={false}
-                  showDeleteColumn={false}
-                  showDateFilter={false}
-                />
+                {tableError ? (
+                  <div className="text-center text-red-500">{tableError}</div>
+                ) : (
+                  <Table
+                    columns={transactioncolumn}
+                    data={transactionData}
+                    loading={tableLoading}
+                    showSearch
+                    showPagination
+                    showExport={false}
+                    showStatusFilter={false}
+                    showDeleteColumn={false}
+                    showDateFilter={false}
+                  />
+                )}
               </div>
             </div>
           </div>

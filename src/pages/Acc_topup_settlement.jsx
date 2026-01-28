@@ -8,7 +8,7 @@ const Acc_topup_settlement = () => {
   const [topupPayoutData, setTopupPayoutData] = useState([]);
 
   const { data, loading, error } = useGet(
-    "/reportrecords-List?product[]=topup_payout&product[]=take_back_from_wallet"
+    "/reportrecords-list?product[]=topup_payout&product[]=take_back_from_wallet"
   );
 
   useEffect(() => {

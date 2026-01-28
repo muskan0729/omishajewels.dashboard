@@ -14,9 +14,9 @@ const Payoutrequest = () => {
   const [amount, setAmount] = useState("");
   const [paymentMode, setPaymentMode] = useState("IMPS");
   const [isLoading, setIsLoading] = useState(false);
-// ===== TOKEN DROPDOWN =====
-const [tokens, setTokens] = useState([]);
-const [selectedToken, setSelectedToken] = useState("");
+  // ===== TOKEN DROPDOWN =====
+  const [tokens, setTokens] = useState([]);
+  const [selectedToken, setSelectedToken] = useState("");
 
   const [amountError, setAmountError] = useState("");
   const [beneEmailError, setbeneEmailError] = useState("");
@@ -37,11 +37,11 @@ const [selectedToken, setSelectedToken] = useState("");
   const { data, loading, error, refetch } = useGet("/beneficiary-List");
 
   // ===== GET TOKEN LIST =====
-const {
-  data: tokenData,
-  loading: tokenLoading,
-  error: tokenError,
-} = useGet("/get-tokens");
+  const {
+    data: tokenData,
+    loading: tokenLoading,
+    error: tokenError,
+  } = useGet("/get-tokens");
 
   useEffect(() => {
     if (data?.data) {
@@ -50,12 +50,11 @@ const {
   }, [data]);
 
   // ===== STORE TOKEN DATA =====
-useEffect(() => {
-  if (tokenData?.data) {
-    setTokens(tokenData.data);
-  }
-}, [tokenData]);
-
+  useEffect(() => {
+    if (tokenData?.data) {
+      setTokens(tokenData.data);
+    }
+  }, [tokenData]);
 
   const { execute: payoutsend } = usePost("/payout/request");
 
@@ -65,15 +64,15 @@ useEffect(() => {
     setIsLoading(true);
     if (!selectedUser) return;
 
-if (!selectedToken) {
-  toast.error("Please select token");
-  return;
-}
+    if (!selectedToken) {
+      toast.error("Please select token");
+      return;
+    }
 
     try {
       const payload = {
         // token: "Pq4mPdo9AkdT2NkEw4MANTy5fw7kBY",
-         token: selectedToken,
+        token: selectedToken,
         orderid: "DASH" + Date.now(),
         beneficiary_email: selectedUser.beneficiary_email_id,
         beneficiary_phone: selectedUser.beneficiary_mobile_no,
@@ -168,9 +167,6 @@ if (!selectedToken) {
   //   },
   // ];
 
-
-
-
   const tableDataWithActions = beneficiary.map((row, index) => ({
     id: row.id,
     sqno: index + 1,
@@ -223,7 +219,6 @@ if (!selectedToken) {
 
   return (
     <>
-
       {/* <div className="bg-gradient-to-t from-[#b58351] to-[#b6916d]  flex justify-between items-center mb-3 p-2.5">
         <h4 className="font-bold text-white text-lg py-2">Beneficiary List</h4> */}
       <div className="p-4">
@@ -234,18 +229,20 @@ if (!selectedToken) {
         >
           <h4 className="font-bold text-white text-lg">Beneficiary List</h4>
 
-        <Button
-  type="button"
-  className="bg-white border border-sky-200 text-sky-800 font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200 cursor-pointer"
-  onClick={() => setShowFormModal(true)}
->
-  + Add New Beneficiary
-</Button>
-
+          <Button
+            type="button"
+            // className="bg-white border border-sky-200 text-sky-800 font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200 cursor-pointer"
+            className="bg-[#e8bb6e] border border-[#b5895c] text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-[#ebaa69] hover:border-[#b5895c] transition-all duration-200 cursor-pointer"
+            onClick={() => setShowFormModal(true)}
+          >
+            + Add New Beneficiary
+          </Button>
         </div>
 
         <div className="bg-white shadow-md rounded-lg p-4 border border-gray-200">
-          {loading ? <TableSkeleton /> : (
+          {loading ? (
+            <TableSkeleton />
+          ) : (
             <Table
               columns={membercolumn}
               data={tableDataWithActions}
@@ -262,7 +259,7 @@ if (!selectedToken) {
       {showModal && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50"
-        // onClick={() => setShowModal(false)}
+          // onClick={() => setShowModal(false)}
         >
           <div
             className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 transform transition-all scale-100"
@@ -281,7 +278,6 @@ if (!selectedToken) {
 
             {/* Beneficiary Table */}
             <div className="overflow-x-auto p-4">
-
               <table className="w-full text-sm text-left border-collapse">
                 <thead>
                   <tr
@@ -327,7 +323,6 @@ if (!selectedToken) {
               showDeleteColumn={false}
             /> */}
 
-
             {/* Scroll bar (if table overflows) */}
             {/* <div className="overflow-x-scroll px-4 mb-2">
               <div className="h-1"></div>
@@ -339,34 +334,33 @@ if (!selectedToken) {
             {/* ✅ Modal Body */}
             <form className="p-6 space-y-4" onSubmit={handleSubmit}>
               <div className="grid grid-cols-2 gap-4">
-
                 {/* ===== TOKEN ID DROPDOWN ===== */}
-<div>
-  <label className="block mb-2 text-sm font-medium text-gray-900">
-    Token ID
-  </label>
-  <select
-    value={selectedToken}
-    onChange={(e) => setSelectedToken(e.target.value)}
-    className="w-full border border-gray-300 rounded-lg p-2 text-sm"
-  >
-    <option value="">
-      {tokenLoading ? "Loading..." : "-- Select Token --"}
-    </option>
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-900">
+                    Token ID
+                  </label>
+                  <select
+                    value={selectedToken}
+                    onChange={(e) => setSelectedToken(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg p-2 text-sm"
+                  >
+                    <option value="">
+                      {tokenLoading ? "Loading..." : "-- Select Token --"}
+                    </option>
 
-    {tokens.map((t, i) => (
-      <option key={i} value={t.token}>
-        {t.token}
-      </option>
-    ))}
-  </select>
+                    {tokens.map((t, i) => (
+                      <option key={i} value={t.token}>
+                        {t.token}
+                      </option>
+                    ))}
+                  </select>
 
-  {tokenError && (
-    <p className="text-red-600 text-sm mt-1">
-      Unable to load token list
-    </p>
-  )}
-</div>
+                  {tokenError && (
+                    <p className="text-red-600 text-sm mt-1">
+                      Unable to load token list
+                    </p>
+                  )}
+                </div>
 
                 {/* Amount */}
                 <div>
@@ -421,10 +415,11 @@ if (!selectedToken) {
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className={`${isLoading
-                    ? "bg-blue-700 cursor-not-allowed opacity-80"
-                    : "bg-[#615141] hover:bg-blue-700"
-                    } text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center`}
+                  className={`${
+                    isLoading
+                      ? "bg-blue-700 cursor-not-allowed opacity-80"
+                      : "bg-[#615141] hover:bg-blue-700"
+                  } text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center`}
                 >
                   {isLoading && (
                     <svg
@@ -456,7 +451,7 @@ if (!selectedToken) {
       {showFormModal && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50"
-        // onClick={() => setShowFormModal(false)}
+          // onClick={() => setShowFormModal(false)}
         >
           <div
             className="bg-white border rounded-lg shadow-lg max-w-3xl w-full mx-2 p-6 transform transition-all scale-100"
@@ -618,7 +613,7 @@ if (!selectedToken) {
                     id="floating_first_name"
                     class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                     placeholder=" "
-                  // required
+                    // required
                   />
                   <label
                     for="floating_first_name"
@@ -701,11 +696,12 @@ if (!selectedToken) {
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className={`${isLoading
-                    ? "bg-blue-700 cursor-not-allowed opacity-80"
-                    : "bg-[#615141] hover:bg-blue-700"
-                    } text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center`}
-                // className="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+                  className={`${
+                    isLoading
+                      ? "bg-blue-700 cursor-not-allowed opacity-80"
+                      : "bg-[#615141] hover:bg-blue-700"
+                  } text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center`}
+                  // className="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
                 >
                   {/* Submit */}
                   {isLoading && (

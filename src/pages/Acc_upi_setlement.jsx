@@ -8,7 +8,7 @@ const Acc_upi_setlement = () => {
   const [payinSettlementData, setPayinSettlementData] = useState([]);
 
   const { data, loading, error } = useGet(
-    "/reportrecords-List?product=payin_settlement"
+    "/reportrecords-list?product=payin_settlement"
   );
 
   useEffect(() => {

@@ -8,7 +8,7 @@ const CryptoStatement = () => {
   const [upiData, setUpiData] = useState([]);
 
 
-  const { data, loading, error } = useGet("/reportrecords-List?product=CRYPTO");
+  const { data, loading, error } = useGet("/reportrecords-list?product=CRYPTO");
 
 
 

@@ -1,24 +1,82 @@
 import { useState, useEffect } from "react";
 import Table from "../components/Table";
-import { useGet } from "../hooks/useGet";
 import { MONTH_NAMES, REPORT_STATUSES } from "../constants/Constants";
 import { TableSkeleton } from "../components/TableSkeleton";
 
 const PayoutStatement = () => {
   const [payoutData, setPayoutData] = useState([]);
 
-  const { data, loading, error } = useGet("/reportrecords-list?product=payout");
+  // ─────────────────────────────────────
+  // Cursor pagination states
+  // ─────────────────────────────────────
+  const [rawData, setRawData] = useState([]);
+  const [cursor, setCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
+  // ─────────────────────────────────────
+  // Cursor-based API fetch
+  // ─────────────────────────────────────
+  const fetchPayoutReports = async () => {
+    if (!hasMore || loading) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const query = new URLSearchParams({
+        product: "payout",
+        per_page: 5000,
+        ...(cursor && { cursor }),
+      }).toString();
+
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/reportrecords-list?${query}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const json = await res.json();
+
+      if (json?.status) {
+        setRawData((prev) => [...prev, ...(json.data || [])]);
+        setCursor(json.next_cursor);
+
+        if (!json.next_cursor) {
+          setHasMore(false);
+        }
+      } else {
+        throw new Error("Invalid API response");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load payout statements");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // First load
   useEffect(() => {
-    if (!data) return;
+    fetchPayoutReports();
+  }, []);
 
-    // ✅ HANDLE BOTH API RESPONSE SHAPES
-    const records =
-      Array.isArray(data?.data?.data)
-        ? data.data.data
-        : Array.isArray(data?.data)
-        ? data.data
-        : [];
+  // Auto load next cursor pages
+  useEffect(() => {
+    if (cursor) fetchPayoutReports();
+  }, [cursor]);
+
+  // ─────────────────────────────────────
+  // Data formatting
+  // ─────────────────────────────────────
+  useEffect(() => {
+    if (!rawData.length) return;
 
     const statusClasses = {
       pending: "bg-yellow-100 text-yellow-800",
@@ -30,11 +88,15 @@ const PayoutStatement = () => {
       refunded: "bg-gray-100 text-gray-800",
     };
 
-    const formatted = records.map((item, index) => {
+    const sortedData = [...rawData].sort(
+      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    );
+
+    const formatted = sortedData.map((item, index) => {
       const date = new Date(item.created_at);
 
       return {
-        // 🔑 REQUIRED FOR TABLE STATUS FILTER
+        // 🔑 required for status filter
         status: item.status?.toLowerCase() ?? "pending",
 
         id: item.id,
@@ -42,24 +104,25 @@ const PayoutStatement = () => {
 
         sqno: (
           <div className="text-left">
-            <b>{index + 1}</b>
+            <b>{item.id}</b>
             <div className="text-xs text-gray-600">
-              {date.getDate()} {MONTH_NAMES[date.getMonth()]} {date.getFullYear()}
+              {date.getDate()} {MONTH_NAMES[date.getMonth()]}{" "}
+              {date.getFullYear()}
               <br />
               {date.toLocaleTimeString()}
             </div>
           </div>
         ),
 
-        merchant_details: item.user?.name ?? "N/A",
+        merchant_details: `${item.user?.name ?? "N/A"} (${item.user_id ?? "N/A"})`,
 
         txnid: (
           <div className="text-left text-sm space-y-1">
-            <div>Payment Mode: <b>{item.payout_mode ?? "N/A"}</b></div>
+            <div>Mode: <b>{item.payout_mode ?? "N/A"}</b></div>
             <div>Account: <b>{item.payer_acc_no ?? "N/A"}</b></div>
             <div>Holder: <b>{item.payer_name ?? "N/A"}</b></div>
             <div>IFSC: <b>{item.payer_ifsc ?? "N/A"}</b></div>
-            <div>UPI ID: <b>{item.payer_upi ?? "N/A"}</b></div>
+            <div>UPI: <b>{item.payer_upi ?? "N/A"}</b></div>
             <div>Mobile: <b>{item.payer_mobile ?? "N/A"}</b></div>
           </div>
         ),
@@ -74,11 +137,11 @@ const PayoutStatement = () => {
 
         amount: (
           <div className="text-left text-sm space-y-1">
-            <div>Opening Wallet: <b>{item.payout_opening_balance ?? 0}</b></div>
+            <div>Opening: <b>{item.payout_opening_balance ?? 0}</b></div>
             <div>Pay Amount: <b>{item.payout_amount ?? 0}</b></div>
             <div>Charges: <b>{item.payer_charges ?? 0}</b></div>
             <div>Total Debit: <b>{item.total_debit ?? 0}</b></div>
-            <div>Closing Wallet: <b>{item.payout_closing_balance ?? 0}</b></div>
+            <div>Closing: <b>{item.payout_closing_balance ?? 0}</b></div>
             <div>Note: <b>{item.note ?? "-"}</b></div>
           </div>
         ),
@@ -96,8 +159,11 @@ const PayoutStatement = () => {
     });
 
     setPayoutData(formatted);
-  }, [data]);
+  }, [rawData]);
 
+  // ─────────────────────────────────────
+  // Table columns
+  // ─────────────────────────────────────
   const payoutColumns = [
     { header: "Order ID", accessor: "sqno" },
     { header: "User Details", accessor: "merchant_details" },
@@ -115,12 +181,10 @@ const PayoutStatement = () => {
       </div>
 
       {/* TABLE */}
-      {loading ? (
+      {loading && rawData.length === 0 ? (
         <TableSkeleton />
       ) : error ? (
-        <div className="text-center py-6 text-red-500">
-          Error loading payout data
-        </div>
+        <div className="text-center py-6 text-red-500">{error}</div>
       ) : (
         <Table
           columns={payoutColumns}

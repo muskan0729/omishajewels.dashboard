@@ -127,11 +127,11 @@ export const PayinRequest = () => {
                 
                 value={payerName}
                 onChange={(e) => setPayerName(e.target.value)}
-                className="block w-full border-b-2 border-gray-300 py-2 px-0 text-gray-900 bg-transparent focus:outline-none focus:border-blue-600 peer"
+                className="block w-full border-b-2 border-gray-300 py-2 px-0 text-gray-900 bg-transparent focus:outline-none focus:border-yellow-600 peer"
                 placeholder=" " // important for peer-focus & floating label
               />
               <label className={`absolute left-0 text-gray-500 text-sm transition-all duration-200
-                ${payerName ? "-top-3 text-blue-600 text-xs" : "top-2"} 
+                ${payerName ? "-top-3 text-yellow-600 text-xs" : "top-2"} 
                 peer-placeholder-shown:top-2 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm`}>
                 Payer Name
               </label>
@@ -147,7 +147,7 @@ export const PayinRequest = () => {
                 setAmount(val);
                 setAmountError(Number(val) < 10 ? "Amount must be at least ₹10" : "");
               }}
-              className="peer block w-full border-b-2 border-gray-300 py-2 px-0 text-gray-900 focus:border-blue-600 focus:outline-none placeholder-transparent"
+              className="peer block w-full border-b-2 border-gray-300 py-2 px-0 text-gray-900 focus:border-yellow-600 focus:outline-none placeholder-transparent"
               placeholder=" "
             />
             <label
@@ -157,9 +157,9 @@ export const PayinRequest = () => {
                 peer-placeholder-shown:top-2
                 peer-placeholder-shown:text-gray-400
                 peer-focus:-top-3
-                peer-focus:text-blue-600
+                peer-focus:text-yellow-600
                 peer-valid:-top-3
-                peer-valid:text-blue-600
+                peer-valid:text-yellow-600
               "
             >
               Amount
@@ -177,7 +177,7 @@ export const PayinRequest = () => {
               value={payerMobile}
               onChange={(e) => setPayerMobile(e.target.value)}
               className="peer block w-full border-b-2 border-gray-300 py-2 px-0
-                        text-gray-900 focus:border-blue-600 focus:outline-none 
+                        text-gray-900 focus:border-yellow-600 focus:outline-none 
                         placeholder-transparent"
               placeholder=" "
             />
@@ -189,10 +189,10 @@ export const PayinRequest = () => {
                 peer-placeholder-shown:text-gray-400
                 
                 peer-focus:-top-3
-                peer-focus:text-blue-600
+                peer-focus:text-yellow-600
 
                 peer-valid:-top-3
-                peer-valid:text-blue-600
+                peer-valid:text-yellow-600
               "
             >
               Mobile Number
@@ -207,7 +207,7 @@ export const PayinRequest = () => {
                 value={payerEmail}
                 onChange={(e) => setPayerEmail(e.target.value)}
                 className="peer block w-full border-b-2 border-gray-300 py-2 px-0
-                          text-gray-900 focus:border-blue-600 focus:outline-none 
+                          text-gray-900 focus:border-yellow-600 focus:outline-none 
                           placeholder-transparent"
                 placeholder=" "
               />
@@ -216,8 +216,8 @@ export const PayinRequest = () => {
                 className={`
                   absolute left-0 text-gray-500 text-sm transition-all duration-200
                   
-                  ${payerEmail ? "-top-3 text-blue-600" : "top-2 text-gray-400"}
-                  peer-focus:-top-3 peer-focus:text-blue-600
+                  ${payerEmail ? "-top-3 text-yellow-600" : "top-2 text-gray-400"}
+                  peer-focus:-top-3 peer-focus:text-yellow-600
                 `}
               >
                 Email
@@ -228,7 +228,7 @@ export const PayinRequest = () => {
           <div className="flex justify-center mt-4">
             <Button
               onClick={handlePayinSubmit}
-              className="bg-[#615141] hover:bg-blue-700 text-white rounded-lg px-6 py-2 shadow-md"
+              className="bg-[#615141] hover:bg-yellow-800 text-white rounded-lg px-6 py-2 shadow-md cursor-pointer"
             >
               {loading ? "Submitting..." : "Submit"}
             </Button>
@@ -242,7 +242,7 @@ export const PayinRequest = () => {
           <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center border border-gray-200">
             <h3 className="text-gray-800 font-semibold text-lg mb-4">Scan to Pay</h3>
             <img src={qrUrl} alt="UPI QR Code" className="w-64 h-64 mb-4" />
-            <Button onClick={() => setQrUrl("")} className="bg-[#615141] hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+            <Button onClick={() => setQrUrl("")} className="bg-[#615141] hover:bg-yellow-700 text-white px-4 py-2 rounded-lg">
               Back
             </Button>
           </div>
