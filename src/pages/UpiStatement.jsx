@@ -7,25 +7,18 @@ import { TableSkeleton } from "../components/TableSkeleton";
 const UpiStatement = () => {
   const [upiData, setUpiData] = useState([]);
 
-  const { data, loading, error } = useGet("/reportrecords-List?product=UPI");
-
-  // Format date same as ACC_TOPUP_SETTLEMENT.jsx
-  const formatDateLikeTopup = (date) => {
-    const d = new Date(date);
-
-    const day = d.getDate();
-    const month = MONTH_NAMES[d.getMonth()];
-    const year = d.getFullYear();
-    const time = d.toLocaleTimeString();
-
-    return `${day} ${month} ${year} - ${time}`;
-  };
+  const { data, loading, error } = useGet("/reportrecords-list?product=UPI");
 
   useEffect(() => {
     if (!data) return;
 
-    // Access the nested data array safely
-    const records = Array.isArray(data?.data?.data) ? data.data.data : [];
+    // ✅ HANDLE BOTH RESPONSE SHAPES
+    const records =
+      Array.isArray(data?.data?.data)
+        ? data.data.data
+        : Array.isArray(data?.data)
+        ? data.data
+        : [];
 
     const statusClasses = {
       pending: "bg-yellow-100 text-yellow-800",
@@ -37,86 +30,92 @@ const UpiStatement = () => {
       refunded: "bg-gray-100 text-gray-800",
     };
 
-    const formattedData = records.map((item, index) => ({
-      sqno: (
-        <div className="flex flex-col text-left">
-          <span><b>{index + 1}</b></span>
-          <span>
-            {new Date(item.created_at).getDate()}{" "}
-            {MONTH_NAMES[new Date(item.created_at).getMonth()]}{" "}
-            {new Date(item.created_at).getFullYear()} <br />
-            {new Date(item.created_at).toLocaleTimeString()}
-          </span>
-        </div>
-      ),
-      id: item.id,
-      user_id: item.user_id,
-      product_type: item.product ?? "N/A",
-      merchant_details: item.user?.name ?? "N/A",
-      txnid: (
-        <div className="flex flex-col text-left">
-          <span>Payee VPA: <b>{item.payee_vpa ?? "N/A"}</b></span>
-          <span>Payee Name: <b>{item.payer_name ?? "N/A"}</b></span>
-          <span>Payee Txnid: <b>{item.mytxnid ?? "N/A"}</b></span>
-          <span>TxnId: <b>{item.txnid ?? "N/A"}</b></span>
-        </div>
-      ),
-      amount: (
-        <div className="flex flex-col text-left">
-          <span>Amount: <b>{item.amount ?? 0}</b></span>
-          <span>GST: <b>{item.gst ?? 0}</b></span>
-          <span>Charges: <b>{item.charge ?? 0}</b></span>
-          <span>Payin Rolling Amount: <b>{item.payin_rolling_amount ?? 0}</b></span>
-        </div>
-      ),
-      numericAmount: parseFloat(item.amount) || 0,
-      date: formatDateLikeTopup(item.created_at),
-      status: item.status,
-      showstatus: (
-        <span
-          className={`px-2 py-1 rounded-full text-sm font-medium ${
-            statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
-          }`}
-        >
-          {item.status ? item.status.charAt(0).toUpperCase() + item.status.slice(1) : "N/A"}
-        </span>
-      ),
-    }));
+    const formatted = records.map((item, index) => {
+      const date = new Date(item.created_at);
 
-    setUpiData(formattedData);
+      return {
+        // ✅ REQUIRED FOR TABLE FILTERS
+        status: item.status?.toLowerCase() ?? "pending",
+
+        id: item.id,
+        user_id: item.user_id,
+
+        sqno: (
+          <div className="text-left">
+            <b>{index + 1}</b>
+            <div className="text-xs text-gray-600">
+              {date.getDate()} {MONTH_NAMES[date.getMonth()]} {date.getFullYear()}
+              <br />
+              {date.toLocaleTimeString()}
+            </div>
+          </div>
+        ),
+
+        merchant_details: item.user?.name ?? "N/A",
+
+        txnid: (
+          <div className="text-left text-sm space-y-1">
+            <div>Payee VPA: <b>{item.payee_vpa ?? "N/A"}</b></div>
+            <div>Payer Name: <b>{item.payer_name ?? "N/A"}</b></div>
+            <div>Txn ID: <b>{item.txnid ?? "N/A"}</b></div>
+          </div>
+        ),
+
+        amount: (
+          <div className="text-left text-sm space-y-1">
+            <div>Amount: <b>{item.amount ?? 0}</b></div>
+            <div>GST: <b>{item.gst ?? 0}</b></div>
+            <div>Charges: <b>{item.charge ?? 0}</b></div>
+          </div>
+        ),
+
+        showstatus: (
+          <span
+            className={`px-2 py-1 rounded-full text-sm font-medium ${
+              statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
+            }`}
+          >
+            {item.status?.toUpperCase() ?? "N/A"}
+          </span>
+        ),
+      };
+    });
+
+    setUpiData(formatted);
   }, [data]);
 
   const upiColumn = [
     { header: "SQ NO", accessor: "sqno" },
     { header: "Merchant Details", accessor: "merchant_details" },
-    { header: "Payer-Payee Details", accessor: "txnid" },
-    { header: "Amount/ Commission", accessor: "amount" },
+    { header: "Payer / Payee Details", accessor: "txnid" },
+    { header: "Amount / Charges", accessor: "amount" },
     { header: "Status", accessor: "showstatus" },
   ];
 
   return (
     <div className="p-4 space-y-4">
-      {/* Header */}
-      <div className="bg-gradient-to-t from-[#b58351] to-[#b6916d] rounded-lg flex justify-between items-center p-4 shadow-md">
-        <h4 className="font-bold text-white text-xl">Upi Statement</h4>
+      {/* HEADER */}
+      <div className="bg-gradient-to-r from-[#b58351] to-[#b6916d] rounded-lg p-4 shadow-md">
+        <h4 className="font-bold text-white text-xl">UPI Statement</h4>
       </div>
 
-      {/* Table */}
+      {/* TABLE */}
       {loading ? (
         <TableSkeleton />
       ) : error ? (
-        <div className="text-center py-6 text-red-500">Error: {error}</div>
+        <div className="text-center py-6 text-red-500">
+          Error loading data
+        </div>
       ) : (
         <Table
           columns={upiColumn}
           data={upiData}
-          showStatusFilter={true}
-          showExport={true}
+          showStatusFilter
+          statusList={REPORT_STATUSES}
+          showExport
           showSearch={false}
           showDeleteColumn={false}
-          showSelectUserFilter={true}
-          statusList={REPORT_STATUSES}
-          className="shadow-lg rounded-lg overflow-hidden"
+          showSelectUserFilter
         />
       )}
     </div>

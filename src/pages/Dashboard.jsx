@@ -8,33 +8,43 @@ import DashboardSkeleton from "../components/DashboardSkeleton";
 import { FlipCard } from "../components/FlipCard";
 import StatsCards from "../components/StatsCards";
 
+const STATUS_LIST = [
+  "pending",
+  "success",
+  "failed",
+  "reversed",
+  "refunded",
+  "complete",
+  "initiated",
+];
 export const Dashboard = () => {
   const [role] = useState(atob(localStorage.getItem("role")) || "admin");
   const [initialLoad, setInitialLoad] = useState(true);
-  const [activeLeaderboardTab] = useState("Today");
-
+ const [statusFilter, setStatusFilter] = useState("success");
   // ================= API CALLS =================
   const { data: cardData, loading: recordLoading } =
     useAutoFetch("/collection-record");
 
-  const { data: tableData } = useAutoFetch(
-    "/reportrecords-List?status=success",
+  // ⚠️ IMPORTANT: LIMIT DATA FOR PERFORMANCE
+  const { data: tableData, loading: tableLoading } = useAutoFetch(
+    `/reportrecords-list?status=${statusFilter}`
   );
 
-  // ✅ PAGINATION SAFE
-  const initialDataOfTransactions = tableData?.data?.data ?? [];
 
-  // ================= SORT DATA =================
+  // ✅ FIX: correct response path
+  const initialDataOfTransactions = useMemo(() => {
+    return Array.isArray(tableData?.data) ? tableData.data : [];
+  }, [tableData]);
+
+  // ================= SORT =================
   const sortedTransactions = useMemo(() => {
-    if (!Array.isArray(initialDataOfTransactions)) return [];
     return [...initialDataOfTransactions].sort(
-      (a, b) => new Date(b.created_at) - new Date(a.created_at),
+      (a, b) => new Date(b.created_at) - new Date(a.created_at)
     );
   }, [initialDataOfTransactions]);
 
-  // ================= TOP 4 TRANSACTIONS =================
+  // ================= TOP TRANSACTIONS =================
   const largeTransactionData = useMemo(() => {
-    if (!Array.isArray(initialDataOfTransactions)) return [];
     return [...initialDataOfTransactions]
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 4)
@@ -49,26 +59,26 @@ export const Dashboard = () => {
   const transactionData = useMemo(() => {
     return sortedTransactions.map((item, index) => {
       const date = new Date(item.created_at);
-      const formattedDate = `${date.getDate()} ${
-        MONTH_NAMES[date.getMonth()]
-      } ${date.getFullYear()}`;
-      const formattedTime = date.toLocaleTimeString();
 
       return {
         sqno: index + 1,
-        txnid: item.txnid,
+        txnid: item.id,
         name: item.user?.name ?? "-",
         type: item.product,
-        amount: item.amount,
+        amount: `₹${Number(item.amount).toLocaleString("en-IN")}`,
         status: (
-          <span className="px-2 py-1 rounded-full text-sm bg-green-100 text-green-800">
+          <span className="px-3 py-1 rounded-full text-sm font-semibold bg-[#F3E6C9] text-[#7A5A2B]">
             {item.status?.toUpperCase()}
           </span>
         ),
         time: (
           <div className="flex flex-col">
-            <span className="text-sm font-medium">{formattedDate}</span>
-            <span className="text-sm text-gray-500">{formattedTime}</span>
+            <span className="text-sm font-medium text-[#3F2A20]">
+              {`${date.getDate()} ${MONTH_NAMES[date.getMonth()]} ${date.getFullYear()}`}
+            </span>
+            <span className="text-xs text-[#7A5A2B]">
+              {date.toLocaleTimeString()}
+            </span>
           </div>
         ),
       };
@@ -83,7 +93,7 @@ export const Dashboard = () => {
     { header: "Type", accessor: "type" },
     { header: "Amount", accessor: "amount" },
     { header: "Status", accessor: "status" },
-    { header: "Date/Time", accessor: "time" },
+    { header: "Date / Time", accessor: "time" },
   ];
 
   // ================= INITIAL LOAD =================
@@ -100,6 +110,7 @@ export const Dashboard = () => {
     total: cardData?.total_payin_amount ?? 0,
     today: cardData?.today_payin ?? 0,
     changePercent: 3.2,
+    color: "#C9A24D",
   };
 
   const outCard = {
@@ -108,26 +119,21 @@ export const Dashboard = () => {
     total: cardData?.total_payout_amount ?? 0,
     today: cardData?.today_payout ?? 0,
     changePercent: 3.2,
+    color: "#B38A3C",
   };
 
   const totalCards = {
     title: "Total Collection",
-    icon: "fa-arrow-trend-up",
+    icon: "fa-layer-group",
     total:
       Number(cardData?.total_payout_amount ?? 0) +
       Number(cardData?.total_payin_amount ?? 0),
     today:
-      Number(cardData?.today_payin ?? 0) + Number(cardData?.today_payout ?? 0),
+      Number(cardData?.today_payin ?? 0) +
+      Number(cardData?.today_payout ?? 0),
     changePercent: 3.2,
+    color: "#7A5A2B",
   };
-
-  const leaderboardByTab = {
-    Today: largeTransactionData,
-    monthly: largeTransactionData,
-    allTime: largeTransactionData,
-  };
-
-  const currentLeaderboard = leaderboardByTab[activeLeaderboardTab] ?? [];
 
   // ================= RENDER =================
   return (
@@ -135,8 +141,8 @@ export const Dashboard = () => {
       {initialLoad ? (
         <DashboardSkeleton />
       ) : (
-        <div className="flex min-h-screen bg-[#fefcf9]">
-          <div className="flex-1 p-6 lg:p-10">
+        <div className="min-h-screen bg-[#FEFCF9]">
+          <div className="p-6 lg:p-10 space-y-10">
             {/* KPI */}
             <StatsCards
               inCard={inCard}
@@ -146,98 +152,83 @@ export const Dashboard = () => {
 
             {/* Charts */}
             {role === "admin" && (
-              <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-12">
-                <FlipCard
-                  frontContent={
-                    <DonutChart data={cardData?.transactionStatusCounts} />
-                  }
-                  backContent={
-                    <div
-                      className="rounded-xl p-4 space-y-3"
-                      style={{
-                        background: "linear-gradient(140deg, #F2DBBC, #FAF3E7)",
-                      }}
-                    >
-                      {currentLeaderboard.length ? (
-                        currentLeaderboard.map((item, index) => {
-                          const medalColor =
-                            index === 0
-                              ? "text-yellow-500"
-                              : index === 1
-                                ? "text-gray-400"
-                                : index === 2
-                                  ? "text-amber-700"
-                                  : "text-[#5c3d2e]";
-
-                          return (
-                            <div
-                              key={item.id}
-                              className="flex items-start justify-between gap-3
-                       rounded-lg bg-white/80 px-4 py-3
-                       shadow-sm hover:bg-white transition"
-                            >
-                              {/* Left: Medal + Name */}
-                              <div className="flex items-start gap-3 flex-1">
-                                <i
-                                  className={`fa-solid fa-medal mt-0.5 ${medalColor}`}
-                                  aria-hidden="true"
-                                />
-
-                                <span
-                                  className="text-sm font-medium text-[#3f2a20]
-                           break-words leading-snug"
-                                >
-                                  {item.name}
-                                </span>
-                              </div>
-
-                              {/* Right: Amount */}
-                              <span
-                                className="text-sm font-semibold text-[#3f2a20]
-                         whitespace-nowrap"
-                              >
-                                ₹{Number(item.amount).toLocaleString("en-IN")}
-                              </span>
-                            </div>
-                          );
-                        })
-                      ) : (
-                        <div
-                          className="rounded-lg bg-white/70 py-6
-                   text-center text-sm font-medium text-[#5c3d2e]"
-                        >
-                          No Transactions
-                        </div>
-                      )}
-                    </div>
-                  }
-                />
-
-                <div className="xl:col-span-2 p-4 rounded-xl bg-white">
-                  <h3 className="text-xl font-semibold mb-3">
+              <div className="flex flex-col lg:flex-row gap-6">
+                <div className="lg:w-2/3 p-6 rounded-xl bg-white shadow-md">
+                  <h3 className="text-xl font-semibold text-[#3F2A20] mb-4">
                     Monthly Revenue
                   </h3>
                   <LineChart data={cardData?.monthWiseStatusCounts ?? []} />
                 </div>
+
+                <div className="lg:w-1/3">
+                  <FlipCard
+                    frontContent={
+                      <DonutChart data={cardData?.transactionStatusCounts} />
+                    }
+                    backContent={
+                      <div className="rounded-xl p-4 space-y-3 bg-gradient-to-br from-[#F3E6C9] to-[#FEFCF9]">
+                        {largeTransactionData.length ? (
+                          largeTransactionData.map((item) => (
+                            <div
+                              key={item.id}
+                              className="flex justify-between items-center bg-white rounded-lg px-4 py-3 shadow-md"
+                            >
+                              <span className="text-sm font-medium text-[#3F2A20]">
+                                {item.name}
+                              </span>
+                              <span className="text-sm font-semibold text-[#7A5A2B]">
+                                ₹{Number(item.amount).toLocaleString("en-IN")}
+                              </span>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center text-[#7A5A2B] font-medium">
+                            No Transactions
+                          </div>
+                        )}
+                      </div>
+                    }
+                  />
+                </div>
               </div>
             )}
 
-            {/* Table */}
-            <div className=" rounded-xl bg-white">
-              <div className="px-6 py-4 border-b border-[#CA935C]">
-                <h3 className="text-lg font-semibold text-[#3f2a20]">
-                  Transactions Table
-                </h3>
-              </div>
+            {/* TABLE */}
+            <div className="rounded-xl bg-white shadow-sm">
+            <div className="px-6 py-4 border-b border-[#E2D2AA] flex items-center justify-between">
+  <h3 className="text-lg font-semibold text-[#3F2A20]">
+    Transactions Table
+  </h3>
+
+  <div className="flex items-center gap-2">
+    <span className="text-sm font-medium text-[#7A5A2B]">
+      Status:
+    </span>
+    <select
+      value={statusFilter}
+      onChange={(e) => setStatusFilter(e.target.value)}
+      className="px-3 py-2 rounded-lg border border-[#E2D2AA]"
+    >
+      <option value="all">All</option>
+      {STATUS_LIST.map((s) => (
+        <option key={s} value={s}>
+          {s.toUpperCase()}
+        </option>
+      ))}
+    </select>
+  </div>
+</div>
+
 
               <div className="p-6">
                 <Table
                   columns={transactioncolumn}
                   data={transactionData}
-                  showSearch={true}
-                  showPagination={true}
+                  loading={tableLoading}
+                  showSearch
+                  showPagination
                   showExport={false}
-                  showStatusFilter={true}
+                  showStatusFilter={false}
                   showDeleteColumn={false}
                   showDateFilter={false}
                 />
