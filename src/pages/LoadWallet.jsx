@@ -81,7 +81,7 @@ const LoadWallet = () => {
   };
 
   const membercolumn = [
-    { header: "SQNo", accessor: "sqno" },
+    { header: "User Id", accessor: "id" },
     { header: "Name", accessor: "name" },
     { header: "Payout Wallet", accessor: "payout_wallet" },
     { header: "Action", accessor: "action" },

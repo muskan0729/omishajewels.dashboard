@@ -254,18 +254,40 @@ export const Dashboard = () => {
               <div className="px-6 py-4 border-b flex justify-between">
                 <h3 className="text-lg font-semibold">Transactions Table</h3>
 
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-3 py-2 border rounded-lg"
-                >
-                  <option value="all">All</option>
-                  {STATUS_LIST.map((s) => (
-                    <option key={s} value={s}>
-                      {s.toUpperCase()}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="
+                      appearance-none
+                      pl-4 pr-10 py-2
+                      rounded-lg
+                      bg-[#FEFCF9]
+                      border border-[#E7D8B1]
+                      text-[#3F2A20]
+                      font-medium
+                      shadow-sm
+                      focus:outline-none
+                      focus:ring-2 focus:ring-[#C9A24D]/40
+                      focus:border-[#C9A24D]
+                      hover:border-[#C9A24D]
+                      transition-all duration-200
+                      cursor-pointer
+                    "
+                  >
+                    <option value="all">All Status</option>
+                    {STATUS_LIST.map((s) => (
+                      <option key={s} value={s}>
+                        {s.toUpperCase()}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Dropdown Icon */}
+                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#7A5A2B]">
+                    ▼
+                  </span>
+                </div>
               </div>
 
               <div className="p-6">

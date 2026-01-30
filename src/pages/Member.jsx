@@ -194,18 +194,18 @@ export const Member = () => {
     return {
         sqno: item.id,
         id: item.id,
-        // name: item.name,
-        name: (
-          <span
-            className="text-blue-600 cursor-pointer w-100"
-            onClick={() => {
-              localStorage.setItem("merchantId", item.id);
-              memberDetails(`/MerchantDetails/${item.id}`);
-            }}
-          >
-            {item.name}
-          </span>
-        ),
+        name: item.name,
+        // name: (
+        //   <span
+        //     className="text-blue-600 cursor-pointer w-100"
+        //     onClick={() => {
+        //       localStorage.setItem("merchantId", item.id);
+        //       memberDetails(`/MerchantDetails/${item.id}`);
+        //     }}
+        //   >
+        //     {item.name}
+        //   </span>
+        // ),
         kyc:
           item.kyc === 1 ? (
             <span className="px-3 py-1 text-sm font-semibold text-green-700 bg-green-100 rounded-full">
@@ -255,11 +255,29 @@ export const Member = () => {
 
   const memberColumns = [
     { header: "SQNo", accessor: "sqno" },
-    { header: "Name", accessor: "name" },
+    // { header: "Name", accessor: "name" },
+    {
+      header: "Name",
+      accessor: "name",
+      Cell: ({ value, row }) => (
+        <span
+          className="text-blue-600 cursor-pointer w-100"
+          onClick={() => {
+            localStorage.setItem("merchantId", row.id);
+            memberDetails(`/MerchantDetails/${row.id}`);
+          }}
+        >
+          {value}
+        </span>
+      ),
+    },
+    
     { header: "KYC", accessor: "kyc" },
     { header: "Payin", accessor: "payin" },
 
     { header: "Payout", accessor: "payout" },
+
+    { header: "Date", accessor: "date" }, // 👈 ADD THIS ✅
 
     { header: "Payin Wallet", accessor: "walletpayin" },
     { header: "Payout Wallet", accessor: "walletpayout" },
@@ -347,6 +365,7 @@ export const Member = () => {
         <Table
           columns={memberColumns}
           data={tableDataWithActions}
+          rawData={merchantData}        // EXPORT ke liye
           className="shadow-lg rounded-lg overflow-hidden border border-gray-200"
           rowClassName={(rowIndex) =>
             rowIndex % 2 === 0

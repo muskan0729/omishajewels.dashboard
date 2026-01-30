@@ -8,6 +8,8 @@ import Logo from "../images/logo.png";
 
 export const Header = ({
   onMenuClick,
+  profileOpen,
+  setProfileOpen,
   currentPath: propCurrentPath,
   role: propRole,
   onRoleChange,
@@ -28,10 +30,7 @@ export const Header = ({
   const { data: merchantData } = useGet("/show-merchant");
 
   /* ===== STATE ===== */
-  const [open, setOpen] = useState(false); // SIDEBAR STATE
   const [activeStat, setActiveStat] = useState(null);
-
-  const sidebarRef = useRef(null);
 
   const email = localStorage.getItem("email");
   const showButton =
@@ -65,25 +64,6 @@ export const Header = ({
     },
   ];
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      // ⛔ If logout modal is open → DO NOTHING
-      if (showLogoutModal) return;
-
-      if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
-        setOpen(false);
-      }
-    };
-
-    if (open) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [open, showLogoutModal]);
-
   const handleLogout = async () => {
     try {
       await logout();
@@ -104,7 +84,23 @@ export const Header = ({
   return (
     <>
       {/* ================= HEADER (100% OLD LOOK) ================= */}
-      <nav className="flex items-center justify-between w-full px-4 py-3 bg-white shadow-lg shadow-[#5d4534]-500/60">
+      <nav
+          className={`
+            relative
+            flex items-center justify-between w-full px-4 py-3
+            bg-white/70
+            backdrop-blur-md
+            border-b border-[#cb997e]/30
+            shadow-lg shadow-[#5d4534]/30
+            transition-all duration-300
+            ${profileOpen ? "blur-sm pointer-events-none" : ""}
+          `}
+      >
+        {/* 🔥 DARK OVERLAY (ONLY WHEN PROFILE OPEN) */}
+        {profileOpen && (
+          <div className="absolute inset-0 bg-black/20 pointer-events-none" />
+        )}
+
         <div className="flex items-center gap-4">
           <button
             onClick={onMenuClick}
@@ -160,7 +156,7 @@ export const Header = ({
         </div>
 
         {/* PROFILE → SIDEBAR OPEN */}
-        <button onClick={() => setOpen(true)}>
+        <button onClick={() => setProfileOpen(true)}>
           <img
             className="w-10 h-10 rounded-full border cursor-pointer"
             src={profile}
@@ -169,26 +165,14 @@ export const Header = ({
         </button>
       </nav>
 
-      {/* ================= BACKDROP ================= */}
-      <div
-        className={`fixed inset-0 z-40 bg-black/25 backdrop-blur-[2px]
-          transition-opacity duration-300 ${
-            open && !showLogoutModal
-              ? "opacity-100 visible"
-              : "opacity-0 invisible"
-          }`}
-        onClick={() => {
-          if (!showLogoutModal) setOpen(false);
-        }}
-      />
       {/* ================= RIGHT SIDEBAR ================= */}
       <div
-        ref={sidebarRef}
         className={`fixed top-0 right-0 h-full w-[260px] z-50
         bg-white border border-gray-200 shadow-2xl
         rounded-l-3xl
         transform transition-transform duration-500 ease-in-out
-        ${open ? "translate-x-0" : "translate-x-full"}`}
+        filter-none
+        ${profileOpen ? "translate-x-0" : "translate-x-full"}`}
       >
         {/* Accent strip */}
         <div className="absolute left-0 top-10 h-53 w-[4px] bg-[#cb997e] rounded-r-full" />
@@ -201,7 +185,7 @@ export const Header = ({
         >
           {/* CLOSE */}
           <button
-            onClick={() => setOpen(false)}
+            onClick={() => setProfileOpen(false)}
             className="absolute top-4 right-4 w-8 h-8
             flex items-center justify-center
             rounded-full border border-gray-300
@@ -336,7 +320,6 @@ export const Header = ({
         <div className="fixed inset-0 z-[60] flex items-center justify-center">
           {/* BACKDROP */}
           <div
-            // className="absolute inset-0"
             className="absolute inset-0 bg-black/25 backdrop-blur-[2px]
              opacity-0 animate-[fadeIn_0.2s_ease-out_forwards]"
             onClick={() => setShowLogoutModal(false)}
@@ -344,7 +327,7 @@ export const Header = ({
 
           {/* MODAL */}
           <div
-            onClick={(e) => e.stopPropagation()} // 👈 ADD THIS LINE
+            onClick={(e) => e.stopPropagation()}
             className="relative w-[92%] max-w-sm rounded-3xl
             bg-white border border-[#cb997e]/40
             shadow-2xl shadow-[#cb997e]/30

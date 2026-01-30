@@ -3,7 +3,8 @@ import { Link, useLocation } from "react-router-dom";
 import Logo from "../images/logo.png";
 import "../css/sidebar.css"; // keep your existing css or add below styles here
 
-export const Sidebar = ({ open, setOpen }) => {
+// export const Sidebar = ({ open, setOpen }) => {
+export const Sidebar = ({ open, setOpen, profileOpen }) => {
   const role = atob(localStorage.getItem("role") || "user");
   const [activeDropdown, setActiveDropdown] = useState(null);
 
@@ -154,8 +155,12 @@ export const Sidebar = ({ open, setOpen }) => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-40 transform transition-transform duration-300 ease-in-out
-      md:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-40
+        transform transition-all duration-300 ease-in-out
+        md:translate-x-0
+        ${open ? "translate-x-0" : "-translate-x-full"}
+        ${profileOpen ? "blur-sm brightness-75 pointer-events-none" : ""}
+        `}
         style={{ display: "flex", flexDirection: "column" }}
       >
         {/* Mobile close button */}

@@ -11,6 +11,7 @@ import { CustomSelect } from "./CustomSelect";
 const Table = ({
   columns,
   data = [],
+  rawData = [], // 👈 ADD THIS
   showSearch = true,
   showPagination = true,
   showExport = true,
@@ -96,7 +97,7 @@ const Table = ({
       const matchesSearch =
         !search ||
         Object.values(row).some((val) =>
-          String(val).toLowerCase().includes(searchText)
+          String(val).toLowerCase().includes(searchText),
         );
 
       const matchesStatus =
@@ -111,16 +112,14 @@ const Table = ({
         (!startDate || rowDate >= startDate) &&
         (!endDate || rowDate <= endDate);
 
-      return (
-        matchesSearch &&
-        matchesStatus &&
-        matchesMerchant &&
-        matchesDate
-      );
+      return matchesSearch && matchesStatus && matchesMerchant && matchesDate;
     });
   }, [data, search, statusFilter, selectedMerchant, startDate, endDate]);
 
-  useEffect(() => setCurrentPage(1), [search, statusFilter, selectedMerchant, startDate, endDate]);
+  useEffect(
+    () => setCurrentPage(1),
+    [search, statusFilter, selectedMerchant, startDate, endDate],
+  );
 
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * entriesPerPage;
@@ -145,54 +144,92 @@ const Table = ({
 
   const exportCSV = () => {
     const headers = columns.map((c) => c.header).join(",");
-    const rows = filteredData
+
+    const rows = rawData
       .map((row) =>
-        columns.map((c) => `"${row[c.accessor] ?? ""}"`).join(",")
+        columns
+          .map((c) => {
+            const val = row[c.accessor];
+            if (val === null || val === undefined) return "";
+            if (typeof val === "object" || typeof val === "function") return "";
+            return `"${val}"`;
+          })
+          .join(",")
       )
       .join("\n");
+
     downloadFile(`${headers}\n${rows}`, "table.csv", "text/csv");
   };
 
   const exportJSON = () => {
+    const cleanData = rawData.map((row) => {
+      const obj = {};
+
+      columns.forEach((c) => {
+        const val = row[c.accessor];
+        if (typeof val !== "object" && typeof val !== "function") {
+          obj[c.accessor] = val;
+        }
+      });
+
+      return obj;
+    });
+
     downloadFile(
-      JSON.stringify(filteredData, null, 2),
+      JSON.stringify(cleanData, null, 2),
       "table.json",
-      "application/json"
+      "application/json",
     );
   };
 
   const exportTXT = () => {
     const headers = columns.map((c) => c.header).join(" | ");
-    const rows = filteredData
-      .map((row) => columns.map((c) => row[c.accessor]).join(" | "))
+
+    const rows = rawData
+      .map((row) =>
+        columns
+          .map((c) => {
+            const val = row[c.accessor];
+            if (val === null || val === undefined) return "";
+            if (typeof val === "object" || typeof val === "function") return "";
+            return val;
+          })
+          .join(" | ")
+      )
       .join("\n");
+
     downloadFile(`${headers}\n${rows}`, "table.txt", "text/plain");
   };
 
   const exportSQL = () => {
     const tableName = "export_table";
-    const sqlRows = filteredData
+
+    const sqlRows = rawData
       .map((row) => {
         const values = columns
           .map((c) => {
             const val = row[c.accessor];
+
             if (val === null || val === undefined) return "NULL";
+            if (typeof val === "object" || typeof val === "function") return "NULL";
             if (typeof val === "number") return val;
+
             return `'${String(val).replace(/'/g, "''")}'`;
           })
           .join(", ");
+
         return `INSERT INTO ${tableName} (${columns
           .map((c) => c.accessor)
           .join(", ")}) VALUES (${values});`;
       })
       .join("\n");
+
     downloadFile(sqlRows, "table.sql", "text/sql");
   };
 
   // ================= JSX =================
   return (
     <div className="w-full">
-
       {/* FILTER BAR */}
       {(showSearch ||
         showStatusFilter ||
@@ -200,13 +237,10 @@ const Table = ({
         showDateFilter ||
         showSelectUserFilter) && (
         <div className="w-full bg-gradient-to-br from-[#f1d9b7] via-[#f8e9d4] to-[#e6d5b8] border border-[#d7c4a8] rounded-2xl shadow-xl p-5 mb-8">
-
           {/* FILTER ROW */}
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-
             {/* LEFT FILTERS */}
             <div className="flex flex-wrap items-center gap-4">
-
               {showSearch && (
                 <div className="relative">
                   <i className="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-[#9c8a78]"></i>
@@ -258,7 +292,9 @@ const Table = ({
                 >
                   <option value="all">All</option>
                   {statusList.map((item) => (
-                    <option key={item} value={item}>{item}</option>
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
                   ))}
                 </select>
               )}
@@ -276,10 +312,30 @@ const Table = ({
                   </button>
                   {openExport && (
                     <div className="absolute right-0 mt-2 bg-white border border-[#d7c4a8] rounded-xl shadow-xl p-2 w-40 z-30">
-                      <button className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md" onClick={exportCSV}>CSV</button>
-                      <button className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md" onClick={exportJSON}>JSON</button>
-                      <button className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md" onClick={exportTXT}>TEXT</button>
-                      <button className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md" onClick={exportSQL}>SQL</button>
+                      <button
+                        className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md cursor-pointer"
+                        onClick={exportCSV}
+                      >
+                        CSV
+                      </button>
+                      <button
+                        className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md cursor-pointer"
+                        onClick={exportJSON}
+                      >
+                        JSON
+                      </button>
+                      <button
+                        className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md cursor-pointer"
+                        onClick={exportTXT}
+                      >
+                        TEXT
+                      </button>
+                      <button
+                        className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md cursor-pointer"
+                        onClick={exportSQL}
+                      >
+                        SQL
+                      </button>
                     </div>
                   )}
                 </div>
@@ -288,13 +344,16 @@ const Table = ({
               <Button
                 className="bg-[#f1d9b7] text-[#4d443b] px-4 py-2 rounded-xl shadow-md hover:bg-[#e9cdaa] transition min-w-[110px] h-[42px] cursor-pointer"
                 onClick={() => {
-                  setSearch(""); setStatusFilter("all"); setSelectedMerchant(null); setStartDate(null); setEndDate(null);
+                  setSearch("");
+                  setStatusFilter("all");
+                  setSelectedMerchant(null);
+                  setStartDate(null);
+                  setEndDate(null);
                 }}
               >
                 Clear All
               </Button>
             </div>
-
           </div>
 
           {showSelectUserFilter && (
@@ -305,7 +364,6 @@ const Table = ({
               </div>
             </div>
           )}
-
         </div>
       )}
 
@@ -313,18 +371,33 @@ const Table = ({
       <div className="w-full space-y-5">
         {paginatedData.length ? (
           paginatedData.map((row) => (
-            <div key={row.id} className="bg-gradient-to-br from-white to-[#faf4ec] border border-[#e6ded4] rounded-2xl shadow-lg p-5 hover:shadow-xl hover:scale-[1.01] transition">
+            <div
+              key={row.id}
+              className="bg-gradient-to-br from-white to-[#faf4ec] border border-[#e6ded4] rounded-2xl shadow-lg p-5 hover:shadow-xl hover:scale-[1.01] transition"
+            >
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {columns.map((col, i) => (
                   <div key={i}>
-                    <p className="text-xs text-[#9c8a78] font-semibold uppercase tracking-wide">{col.header}</p>
-                    <p className="text-[#4d443b] text-sm mt-1">{col.Cell ? col.Cell({ value: row[col.accessor], row }) : row[col.accessor]}</p>
+                    <p className="text-xs text-[#9c8a78] font-semibold uppercase tracking-wide">
+                      {col.header}
+                    </p>
+                    <p className="text-[#4d443b] text-sm mt-1">
+                      {col.Cell
+                        ? col.Cell({ value: row[col.accessor], row })
+                        : row[col.accessor]}
+                    </p>
                   </div>
                 ))}
               </div>
               {showDeleteColumn && (
                 <div className="flex justify-end mt-4">
-                  <Button onClick={() => {setRecordId(row.id); setShowConfirmModal(true);}} className="bg-red-100 text-red-600 px-3 py-2 rounded-xl hover:bg-red-200 transition">
+                  <Button
+                    onClick={() => {
+                      setRecordId(row.id);
+                      setShowConfirmModal(true);
+                    }}
+                    className="bg-red-100 text-red-600 px-3 py-2 rounded-xl hover:bg-red-200 transition"
+                  >
                     <i className="fa-solid fa-trash"></i>
                   </Button>
                 </div>
@@ -345,7 +418,10 @@ const Table = ({
             Show
             <select
               value={entriesPerPage}
-              onChange={(e) => {setEntriesPerPage(Number(e.target.value)); setCurrentPage(1);}}
+              onChange={(e) => {
+                setEntriesPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
               className="border border-[#d7c4a8] rounded-lg px-2 py-1 bg-white text-[#4d443b] shadow-sm cursor-pointer"
             >
               <option value={5}>5</option>
@@ -364,13 +440,27 @@ const Table = ({
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
               className={`px-4 py-1 rounded-xl text-sm transition cursor-pointer ${currentPage === 1 ? "bg-gray-200 text-gray-500" : "bg-gradient-to-r from-[#f1d9b7] to-[#b58351] text-white hover:brightness-110"}`}
-            >Prev</Button>
-            <span className="text-[#4d443b]">Page <strong>{currentPage}</strong></span>
+            >
+              Prev
+            </Button>
+            <span className="text-[#4d443b]">
+              Page <strong>{currentPage}</strong>
+            </span>
             <Button
-              onClick={() => setCurrentPage((prev) => prev < Math.ceil(filteredData.length / entriesPerPage) ? prev + 1 : prev)}
-              disabled={currentPage === Math.ceil(filteredData.length / entriesPerPage)}
+              onClick={() =>
+                setCurrentPage((prev) =>
+                  prev < Math.ceil(filteredData.length / entriesPerPage)
+                    ? prev + 1
+                    : prev,
+                )
+              }
+              disabled={
+                currentPage === Math.ceil(filteredData.length / entriesPerPage)
+              }
               className={`px-4 py-1 rounded-xl text-sm transition cursor-pointer ${currentPage === Math.ceil(filteredData.length / entriesPerPage) ? "bg-gray-200 text-gray-500" : "bg-gradient-to-r from-[#f1d9b7] to-[#b58351] text-white hover:brightness-110"}`}
-            >Next</Button>
+            >
+              Next
+            </Button>
           </div>
         </div>
       )}
@@ -383,7 +473,6 @@ const Table = ({
         heading="Confirm Delete"
         body="Are you sure you want to delete this record?"
       />
-
     </div>
   );
 };
