@@ -24,6 +24,7 @@ const Table = ({
   setData,
   statusList = [],
 }) => {
+  const [role] = useState(atob(localStorage.getItem("role")) || "admin");
   const toast = useToast();
 
   const [search, setSearch] = useState("");
@@ -91,30 +92,29 @@ const Table = ({
 
   // ================= FILTER DATA =================
   const filteredData = useMemo(() => {
-    return data.filter((row) => {
-      const searchText = search.toLowerCase();
+    const q = search.toLowerCase().trim();
 
-      const matchesSearch =
-        !search ||
-        Object.values(row).some((val) =>
-          String(val).toLowerCase().includes(searchText),
-        );
+    if (!q) return data;
 
-      const matchesStatus =
-        statusFilter === "all" ||
-        String(row.status).toLowerCase() === statusFilter.toLowerCase();
+    // 🔹 rawData fallback
+    const source = rawData.length ? rawData : data;
 
-      const matchesMerchant =
-        !selectedMerchant || row.user_id === selectedMerchant.value;
+    const matchedIds = new Set(
+      source.filter((item) =>
+        Object.values(item).some((val) => {
+          if (val == null) return false;
 
-      const rowDate = row.date ? new Date(row.date) : null;
-      const matchesDate =
-        (!startDate || rowDate >= startDate) &&
-        (!endDate || rowDate <= endDate);
+          // JSX / React elements skip
+          if (typeof val === "object") return false;
 
-      return matchesSearch && matchesStatus && matchesMerchant && matchesDate;
-    });
-  }, [data, search, statusFilter, selectedMerchant, startDate, endDate]);
+          return String(val).toLowerCase().includes(q);
+        })
+      ).map((item) => item.id)
+    );
+
+    return data.filter((row) => matchedIds.has(row.id));
+  }, [search, data, rawData]);
+
 
   useEffect(
     () => setCurrentPage(1),
@@ -255,14 +255,27 @@ const Table = ({
               )}
 
               {showSelectUserFilter && (
-                <div className="w-56">
-                  <CustomSelect
-                    options={selectData}
-                    placeholder="Select Merchant"
-                    value={selectedMerchant}
-                    onChange={setSelectedMerchant}
-                  />
-                </div>
+                role === "admin" ? (
+                  <div className="w-56">
+                    <CustomSelect
+                      options={selectData}
+                      placeholder="Select Merchant"
+                      value={selectedMerchant}
+                      onChange={setSelectedMerchant}
+                    />
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <i className="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-[#9c8a78]"></i>
+                    <input
+                      type="text"
+                      placeholder="Search ID"
+                      className="w-56 pl-10 pr-3 py-2 bg-white border border-[#d7c4a8] rounded-xl shadow-sm"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+                  </div>
+                )
               )}
 
               {showDateFilter && (

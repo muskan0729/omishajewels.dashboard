@@ -189,6 +189,7 @@ const PayoutStatement = () => {
         <Table
           columns={payoutColumns}
           data={payoutData}
+          rawData={rawData}   // ✅ THIS IS REQUIRED
           showStatusFilter
           statusList={REPORT_STATUSES}
           showExport

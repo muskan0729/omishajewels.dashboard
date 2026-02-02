@@ -180,6 +180,7 @@ const UpiStatement = () => {
         <Table
           columns={upiColumn}
           data={upiData}
+          rawData={rawData}   // ✅ ADD THIS LINE
           showStatusFilter={true}
           showExport={true}
           showSearch={false}

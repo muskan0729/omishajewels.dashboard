@@ -115,6 +115,8 @@ const Scheme = () => {
         <Table
           columns={schemecolumn}
           data={schemedata}
+          rawData={schemedata}
+          showExport={false}   // 👈 EXPORT BUTTON HIDE
           className="shadow-lg rounded-lg overflow-hidden border border-gray-200"
           rowClassName={(rowIndex) =>
             rowIndex % 2 === 0

@@ -128,6 +128,7 @@ const LoadWallet = () => {
         <Table
           columns={membercolumn}
           data={tableDataWithActions}
+          rawData={walletData}            // 👈 EXPORT ke liye (NO JSX)
           showStatusFilter={false}
           showDateFilter={false}
           showDeleteColumn={false}

@@ -123,6 +123,7 @@ export const Dashboard = () => {
       const date = new Date(item.created_at);
 
       return {
+        id: item.id, // ✅ VERY IMPORTANT
         sqno: index + 1,
         txnid: item.id,
         name: item.user?.name ?? "-",
@@ -297,6 +298,7 @@ export const Dashboard = () => {
                   <Table
                     columns={transactioncolumn}
                     data={transactionData}
+                    rawData={rawData}   // ✅ REQUIRED FOR SEARCH
                     loading={tableLoading}
                     showSearch
                     showPagination

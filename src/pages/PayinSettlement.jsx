@@ -32,7 +32,7 @@ const PayinSettlement = () => {
   }, [initialDataOfPayinWallet]);
 
   const membercolumn = [
-    { header: "SQNo", accessor: "sqno" },
+    { header: "User Id", accessor: "id" },
     { header: "Name", accessor: "name" },
     { header: "Payin Wallet", accessor: "payin_wallet" },
     { header: "Action", accessor: "action" },
@@ -97,6 +97,7 @@ const PayinSettlement = () => {
         <Table
           columns={membercolumn}
           data={tableDataWithActions}
+          rawData={payinSettlementData}        // 👈 EXPORT ke liye
           showDeleteColumn={false}
           showDateFilter={false}
           showStatusFilter={false}
