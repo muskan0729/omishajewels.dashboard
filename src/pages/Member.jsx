@@ -262,10 +262,10 @@ export const Member = () => {
       Cell: ({ value, row }) => (
         <span
           className="text-blue-600 cursor-pointer w-100"
-          onClick={() => {
-            localStorage.setItem("merchantId", row.id);
-            memberDetails(`/MerchantDetails/${row.id}`);
-          }}
+          // onClick={() => {
+          //   localStorage.setItem("merchantId", row.id);
+          //   memberDetails(`/MerchantDetails/${row.id}`);
+          // }}
         >
           {value}
         </span>

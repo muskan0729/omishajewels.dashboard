@@ -4,14 +4,22 @@ import { useGet } from "../hooks/useGet";
 import { MONTH_NAMES, REPORT_STATUSES } from "../constants/Constants";
 import { TableSkeleton } from "../components/TableSkeleton";
 
+const LIMIT = 50;
+
 const Acc_upi_setlement = () => {
   const [payinSettlementData, setPayinSettlementData] = useState([]);
+  const [cursor, setCursor] = useState(null);
+  const [nextCursor, setNextCursor] = useState(null);
 
-  const { data, loading, error } = useGet(
-    "/reportrecords-list?product=payin_settlement"
-  );
+  const query = cursor
+    ? `/reportrecords-list?product=payin_settlement&limit=${LIMIT}&cursor=${cursor}`
+    : `/reportrecords-list?product=payin_settlement&limit=${LIMIT}`;
+
+  const { data, loading, error } = useGet(query);
 
   useEffect(() => {
+    if (!data) return;
+
     const statusClasses = {
       pending: "bg-yellow-100 text-yellow-800",
       initiated: "bg-blue-100 text-blue-800",
@@ -22,53 +30,53 @@ const Acc_upi_setlement = () => {
       refunded: "bg-gray-100 text-gray-800",
     };
 
-    // Safely get the nested data array from API response
-    const records = Array.isArray(data?.data?.data) ? data.data.data : [];
+    // ✅ Expect backend: { data: [...], next_cursor: "xyz" }
+    const records = Array.isArray(data?.data) ? data.data : [];
 
-    const formattedData = records.map((item, index) => ({
-      sqno: index + 1,
-      id: item.id,
-      user_id: item.user_id,
-      product_type: item.product ?? "N/A",
-      merchant_details: item.user?.name ?? "N/A",
-      txnid: item.txnid ?? "N/A",
-      amount: item.amount ?? "N/A",
+    setNextCursor(data?.next_cursor ?? null);
 
-      // Numeric value for calculations
-      numericAmount: parseFloat(item.amount) || 0,
+    const formattedData = records.map((item, index) => {
+      const date = new Date(item.created_at);
 
-      date:
-        new Date(item.created_at).getDate() +
-        " " +
-        MONTH_NAMES[new Date(item.created_at).getMonth()] +
-        " " +
-        new Date(item.created_at).getFullYear() +
-        " - " +
-        new Date(item.created_at).toLocaleTimeString(),
-      status: item.status,
-      showstatus: (
-        <span
-          className={`px-2 py-1 rounded-full text-sm font-medium ${
-            statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
-          }`}
-        >
-          {item?.status
-            ? item.status.charAt(0).toUpperCase() + item.status.slice(1)
-            : "N/A"}
-        </span>
-      ),
-    }));
+      return {
+        sqno: index + 1,
+        id: item.id,
+        user_id: item.user_id,
+        product_type: item.product ?? "N/A",
+        merchant_details: item.user?.name ?? "N/A",
+        txnid: item.txnid ?? "N/A",
+        amount: item.amount ?? "0.00",
+
+        numericAmount: parseFloat(item.amount) || 0,
+
+        date: `${date.getDate()} ${
+          MONTH_NAMES[date.getMonth()]
+        } ${date.getFullYear()} - ${date.toLocaleTimeString()}`,
+
+        status: item.status,
+
+        showstatus: (
+          <span
+            className={`px-2 py-1 rounded-full text-sm font-medium ${
+              statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
+            }`}
+          >
+            {item.status?.toUpperCase() ?? "N/A"}
+          </span>
+        ),
+      };
+    });
 
     setPayinSettlementData(formattedData);
   }, [data]);
 
   const payinSettlementColumn = [
     { header: "SQ NO", accessor: "sqno" },
-    { header: "Id", accessor: "id" },
-    { header: "User Id", accessor: "user_id" },
+    { header: "ID", accessor: "id" },
+    { header: "User ID", accessor: "user_id" },
     { header: "Product Type", accessor: "product_type" },
-    { header: "Merchant Details", accessor: "merchant_details" },
-    { header: "Transaction Id", accessor: "txnid" },
+    { header: "Merchant", accessor: "merchant_details" },
+    { header: "Txn ID", accessor: "txnid" },
     { header: "Amount", accessor: "amount" },
     { header: "Status", accessor: "showstatus" },
     { header: "Date", accessor: "date" },
@@ -76,30 +84,48 @@ const Acc_upi_setlement = () => {
 
   return (
     <div className="p-4 space-y-4">
-      {/* Header */}
+      {/* HEADER + CURSOR CONTROLS */}
       <div className="bg-gradient-to-t from-[#b58351] to-[#b6916d] rounded-lg flex justify-between items-center p-4 shadow-md">
         <h4 className="font-bold text-white text-lg sm:text-xl">
           Payin Settlement Statement
         </h4>
+
+        <div className="flex gap-2 hidden">
+          <button
+            disabled={!cursor}
+            onClick={() => setCursor(null)}
+            className="px-3 py-1 bg-white rounded text-[#3F2A20] disabled:opacity-50"
+          >
+            First
+          </button>
+
+          <button
+            disabled={!nextCursor}
+            onClick={() => setCursor(nextCursor)}
+            className="px-3 py-1 bg-white rounded text-[#3F2A20] disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
       </div>
 
-      {/* Table */}
+      {/* TABLE */}
       {loading ? (
         <TableSkeleton />
       ) : error ? (
         <div className="text-center py-6 text-red-500 text-sm sm:text-base">
-          Error: {error}
+          Error loading data
         </div>
       ) : (
         <div className="overflow-x-auto">
           <Table
             columns={payinSettlementColumn}
             data={payinSettlementData}
-            showStatusFilter={true}
-            showExport={true}
+            showStatusFilter
+            showExport
             showSearch={false}
-            showSelectUserFilter={true}
-            showDateFilter={true}
+            showSelectUserFilter
+            showDateFilter
             showDeleteColumn={false}
             statusList={REPORT_STATUSES}
             className="shadow-lg rounded-lg overflow-hidden min-w-[700px] sm:min-w-full"

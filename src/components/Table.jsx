@@ -11,7 +11,7 @@ import { CustomSelect } from "./CustomSelect";
 const Table = ({
   columns,
   data = [],
-  rawData = [], // 👈 ADD THIS
+  rawData = [], // ✅ raw data for search/export
   showSearch = true,
   showPagination = true,
   showExport = true,
@@ -29,7 +29,7 @@ const Table = ({
 
   const [search, setSearch] = useState("");
   const [recordId, setRecordId] = useState(null);
-  const [entriesPerPage, setEntriesPerPage] = useState(5);
+  const [entriesPerPage, setEntriesPerPage] = useState(10); // ✅ default 10
   const [currentPage, setCurrentPage] = useState(1);
   const [openExport, setOpenExport] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
@@ -72,8 +72,7 @@ const Table = ({
   }, []);
 
   // ================= DELETE =================
-  const modifiedEndpoint =
-    endPoint && recordId ? `${endPoint}/${recordId}` : null;
+  const modifiedEndpoint = endPoint && recordId ? `${endPoint}/${recordId}` : null;
   const { execute: deleteRecord } = usePost(modifiedEndpoint || "");
 
   const handleDelete = async () => {
@@ -90,37 +89,92 @@ const Table = ({
     }
   };
 
-  // ================= FILTER DATA =================
+  // ================= FILTER DATA (search + status + merchant + date) =================
   const filteredData = useMemo(() => {
     const q = search.toLowerCase().trim();
 
-    if (!q) return data;
+    // 🔹 rawData fallback for search matching
+    const sourceForSearch = rawData.length ? rawData : data;
 
-    // 🔹 rawData fallback
-    const source = rawData.length ? rawData : data;
+    // 1) SEARCH MATCH (returns ids)
+    let matchedIds = null;
+    if (q) {
+      matchedIds = new Set(
+        sourceForSearch
+          .filter((item) =>
+            Object.values(item).some((val) => {
+              if (val == null) return false;
+              if (typeof val === "object") return false; // skip JSX/objects
+              return String(val).toLowerCase().includes(q);
+            })
+          )
+          .map((item) => item.id)
+      );
+    }
 
-    const matchedIds = new Set(
-      source.filter((item) =>
-        Object.values(item).some((val) => {
-          if (val == null) return false;
+    // 2) Apply all filters on `data` (render data)
+    return data.filter((row) => {
+      // search
+      if (matchedIds && !matchedIds.has(row.id)) return false;
 
-          // JSX / React elements skip
-          if (typeof val === "object") return false;
+      // status
+      if (statusFilter !== "all") {
+        const s = String(row.status ?? "").toLowerCase();
+        if (s !== String(statusFilter).toLowerCase()) return false;
+      }
 
-          return String(val).toLowerCase().includes(q);
-        })
-      ).map((item) => item.id)
-    );
+      // merchant
+      if (selectedMerchant?.value) {
+        if (String(row.user_id) !== String(selectedMerchant.value)) return false;
+      }
 
-    return data.filter((row) => matchedIds.has(row.id));
-  }, [search, data, rawData]);
+      // date range (expects row.date OR row.created_at OR row.updated_at)
+      if (startDate || endDate) {
+        const raw =
+          row.date || row.created_at || row.updated_at || row.createdAt || row.updatedAt;
 
+        if (!raw) return false;
 
-  useEffect(
-    () => setCurrentPage(1),
-    [search, statusFilter, selectedMerchant, startDate, endDate],
-  );
+        const rowDate = new Date(raw);
+        if (Number.isNaN(rowDate.getTime())) return false;
 
+        if (startDate) {
+          const s = new Date(startDate);
+          s.setHours(0, 0, 0, 0);
+          if (rowDate < s) return false;
+        }
+
+        if (endDate) {
+          const e = new Date(endDate);
+          e.setHours(23, 59, 59, 999);
+          if (rowDate > e) return false;
+        }
+      }
+
+      return true;
+    });
+  }, [search, data, rawData, statusFilter, selectedMerchant, startDate, endDate]);
+
+  // Reset page on filter change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, statusFilter, selectedMerchant, startDate, endDate]);
+
+  // ✅ total pages
+  const totalPages = useMemo(() => {
+    return Math.ceil(filteredData.length / entriesPerPage);
+  }, [filteredData.length, entriesPerPage]);
+
+  // ✅ keep currentPage valid
+  useEffect(() => {
+    if (totalPages === 0) {
+      if (currentPage !== 1) setCurrentPage(1);
+      return;
+    }
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [totalPages, currentPage]);
+
+  // Paginated data
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * entriesPerPage;
     return filteredData.slice(start, start + entriesPerPage);
@@ -132,6 +186,7 @@ const Table = ({
       .reduce((sum, row) => sum + (row.numericAmount || 0), 0);
   }, [filteredData]);
 
+  // ================= EXPORT HELPERS =================
   const downloadFile = (content, fileName, mimeType) => {
     const blob = new Blob([content], { type: mimeType });
     const url = URL.createObjectURL(blob);
@@ -144,7 +199,6 @@ const Table = ({
 
   const exportCSV = () => {
     const headers = columns.map((c) => c.header).join(",");
-
     const rows = rawData
       .map((row) =>
         columns
@@ -152,39 +206,30 @@ const Table = ({
             const val = row[c.accessor];
             if (val === null || val === undefined) return "";
             if (typeof val === "object" || typeof val === "function") return "";
-            return `"${val}"`;
+            return `"${String(val).replace(/"/g, '""')}"`;
           })
           .join(",")
       )
       .join("\n");
-
     downloadFile(`${headers}\n${rows}`, "table.csv", "text/csv");
   };
 
   const exportJSON = () => {
     const cleanData = rawData.map((row) => {
       const obj = {};
-
       columns.forEach((c) => {
         const val = row[c.accessor];
         if (typeof val !== "object" && typeof val !== "function") {
           obj[c.accessor] = val;
         }
       });
-
       return obj;
     });
-
-    downloadFile(
-      JSON.stringify(cleanData, null, 2),
-      "table.json",
-      "application/json",
-    );
+    downloadFile(JSON.stringify(cleanData, null, 2), "table.json", "application/json");
   };
 
   const exportTXT = () => {
     const headers = columns.map((c) => c.header).join(" | ");
-
     const rows = rawData
       .map((row) =>
         columns
@@ -192,28 +237,24 @@ const Table = ({
             const val = row[c.accessor];
             if (val === null || val === undefined) return "";
             if (typeof val === "object" || typeof val === "function") return "";
-            return val;
+            return String(val);
           })
           .join(" | ")
       )
       .join("\n");
-
     downloadFile(`${headers}\n${rows}`, "table.txt", "text/plain");
   };
 
   const exportSQL = () => {
     const tableName = "export_table";
-
     const sqlRows = rawData
       .map((row) => {
         const values = columns
           .map((c) => {
             const val = row[c.accessor];
-
             if (val === null || val === undefined) return "NULL";
             if (typeof val === "object" || typeof val === "function") return "NULL";
             if (typeof val === "number") return val;
-
             return `'${String(val).replace(/'/g, "''")}'`;
           })
           .join(", ");
@@ -231,13 +272,8 @@ const Table = ({
   return (
     <div className="w-full">
       {/* FILTER BAR */}
-      {(showSearch ||
-        showStatusFilter ||
-        showExport ||
-        showDateFilter ||
-        showSelectUserFilter) && (
+      {(showSearch || showStatusFilter || showExport || showDateFilter || showSelectUserFilter) && (
         <div className="w-full bg-gradient-to-br from-[#f1d9b7] via-[#f8e9d4] to-[#e6d5b8] border border-[#d7c4a8] rounded-2xl shadow-xl p-5 mb-8">
-          {/* FILTER ROW */}
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
             {/* LEFT FILTERS */}
             <div className="flex flex-wrap items-center gap-4">
@@ -254,8 +290,8 @@ const Table = ({
                 </div>
               )}
 
-              {showSelectUserFilter && (
-                role === "admin" ? (
+              {showSelectUserFilter &&
+                (role === "admin" ? (
                   <div className="w-56">
                     <CustomSelect
                       options={selectData}
@@ -275,8 +311,7 @@ const Table = ({
                       onChange={(e) => setSearch(e.target.value)}
                     />
                   </div>
-                )
-              )}
+                ))}
 
               {showDateFilter && (
                 <div className="flex items-center gap-2">
@@ -323,6 +358,7 @@ const Table = ({
                   >
                     <i className="fa-solid fa-download"></i> Export
                   </button>
+
                   {openExport && (
                     <div className="absolute right-0 mt-2 bg-white border border-[#d7c4a8] rounded-xl shadow-xl p-2 w-40 z-30">
                       <button
@@ -362,6 +398,7 @@ const Table = ({
                   setSelectedMerchant(null);
                   setStartDate(null);
                   setEndDate(null);
+                  setCurrentPage(1);
                 }}
               >
                 Clear All
@@ -395,13 +432,12 @@ const Table = ({
                       {col.header}
                     </p>
                     <p className="text-[#4d443b] text-sm mt-1">
-                      {col.Cell
-                        ? col.Cell({ value: row[col.accessor], row })
-                        : row[col.accessor]}
+                      {col.Cell ? col.Cell({ value: row[col.accessor], row }) : row[col.accessor]}
                     </p>
                   </div>
                 ))}
               </div>
+
               {showDeleteColumn && (
                 <div className="flex justify-end mt-4">
                   <Button
@@ -424,9 +460,10 @@ const Table = ({
         )}
       </div>
 
-      {/* PAGINATION */}
-      {showPagination && filteredData.length > 0 && (
-        <div className="flex flex-col md:flex-row justify-between items-center bg-gradient-to-br from-[#faf4ec] to-[#f8efe4] border border-[#e6ded4] rounded-2xl shadow-md px-4 py-3 mt-3">
+      {/* ✅ FIXED PAGINATION */}
+      {showPagination && totalPages > 0 && (
+        <div className="flex flex-wrap justify-between items-center bg-gradient-to-br from-[#faf4ec] to-[#f8efe4] border border-[#e6ded4] rounded-2xl shadow-md px-4 py-3 mt-3 gap-3">
+          {/* Show entries */}
           <div className="flex items-center gap-2 text-[#4d443b]">
             Show
             <select
@@ -437,42 +474,71 @@ const Table = ({
               }}
               className="border border-[#d7c4a8] rounded-lg px-2 py-1 bg-white text-[#4d443b] shadow-sm cursor-pointer"
             >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-              <option value={150}>150</option>
-              <option value={200}>200</option>
+              {[10, 50, 100, 150, 200].map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
             </select>
             entries
           </div>
 
-          <div className="flex items-center gap-3 mt-3 md:mt-0">
+          {/* Page controls */}
+          <div className="flex items-center gap-2">
             <Button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              onClick={() => setCurrentPage(1)}
               disabled={currentPage === 1}
-              className={`px-4 py-1 rounded-xl text-sm transition cursor-pointer ${currentPage === 1 ? "bg-gray-200 text-gray-500" : "bg-gradient-to-r from-[#f1d9b7] to-[#b58351] text-white hover:brightness-110"}`}
+              className={`px-3 py-1.5 rounded-xl text-sm font-medium transition
+                ${
+                  currentPage === 1
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-[#f1d9b7] to-[#b58351] text-white shadow hover:brightness-110"
+                }`}
+            >
+              First
+            </Button>
+
+            <Button
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-1.5 rounded-xl text-sm font-medium transition
+                ${
+                  currentPage === 1
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-[#f1d9b7] to-[#b58351] text-white shadow hover:brightness-110"
+                }`}
             >
               Prev
             </Button>
-            <span className="text-[#4d443b]">
-              Page <strong>{currentPage}</strong>
+
+            <span className="px-4 py-1.5 rounded-xl bg-white border border-[#e6ded4] text-sm text-[#4d443b] shadow-sm">
+              Page <b>{currentPage}</b> / {totalPages}
             </span>
+
             <Button
-              onClick={() =>
-                setCurrentPage((prev) =>
-                  prev < Math.ceil(filteredData.length / entriesPerPage)
-                    ? prev + 1
-                    : prev,
-                )
-              }
-              disabled={
-                currentPage === Math.ceil(filteredData.length / entriesPerPage)
-              }
-              className={`px-4 py-1 rounded-xl text-sm transition cursor-pointer ${currentPage === Math.ceil(filteredData.length / entriesPerPage) ? "bg-gray-200 text-gray-500" : "bg-gradient-to-r from-[#f1d9b7] to-[#b58351] text-white hover:brightness-110"}`}
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1.5 rounded-xl text-sm font-medium transition
+                ${
+                  currentPage === totalPages
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-[#f1d9b7] to-[#b58351] text-white shadow hover:brightness-110"
+                }`}
             >
               Next
+            </Button>
+
+            <Button
+              onClick={() => setCurrentPage(totalPages)}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1.5 rounded-xl text-sm font-medium transition
+                ${
+                  currentPage === totalPages
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-[#f1d9b7] to-[#b58351] text-white shadow hover:brightness-110"
+                }`}
+            >
+              Last
             </Button>
           </div>
         </div>
