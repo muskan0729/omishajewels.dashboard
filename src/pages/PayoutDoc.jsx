@@ -495,6 +495,11 @@ token = "Q9xRwseKPkMWXXXXXT78wnHPji&apitxnid=AK0XXXX"
   } else if (payoutGateway === "busybox") {
     setApiSections(BUSYBOX_SECTIONS);
     setActiveSection("busybox-request");
+  
+    // BULK_PE DOCS HAVE TO BE CHANGED
+  }  else if (payoutGateway === "bulk_pe") {
+    setApiSections(BUSYBOX_SECTIONS);
+    setActiveSection("busybox-request");
   }
 }, [payoutGateway]);
 

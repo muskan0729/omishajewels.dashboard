@@ -6,7 +6,6 @@ const PayinDoc = () => {
   const [activeSection, setActiveSection] = useState("payin-request");
   const [provider, setProvider] = useState("airpay"); // default until backend loads
   const [apiSections, setApiSections] = useState([]);
-
   // -----------------------------------------
   // 👉 LOAD PROVIDER FROM BACKEND
   // -----------------------------------------
