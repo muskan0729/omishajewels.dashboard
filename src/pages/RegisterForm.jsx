@@ -10,23 +10,38 @@ function OtpInput({ value, onChange }) {
   const refs = useRef([]);
 
   useEffect(() => {
-    // update internal OTP if value prop changes (for clearing)
     if (value === "") setOtp(Array(6).fill(""));
   }, [value]);
 
   const handleChange = (v, i) => {
     if (!/^\d?$/.test(v)) return;
+
     const arr = [...otp];
     arr[i] = v;
     setOtp(arr);
     onChange(arr.join(""));
+
     if (v && i < 5) refs.current[i + 1].focus();
   };
 
   const handleKeyDown = (e, i) => {
-  if (e.key === "Backspace" && !otp[i] && i > 0) {
-    refs.current[i - 1].focus();
-  }
+    if (e.key === "Backspace" && !otp[i] && i > 0) {
+      refs.current[i - 1].focus();
+    }
+  };
+
+  // ✅ NEW: Handle Paste
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").trim();
+
+    if (!/^\d{6}$/.test(pastedData)) return;
+
+    const arr = pastedData.split("");
+    setOtp(arr);
+    onChange(arr.join(""));
+
+    refs.current[5]?.focus();
   };
 
   return (
@@ -39,6 +54,7 @@ function OtpInput({ value, onChange }) {
           maxLength={1}
           onChange={(e) => handleChange(e.target.value, i)}
           onKeyDown={(e) => handleKeyDown(e, i)}
+          onPaste={handlePaste} // ✅ ADD THIS
           className="w-12 h-12 rounded-lg border border-gray-300 text-center text-lg
                      focus:border-[#c7a43d] focus:ring-1 focus:ring-[#c7a43d] outline-none"
         />
@@ -88,7 +104,7 @@ export default function RegisterForm() {
   const [mobileTime, resetMobileTimer] = useTimer(30);
   const [emailTime, resetEmailTimer] = useTimer(30);
 
-   /* ================= VALIDATION ================= */
+  /* ================= VALIDATION ================= */
   const validateName = () => {
     if (!data.name.trim()) {
       setNameError("Full name is required");
@@ -116,10 +132,14 @@ export default function RegisterForm() {
   /* ================= HANDLERS ================= */
   const sendMobile = async () => {
     setMobileError("");
-    if (!validateName() || !validateMobile() ) return;
+    if (!validateName() || !validateMobile()) return;
 
     try {
-      await sendMobileOtp({ mobile_no: data.mobile_no });
+      const res = await sendMobileOtp({ mobile_no: data.mobile_no });
+
+      // ✅ console mobile OTP coming from API
+      alert("Mobile OTP: " + res?.otp_for_testing);
+
       setMobileSent(true);
       resetMobileTimer();
       setMobileOtp(""); // clear OTP inputs
@@ -136,7 +156,10 @@ export default function RegisterForm() {
       return;
     }
     try {
-      const res = await verifyMobileOtp({ mobile_no: data.mobile_no, otp: mobileOtp });
+      const res = await verifyMobileOtp({
+        mobile_no: data.mobile_no,
+        otp: mobileOtp,
+      });
       if (res?.verified) {
         setMobileVerified(true);
       } else {
@@ -150,9 +173,12 @@ export default function RegisterForm() {
   const sendEmail = async () => {
     setEmailError("");
     if (!validateEmail()) return;
-    
+
     try {
-      await sendEmailOtp({ email: data.email });
+      const res = await sendEmailOtp({ email: data.email });
+
+      alert("Email OTP: " + res?.otp_for_testing);
+
       setEmailSent(true);
       resetEmailTimer();
       setEmailOtp("");
@@ -180,45 +206,30 @@ export default function RegisterForm() {
     }
   };
 
-  // const register = async () => {
-  //   try {
-  //     await registerUser({
-  //       ...data,
-  //       password: data.mobile_no,
-  //       password_confirmation: data.mobile_no,
-  //     });
-  //     navigate("/MemberUserForm");
-  //   } catch (err) {
-  //     setError(err?.response?.data?.message || "Failed to register");
-  //   }
-  // };
-
   const register = async () => {
-  try {
-    const res = await registerUser({
-      ...data,
-      password: data.mobile_no,
-      password_confirmation: data.mobile_no,
-    });
+    try {
+      const res = await registerUser({
+        ...data,
+        password: data.mobile_no,
+        password_confirmation: data.mobile_no,
+      });
 
-    // 👇 response se id le rahe hain
-    navigate("/MemberUserForm", {
-      state: {
-        id: res.id,
-        name: data.name,
-        mobile_no: data.mobile_no,
-        email: data.email,
-      },
-    });
-  } catch (err) {
-    setError(err?.response?.data?.message || "Failed to register");
-  }
-};
-
+      // 👇 response se id le rahe hain
+      navigate("/MemberUserForm", {
+        state: {
+          id: res.id,
+          name: data.name,
+          mobile_no: data.mobile_no,
+          email: data.email,
+        },
+      });
+    } catch (err) {
+      setError(err?.response?.data?.message || "Failed to register");
+    }
+  };
 
   return (
     <div className="relative min-h-screen overflow-hidden flex items-center justify-center">
-      
       {/* ================= BACKGROUND IMAGE ================= */}
       <div
         className="absolute inset-0 bg-no-repeat bg-center bg-cover"
@@ -230,7 +241,6 @@ export default function RegisterForm() {
       {/* ================= MAIN CONTENT ================= */}
       <div className="relative z-10 w-full flex items-center justify-center px-4">
         <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl px-10 py-10">
-          
           {/* ================= BRAND ================= */}
           {/* <div className="flex flex-col items-center mb-8">
             <div className="flex items-center gap-3">
@@ -245,21 +255,20 @@ export default function RegisterForm() {
           {/* Logo + Site Name (Side-by-side) */}
           <div className="flex items-center justify-center pr-10 mb-2">
             <img src={logo} alt="logo" className="w-40 h-auto" />
-  
+
             <div className="flex flex-col">
               <h1 className="text-2xl font-bold text-[#615141] tracking-wide leading-tight">
                 Omisha<span className="text-[#c7a43d]">Jewels</span>
               </h1>
             </div>
           </div>
-  
+
           <p className="text-sm text-gray-500 text-center">
             Create Your Account
           </p>
 
           {/* ================= FORM ================= */}
           <div className="space-y-5">
-            
             {/* NAME */}
             {!(mobileVerified && emailVerified) && (
               // <FloatingInput
@@ -294,7 +303,9 @@ export default function RegisterForm() {
                   value={data.mobile_no}
                   error={mobileError}
                   onChange={(e) => {
-                    const value = e.target.value.replace(/\D/g, "").slice(0, 10); // ✅ only digits, max 10
+                    const value = e.target.value
+                      .replace(/\D/g, "")
+                      .slice(0, 10); // ✅ only digits, max 10
                     setData({ ...data, mobile_no: value });
                     setMobileError("");
                   }}
@@ -422,7 +433,6 @@ export default function RegisterForm() {
       </div>
     </div>
   );
-
 }
 
 /* ================= UI COMPONENTS ================= */
@@ -458,22 +468,25 @@ function FloatingInput({ id, label, value, onChange, error }) {
         {label}
       </label>
 
-      {error && (
-        <p className="text-red-500 text-xs mt-1 ml-3">{error}</p>
-      )}
+      {error && <p className="text-red-500 text-xs mt-1 ml-3">{error}</p>}
     </div>
   );
 }
 
-
 const GoldBtn = ({ children, ...p }) => (
-  <button {...p} className="w-full mt-3 py-2 rounded-lg bg-[#c7a43d] text-white">
+  <button
+    {...p}
+    className="w-full mt-3 py-2 rounded-lg bg-[#c7a43d] text-white"
+  >
     {children}
   </button>
 );
 
 const BrownBtn = ({ children, ...p }) => (
-  <button {...p} className="w-full mt-3 py-2 rounded-lg bg-[#615141] text-white">
+  <button
+    {...p}
+    className="w-full mt-3 py-2 rounded-lg bg-[#615141] text-white"
+  >
     {children}
   </button>
 );
@@ -500,9 +513,7 @@ const SummaryItem = ({ label, value, verified }) => (
     className={`
       flex justify-between items-center rounded-xl p-4 mt-2 border
       ${
-        verified
-          ? "bg-green-50 border-green-200"
-          : "bg-gray-50 border-gray-200"
+        verified ? "bg-green-50 border-green-200" : "bg-gray-50 border-gray-200"
       }
     `}
   >
