@@ -30,12 +30,12 @@ export const VerifyMerchant = () => {
   const { execute: updateMerchant } = usePost("/update-merchant-scheme");
   // Payin Banks (for "Payin at Onboard")
   const { data: payinBanks, refetch: refetchPayin } = useGet(
-    "/payinbanks-List?status=1"
+    "/payinbanks-List?status=1",
   );
 
   // Payout Banks (for "Payout at Onboard")
   const { data: payoutBanks, refetch: refetchPayout } = useGet(
-    "/payoutbanks-List?status=1"
+    "/payoutbanks-List?status=1",
   );
 
   // Schemes (for "Scheme" dropdown)
@@ -198,7 +198,8 @@ export const VerifyMerchant = () => {
     if (!filePath)
       return <span className="text-gray-400 text-sm">Not uploaded</span>;
 
-    const BASE_URL = "https://dashboard.omishajewels.co.in";
+    const BASE_URL =
+      "https://dashboard.omishajewels.co.in/laravel_project/public/";
 
     // 🚀 FIX: convert server path → public URL
     const normalizePath = (path) => {
