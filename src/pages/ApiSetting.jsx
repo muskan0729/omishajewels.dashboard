@@ -43,10 +43,10 @@ const ApiSetting = () => {
                 navigator.clipboard.writeText(item.token);
                 Toast.success("Token copied");
               }}
-              className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded border"
+              className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded cursor-pointer"
               title="Copy token"
             >
-              Copy
+              <i className="fa-regular fa-copy text-sm"></i>
             </button>
           </div>
         ),
