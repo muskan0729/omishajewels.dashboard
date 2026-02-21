@@ -125,7 +125,7 @@ export const Profile = () => {
     { key: "director", label: "Directors Info", icon: "fa-people-roof" },
     { key: "company", label: "Company Info", icon: "fa-building" },
     { key: "account", label: "Account Details", icon: "fa-folder-closed" },
-    { key: "password", label: "Change Password", icon: "fa-rotate" },
+    // { key: "password", label: "Change Password", icon: "fa-rotate" },
   ];
 
   const visibleTabs =

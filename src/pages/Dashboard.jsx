@@ -55,7 +55,7 @@ export const Dashboard = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const json = await res.json();
@@ -91,7 +91,7 @@ export const Dashboard = () => {
   // ================= SORT =================
   const sortedTransactions = useMemo(() => {
     return [...rawData].sort(
-      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      (a, b) => new Date(b.created_at) - new Date(a.created_at),
     );
   }, [rawData]);
 
@@ -100,8 +100,7 @@ export const Dashboard = () => {
     if (statusFilter === "all") return sortedTransactions;
 
     return sortedTransactions.filter(
-      (item) =>
-        item.status?.toLowerCase() === statusFilter.toLowerCase()
+      (item) => item.status?.toLowerCase() === statusFilter.toLowerCase(),
     );
   }, [sortedTransactions, statusFilter]);
 
@@ -150,8 +149,8 @@ export const Dashboard = () => {
 
   // ================= COLUMNS =================
   const transactioncolumn = [
-    { header: "SQ No.", accessor: "sqno" },
-    { header: "TXN Id", accessor: "txnid" },
+    { header: "SQ No.", accessor: "id" },
+    // { header: "TXN Id", accessor: "txnid" },
     { header: "Name", accessor: "name" },
     { header: "Type", accessor: "type" },
     { header: "Amount", accessor: "amount" },
@@ -192,8 +191,7 @@ export const Dashboard = () => {
       Number(cardData?.total_payout_amount ?? 0) +
       Number(cardData?.total_payin_amount ?? 0),
     today:
-      Number(cardData?.today_payin ?? 0) +
-      Number(cardData?.today_payout ?? 0),
+      Number(cardData?.today_payin ?? 0) + Number(cardData?.today_payout ?? 0),
     changePercent: 3.2,
     color: "#7A5A2B",
   };
@@ -298,7 +296,7 @@ export const Dashboard = () => {
                   <Table
                     columns={transactioncolumn}
                     data={transactionData}
-                    rawData={rawData}   // ✅ REQUIRED FOR SEARCH
+                    rawData={rawData} // ✅ REQUIRED FOR SEARCH
                     loading={tableLoading}
                     showSearch
                     showPagination
