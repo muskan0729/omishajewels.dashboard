@@ -98,8 +98,8 @@ export default function StatsCards({ inCard, outCard, totalCards }) {
 
         <StatCard
           title="Profit Collection"
-          totalValue={outCard.total - outCard.today}
-          todayValue={inCard.today - outCard.today}
+          totalValue={outCard.total}
+          todayValue={outCard.today}
           iconTotal="fa-coins text-yellow-600"
           iconToday="fa-coins text-yellow-600"
           gradientFrom="#e9f8e7"
