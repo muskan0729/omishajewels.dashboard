@@ -35,9 +35,14 @@ import SpayGlidePGError from "../pages/SpayGlidePGError";
 import MerchantDetails from "../pages/MerchantDetails";
 
 import { VerifyMerchant } from "../pages/VerifyMerchant";
+import ScrollTop from "../components/ScrollTop";
+
 
 const AppRoutes = () => {
   return (
+    <>
+    <ScrollTop />
+   
     <Routes>
       <Route path="/spay-glide-pgwidget" element={<SpayGlidePGWidget />} />
       <Route path="/spay-glide-pgsuccess" element={<SpayGlidePGSuccess />} />
@@ -228,6 +233,7 @@ const AppRoutes = () => {
         />
       </Route>
     </Routes>
+     </>
   );
 };
 
