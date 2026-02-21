@@ -33,6 +33,8 @@ const Acc_upi_setlement = () => {
     // ✅ Expect backend: { data: [...], next_cursor: "xyz" }
     const records = Array.isArray(data?.data) ? data.data : [];
 
+    console.log("records", records);
+
     setNextCursor(data?.next_cursor ?? null);
 
     const formattedData = records.map((item, index) => {
@@ -43,9 +45,13 @@ const Acc_upi_setlement = () => {
         id: item.id,
         user_id: item.user_id,
         product_type: item.product ?? "N/A",
-        merchant_details: item.user?.name ?? "N/A",
+        // merchant_details: item.user?.name ?? "N/A",
+        merchant_details: `${item.user?.name ?? "N/A"} (${item.user_id ?? "N/A"})`,
         txnid: item.txnid ?? "N/A",
         amount: item.amount ?? "0.00",
+
+        payin_opening_balance: item.payin_opening ?? "0.00",
+        payin_closing_balance: item.payin_closing ?? "0.00",
 
         numericAmount: parseFloat(item.amount) || 0,
 
@@ -71,15 +77,18 @@ const Acc_upi_setlement = () => {
   }, [data]);
 
   const payinSettlementColumn = [
-    { header: "SQ NO", accessor: "sqno" },
-    { header: "ID", accessor: "id" },
-    { header: "User ID", accessor: "user_id" },
-    { header: "Product Type", accessor: "product_type" },
+    // { header: "SQ NO", accessor: "sqno" },
+    { header: "SQ NO", accessor: "id" },
     { header: "Merchant", accessor: "merchant_details" },
+    // { header: "User ID", accessor: "user_id" },
+    { header: "Product Type", accessor: "product_type" },
+
     { header: "Txn ID", accessor: "txnid" },
-    { header: "Amount", accessor: "amount" },
-    { header: "Status", accessor: "showstatus" },
     { header: "Date", accessor: "date" },
+    { header: "Amount", accessor: "amount" },
+    { header: "Opening Bal", accessor: "payin_opening_balance" },
+    { header: "Closing Bal", accessor: "payin_closing_balance" },
+    { header: "Status", accessor: "showstatus" },
   ];
 
   return (

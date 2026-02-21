@@ -39,7 +39,7 @@ const PayoutStatement = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const json = await res.json();
@@ -89,7 +89,7 @@ const PayoutStatement = () => {
     };
 
     const sortedData = [...rawData].sort(
-      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      (a, b) => new Date(b.created_at) - new Date(a.created_at),
     );
 
     const formatted = sortedData.map((item, index) => {
@@ -106,10 +106,15 @@ const PayoutStatement = () => {
           <div className="text-left">
             <b>{item.id}</b>
             <div className="text-xs text-gray-600">
-              {date.getDate()} {MONTH_NAMES[date.getMonth()]}{" "}
-              {date.getFullYear()}
+              {`${String(date.getDate()).padStart(2, "0")} ${
+                MONTH_NAMES[date.getMonth()]
+              } ${String(date.getFullYear()).slice(-2)}`}
               <br />
-              {date.toLocaleTimeString()}
+              {date.toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              })}
             </div>
           </div>
         ),
@@ -118,31 +123,61 @@ const PayoutStatement = () => {
 
         txnid: (
           <div className="text-left text-sm space-y-1">
-            <div>Mode: <b>{item.payout_mode ?? "N/A"}</b></div>
-            <div>Account: <b>{item.payer_acc_no ?? "N/A"}</b></div>
-            <div>Holder: <b>{item.payer_name ?? "N/A"}</b></div>
-            <div>IFSC: <b>{item.payer_ifsc ?? "N/A"}</b></div>
-            <div>UPI: <b>{item.payer_upi ?? "N/A"}</b></div>
-            <div>Mobile: <b>{item.payer_mobile ?? "N/A"}</b></div>
+            <div>
+              Mode: <b>{item.payout_mode ?? "N/A"}</b>
+            </div>
+            <div>
+              Account: <b>{item.payer_acc_no ?? "N/A"}</b>
+            </div>
+            <div>
+              Holder: <b>{item.payer_name ?? "N/A"}</b>
+            </div>
+            <div>
+              IFSC: <b>{item.payer_ifsc ?? "N/A"}</b>
+            </div>
+            <div>
+              UPI: <b>{item.payer_upi ?? "N/A"}</b>
+            </div>
+            <div>
+              Mobile: <b>{item.payer_mobile ?? "N/A"}</b>
+            </div>
           </div>
         ),
 
         reference_details: (
           <div className="text-left text-sm space-y-1">
-            <div>Ref No: <b>{item.refno ?? "N/A"}</b></div>
-            <div>Order ID: <b>{item.mytxnid ?? "N/A"}</b></div>
-            <div>Txn ID: <b>{item.txnid ?? "N/A"}</b></div>
+            <div>
+              Ref No: <b>{item.refno ?? "N/A"}</b>
+            </div>
+            <div>
+              Order ID: <b>{item.mytxnid ?? "N/A"}</b>
+            </div>
+            <div>
+              Txn ID: <b>{item.txnid ?? "N/A"}</b>
+            </div>
           </div>
         ),
 
         amount: (
           <div className="text-left text-sm space-y-1">
-            <div>Opening: <b>{item.payout_opening_balance ?? 0}</b></div>
-            <div>Pay Amount: <b>{item.payout_amount ?? 0}</b></div>
-            <div>Charges: <b>{item.payer_charges ?? 0}</b></div>
-            <div>Total Debit: <b>{item.total_debit ?? 0}</b></div>
-            <div>Closing: <b>{item.payout_closing_balance ?? 0}</b></div>
-            <div>Note: <b>{item.note ?? "-"}</b></div>
+            <div>
+              Opening: <b>{item.payout_opening_balance ?? 0}</b>
+            </div>
+            <div>
+              Pay Amount: <b>{item.payout_amount ?? 0}</b>
+            </div>
+            <div>
+              Charges: <b>{item.payer_charges ?? 0}</b>
+            </div>
+            <div>
+              Total Debit: <b>{item.total_debit ?? 0}</b>
+            </div>
+            <div>
+              Closing: <b>{item.payout_closing_balance ?? 0}</b>
+            </div>
+            <div>
+              Note: <b>{item.note ?? "-"}</b>
+            </div>
           </div>
         ),
 
@@ -189,7 +224,7 @@ const PayoutStatement = () => {
         <Table
           columns={payoutColumns}
           data={payoutData}
-          rawData={rawData}   // ✅ THIS IS REQUIRED
+          rawData={rawData} // ✅ THIS IS REQUIRED
           showStatusFilter
           statusList={REPORT_STATUSES}
           showExport

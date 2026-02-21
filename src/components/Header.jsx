@@ -85,7 +85,7 @@ export const Header = ({
     <>
       {/* ================= HEADER (100% OLD LOOK) ================= */}
       <nav
-          className={`
+        className={`
             relative
             flex items-center justify-between w-full px-4 py-3
             bg-white/70
@@ -267,7 +267,7 @@ export const Header = ({
           </div>
 
           {/* SPACER – 70px like before */}
-          <div className="h-[240px] shrink-0 flex items-center justify-center">
+          <div className="h-[200px] shrink-0 flex items-center justify-center">
             <img
               src={Logo}
               alt="Omisha Jewels"
@@ -290,7 +290,7 @@ export const Header = ({
           </div>
 
           {/* LOGOUT */}
-          <div className="px-4 py-4 bg-white shrink-0">
+          <div className="px-4 py-0 bg-white shrink-0">
             <button
               onClick={() => setShowLogoutModal(true)}
               className="w-full flex items-center justify-between
@@ -308,7 +308,7 @@ export const Header = ({
           </div>
         </div>
         <div
-          className="mt-13 px-7 py-5 text-center text-xs text-[#3C3C3C]/70
+          className="mt-7 px-7 py-5 text-center text-xs text-[#3C3C3C]/70
           border-t border-gray-300/40 shrink-0"
         >
           Omisha Jewels OPC Pvt Ltd Dashboard • © 2026

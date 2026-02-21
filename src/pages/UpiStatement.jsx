@@ -39,7 +39,7 @@ const UpiStatement = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const json = await res.json();
@@ -89,7 +89,7 @@ const UpiStatement = () => {
     };
 
     const sortedData = [...rawData].sort(
-      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      (a, b) => new Date(b.created_at) - new Date(a.created_at),
     );
 
     const formattedData = sortedData.map((item) => {
@@ -104,30 +104,55 @@ const UpiStatement = () => {
 
         sqno: (
           <div className="flex flex-col text-left">
-            <span><b>{item.id}</b></span>
             <span>
-              {d.getDate()} {MONTH_NAMES[d.getMonth()]} {d.getFullYear()}
+              <b>{item.id}</b>
             </span>
-            <span className="text-sm text-gray-500">
-              {d.toLocaleTimeString()}
+            <span className="flex flex-col">
+              <span>
+                {`${String(d.getDate()).padStart(2, "0")} ${
+                  MONTH_NAMES[d.getMonth()]
+                } ${String(d.getFullYear()).slice(-2)}`}
+              </span>
+
+              <span className="text-xs text-gray-500">
+                {d.toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })}
+              </span>
             </span>
           </div>
         ),
 
         txnid: (
           <div className="flex flex-col text-left">
-            <span>Payee VPA: <b>{item.payee_vpa ?? "null"}</b></span>
-            <span>Ref No: <b>{item.refno ?? "null"}</b></span>
-            <span>Payee Txnid: <b>{item.mytxnid}</b></span>
-            <span>TxnId: <b>{item.txnid}</b></span>
+            <span>
+              Payee VPA: <b>{item.payee_vpa ?? "null"}</b>
+            </span>
+            <span>
+              Ref No: <b>{item.refno ?? "null"}</b>
+            </span>
+            <span>
+              Payee Txnid: <b>{item.mytxnid}</b>
+            </span>
+            <span>
+              TxnId: <b>{item.txnid}</b>
+            </span>
           </div>
         ),
 
         amount: (
           <div className="flex flex-col text-left">
-            <span>Amount: <b>{item.amount}</b></span>
-            <span>Charges: <b>{item.charge}</b></span>
-            <span>GST: <b>{item.gst}</b></span>
+            <span>
+              Amount: <b>{item.amount}</b>
+            </span>
+            <span>
+              Charges: <b>{item.charge}</b>
+            </span>
+            <span>
+              GST: <b>{item.gst}</b>
+            </span>
             <span>
               Payin Rolling Amount: <b>{item.payin_rolling_amount}</b>
             </span>
@@ -180,7 +205,7 @@ const UpiStatement = () => {
         <Table
           columns={upiColumn}
           data={upiData}
-          rawData={rawData}   // ✅ ADD THIS LINE
+          rawData={rawData} // ✅ ADD THIS LINE
           showStatusFilter={true}
           showExport={true}
           showSearch={false}

@@ -21,8 +21,7 @@ const Acc_topup_settlement = () => {
     if (!data) return;
 
     // ✅ BACKEND RESPONSE
-    const records =
-      Array.isArray(data?.data) ? data.data : [];
+    const records = Array.isArray(data?.data) ? data.data : [];
 
     setNextCursor(data?.next_cursor ?? null);
 
@@ -47,7 +46,7 @@ const Acc_topup_settlement = () => {
         sqno: index + 1,
 
         product_type: item.product ?? "N/A",
-        merchant_details: item.user?.name ?? "N/A",
+        merchant_details: `${item.user?.name ?? "N/A"} (${item.user_id ?? "N/A"})`,
         txnid: item.txnid ?? "N/A",
 
         amount: item.amount ?? 0,
@@ -75,17 +74,18 @@ const Acc_topup_settlement = () => {
   }, [data]);
 
   const columns = [
-    { header: "SQ NO", accessor: "sqno" },
-    { header: "ID", accessor: "id" },
-    { header: "User ID", accessor: "user_id" },
-    { header: "Product Type", accessor: "product_type" },
+    // { header: "SQ NO", accessor: "sqno" },
+    { header: "SQ NO", accessor: "id" },
     { header: "Merchant", accessor: "merchant_details" },
+    // { header: "User ID", accessor: "user_id" },
+    { header: "Product Type", accessor: "product_type" },
     { header: "Txn ID", accessor: "txnid" },
-    { header: "Amount", accessor: "amount" },
-    { header: "Status", accessor: "showstatus" },
+
     { header: "Date", accessor: "date" },
+    { header: "Amount", accessor: "amount" },
     { header: "Opening Bal", accessor: "payout_opening_balance" },
     { header: "Closing Bal", accessor: "payout_closing_balance" },
+    { header: "Status", accessor: "showstatus" },
   ];
 
   return (
@@ -120,9 +120,7 @@ const Acc_topup_settlement = () => {
       {loading ? (
         <TableSkeleton />
       ) : error ? (
-        <div className="text-center py-6 text-red-500">
-          Error loading data
-        </div>
+        <div className="text-center py-6 text-red-500">Error loading data</div>
       ) : (
         <Table
           columns={columns}
