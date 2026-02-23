@@ -41,7 +41,6 @@ const PayoutStatement = () => {
           },
         },
       );
-
       const json = await res.json();
 
       if (json?.status) {
@@ -66,6 +65,7 @@ const PayoutStatement = () => {
   useEffect(() => {
     fetchPayoutReports();
   }, []);
+  // console.log("ftech payout",fetchPayoutReports);
 
   // Auto load next cursor pages
   useEffect(() => {
@@ -164,19 +164,19 @@ const PayoutStatement = () => {
               Opening: <b>{item.payout_opening_balance ?? 0}</b>
             </div>
             <div>
-              Pay Amount: <b>{item.payout_amount ?? 0}</b>
+              Pay Amount: <b>{item.amount ?? 0}</b>
             </div>
             <div>
-              Charges: <b>{item.payer_charges ?? 0}</b>
+              Charges: <b>{item.profit ?? 0}</b>
             </div>
             <div>
-              Total Debit: <b>{item.total_debit ?? 0}</b>
+              Total Debit: <b>{item.payout_amount ?? 0}</b>
             </div>
             <div>
               Closing: <b>{item.payout_closing_balance ?? 0}</b>
             </div>
             <div>
-              Note: <b>{item.note ?? "-"}</b>
+              Note: <b>{item.description ?? "-"}</b>
             </div>
           </div>
         ),
