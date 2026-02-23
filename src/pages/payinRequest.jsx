@@ -15,16 +15,17 @@ export const PayinRequest = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showFailed, setShowFailed] = useState(false);
 
+  const [payerNameError, setPayerNameError] = useState("");
+  const [payerMobileError, setPayerMobileError] = useState("");
+  const [payerEmailError, setPayerEmailError] = useState("");
+
+  const [qrTimer, setQrTimer] = useState(120); // 2 min = 120 sec
+  const qrTimerRef = useRef(null);
+
   const intervalRef = useRef(null);
 
   const { execute: executePayin, loading } = usePost("/Airpay/request");
   const { execute: executeCheckStatus } = usePost("/AP/payin/checkstatus");
-
-  // Generate unique order ID on mount
-  useEffect(() => {
-    const uniqueOrderId = `DSB${Date.now()}${Math.floor(Math.random() * 1000)}`;
-    setPayerOrderId(uniqueOrderId);
-  }, []);
 
   // Poll payment status
   useEffect(() => {
@@ -34,32 +35,49 @@ export const PayinRequest = () => {
     return () => clearInterval(intervalRef.current);
   }, [orderId]);
 
-  // Auto-reset form after success/fail
+  useEffect(() => {
+    if (qrTimer === 0) {
+      clearInterval(qrTimerRef.current);
+      resetForm(); // ⬅️ AUTO BACK
+    }
+  }, [qrTimer]);
+
   useEffect(() => {
     if (showSuccess || showFailed) {
       const timer = setTimeout(() => {
-        setShowSuccess(false);
-        setShowFailed(false);
-        setQrUrl("");
-        setAmount("");
-        setPayerName("");
-        setPayerMobile("");
-        setPayerEmail("");
-        const uniqueOrderId = `DSB${Date.now()}${Math.floor(Math.random() * 1000)}`;
-        setPayerOrderId(uniqueOrderId);
+        resetForm();
       }, 5000);
+
       return () => clearTimeout(timer);
     }
-
-
   }, [showSuccess, showFailed]);
-    
 
   const handlePayinSubmit = async () => {
-    if (Number(amount) < 10) {
-      setAmountError("Amount must be at least ₹10");
-      return;
+    let isValid = true;
+
+    if (!payerName || !nameRegex.test(payerName)) {
+      setPayerNameError("Name should contain only alphabets");
+      isValid = false;
     }
+
+    if (!mobileRegex.test(payerMobile)) {
+      setPayerMobileError("Enter a valid 10-digit mobile number");
+      isValid = false;
+    }
+
+    if (!emailRegex.test(payerEmail)) {
+      setPayerEmailError("Please enter a valid email address");
+      isValid = false;
+    }
+
+    if (!amount || Number(amount) < 10) {
+      setAmountError("Amount must be at least ₹10");
+      isValid = false;
+    }
+
+    if (!isValid) return; // STOP API CALL
+
+    // API CALL
     try {
       const payload = {
         buyer_name: payerName,
@@ -68,14 +86,24 @@ export const PayinRequest = () => {
         amount,
         orderid: payerOrderId,
       };
+
       const data = await executePayin(payload);
+
       if (data.status === "success") {
         setQrUrl(
           `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(
-            data.data.qrcode_string
-          )}`
+            data.data.qrcode_string,
+          )}`,
         );
         setOrderId(data.data.orderid);
+
+        // ⏱️ START QR TIMER
+        setQrTimer(120);
+        clearInterval(qrTimerRef.current);
+        qrTimerRef.current = setInterval(() => {
+          setQrTimer((prev) => prev - 1);
+        }, 1000);
+
         setShowSuccess(false);
         setShowFailed(false);
       } else {
@@ -86,6 +114,40 @@ export const PayinRequest = () => {
       setShowFailed(true);
       setQrUrl("");
     }
+  };
+
+  const resetForm = () => {
+    // stop timers
+    clearInterval(intervalRef.current);
+    clearInterval(qrTimerRef.current);
+
+    // reset timer
+    setQrTimer(120);
+
+    // form values
+    setPayerName("");
+    setAmount("");
+    setPayerMobile("");
+    setPayerEmail("");
+
+    // errors
+    setAmountError("");
+    setPayerNameError("");
+    setPayerMobileError("");
+    setPayerEmailError("");
+
+    // flow states
+    setQrUrl("");
+    setOrderId("");
+    setShowSuccess(false);
+    setShowFailed(false);
+
+    // new order id
+    const uniqueOrderId = `DSB${Date.now()}${Math.floor(Math.random() * 1000)}`;
+    setPayerOrderId(uniqueOrderId);
+
+    // stop polling (important)
+    clearInterval(intervalRef.current);
   };
 
   const checkPaymentStatus = async () => {
@@ -110,8 +172,12 @@ export const PayinRequest = () => {
     }
   };
 
+  const nameRegex = /^[A-Za-z ]+$/;
+  const mobileRegex = /^[6-9]\d{9}$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   return (
-    <div className="p-6 space-y-6"> 
+    <div className="p-6 space-y-6">
       {/* Header */}
       <div className="bg-gradient-to-t from-[#b58351] to-[#b6916d]  rounded-lg p-4 shadow-md">
         <h4 className="text-white font-bold text-xl">Load Wallet</h4>
@@ -124,91 +190,118 @@ export const PayinRequest = () => {
             <div className="relative w-full">
               <input
                 type="text"
-                
                 value={payerName}
-                onChange={(e) => setPayerName(e.target.value)}
-                className="block w-full border-b-2 border-gray-300 py-2 px-0 text-gray-900 bg-transparent focus:outline-none focus:border-yellow-600 peer"
-                placeholder=" " // important for peer-focus & floating label
+                onChange={(e) => {
+                  const value = e.target.value;
+
+                  if (value === "" || nameRegex.test(value)) {
+                    setPayerName(value);
+                    setPayerNameError("");
+                  } else {
+                    setPayerNameError("Name should contain only alphabets");
+                  }
+                }}
+                className="block w-full border-b-2 border-gray-300 py-2 px-0
+                  text-gray-900 bg-transparent focus:outline-none focus:border-yellow-600 peer"
+                placeholder=" "
               />
-              <label className={`absolute left-0 text-gray-500 text-sm transition-all duration-200
+              <label
+                className={`absolute left-0 text-gray-500 text-sm transition-all duration-200
                 ${payerName ? "-top-3 text-yellow-600 text-xs" : "top-2"} 
-                peer-placeholder-shown:top-2 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm`}>
+                peer-placeholder-shown:top-2 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm`}
+              >
                 Payer Name
               </label>
+              {payerNameError && (
+                <p className="text-red-600 text-sm mt-1">{payerNameError}</p>
+              )}
             </div>
 
             <div className="relative w-full">
-            <input
-              type="number"
-              required
-              value={amount}
-              onChange={(e) => {
-                const val = e.target.value;
-                setAmount(val);
-                setAmountError(Number(val) < 10 ? "Amount must be at least ₹10" : "");
-              }}
-              className="peer block w-full border-b-2 border-gray-300 py-2 px-0 text-gray-900 focus:border-yellow-600 focus:outline-none placeholder-transparent"
-              placeholder=" "
-            />
-            <label
-              className="
-                absolute left-0 text-gray-500 text-sm 
-                transition-all duration-200
-                peer-placeholder-shown:top-2
-                peer-placeholder-shown:text-gray-400
-                peer-focus:-top-3
-                peer-focus:text-yellow-600
-                peer-valid:-top-3
-                peer-valid:text-yellow-600
-              "
-            >
-              Amount
-            </label>
-            {amountError && <p className="text-red-600 text-sm mt-1">{amountError}</p>}
-          </div>
+              <input
+                type="number"
+                required
+                value={amount}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setAmount(val);
+                  setAmountError(
+                    Number(val) < 10 ? "Amount must be at least ₹10" : "",
+                  );
+                }}
+                className="peer block w-full border-b-2 border-gray-300 py-2 px-0 text-gray-900 focus:border-yellow-600 focus:outline-none placeholder-transparent"
+                placeholder=" "
+              />
+              <label
+                className={`
+                  absolute left-0 text-gray-500 text-sm transition-all duration-200
+                  
+                  ${amount ? "-top-3 text-yellow-600" : "top-2 text-gray-400"}
+                  peer-focus:-top-3 peer-focus:text-yellow-600
+                `}
+              >
+                Amount
+              </label>
+              {amountError && (
+                <p className="text-red-600 text-sm mt-1">{amountError}</p>
+              )}
+            </div>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
-          {/* Mobile Number */}
-          <div className="relative w-full">
-            <input
-              type="tel"
-              required
-              value={payerMobile}
-              onChange={(e) => setPayerMobile(e.target.value)}
-              className="peer block w-full border-b-2 border-gray-300 py-2 px-0
-                        text-gray-900 focus:border-yellow-600 focus:outline-none 
-                        placeholder-transparent"
-              placeholder=" "
-            />
-            <label
-              className="
-                absolute left-0 text-gray-500 text-sm transition-all duration-200
+            {/* Mobile Number */}
+            <div className="relative w-full">
+              <input
+                type="tel"
+                required
+                pattern="[6-9]{1}[0-9]{9}"
+                value={payerMobile}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, "");
 
-                peer-placeholder-shown:top-2
-                peer-placeholder-shown:text-gray-400
-                
-                peer-focus:-top-3
-                peer-focus:text-yellow-600
+                  if (value.length <= 10) {
+                    setPayerMobile(value);
+                    setPayerMobileError("");
+                  }
+                }}
+                className="peer block w-full border-b-2 border-gray-300 py-2 px-0
+               text-gray-900 focus:border-yellow-600 focus:outline-none
+               placeholder-transparent"
+                placeholder=" "
+              />
+              <label
+                className={`
+                  absolute left-0 text-gray-500 text-sm transition-all duration-200
+                  
+                  ${payerMobile ? "-top-3 text-yellow-600" : "top-2 text-gray-400"}
+                  peer-focus:-top-3 peer-focus:text-yellow-600
+                `}
+              >
+                Mobile Number
+              </label>
+              {payerMobileError && (
+                <p className="text-red-600 text-sm mt-1">{payerMobileError}</p>
+              )}
+            </div>
 
-                peer-valid:-top-3
-                peer-valid:text-yellow-600
-              "
-            >
-              Mobile Number
-            </label>
-          </div>
-
-          {/* Email */}
+            {/* Email */}
             <div className="relative w-full">
               <input
                 type="email"
-                required
                 value={payerEmail}
-                onChange={(e) => setPayerEmail(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setPayerEmail(value);
+
+                  if (!emailRegex.test(value)) {
+                    setPayerEmailError("Please enter a valid email address");
+                  } else {
+                    setPayerEmailError("");
+                  }
+                }}
                 className="peer block w-full border-b-2 border-gray-300 py-2 px-0
-                          text-gray-900 focus:border-yellow-600 focus:outline-none 
-                          placeholder-transparent"
+                text-gray-900 focus:border-yellow-600 focus:outline-none
+                placeholder-transparent"
                 placeholder=" "
               />
 
@@ -222,8 +315,11 @@ export const PayinRequest = () => {
               >
                 Email
               </label>
+              {payerEmailError && (
+                <p className="text-red-600 text-sm mt-1">{payerEmailError}</p>
+              )}
             </div>
-        </div>
+          </div>
 
           <div className="flex justify-center mt-4">
             <Button
@@ -240,9 +336,21 @@ export const PayinRequest = () => {
       {qrUrl && (
         <div className="flex justify-center">
           <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center border border-gray-200">
-            <h3 className="text-gray-800 font-semibold text-lg mb-4">Scan to Pay</h3>
+            <h3 className="text-gray-800 font-semibold text-lg mb-4">
+              Scan to Pay
+            </h3>
+            <p className="text-sm text-gray-600 mb-2">
+              Time left:{" "}
+              <span className="font-semibold text-red-600">
+                {Math.floor(qrTimer / 60)}:
+                {(qrTimer % 60).toString().padStart(2, "0")}
+              </span>
+            </p>
             <img src={qrUrl} alt="UPI QR Code" className="w-64 h-64 mb-4" />
-            <Button onClick={() => setQrUrl("")} className="bg-[#615141] hover:bg-yellow-700 text-white px-4 py-2 rounded-lg">
+            <Button
+              onClick={resetForm}
+              className="bg-[#615141] hover:bg-yellow-700 text-white px-4 py-2 rounded-lg"
+            >
               Back
             </Button>
           </div>
@@ -253,7 +361,9 @@ export const PayinRequest = () => {
       {showSuccess && (
         <div className="flex justify-center">
           <div className="bg-green-100 w-72 h-72 rounded-full shadow-lg flex flex-col items-center justify-center border border-green-300">
-            <h2 className="text-green-800 font-bold text-lg">Payment Successful!</h2>
+            <h2 className="text-green-800 font-bold text-lg">
+              Payment Successful!
+            </h2>
           </div>
         </div>
       )}
