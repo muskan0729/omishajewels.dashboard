@@ -125,7 +125,9 @@ export const Dashboard = () => {
         id: item.id, // ✅ VERY IMPORTANT
         sqno: index + 1,
         txnid: item.id,
-        name: item.user?.name ?? "-",
+        // name: item.user?.name ?? "-",
+        merchant_details: `${item.user?.name ?? "N/A"} (${item.user_id ?? "N/A"})`,
+
         type: item.product,
         amount: `₹${Number(item.amount).toLocaleString("en-IN")}`,
         status: (
@@ -133,13 +135,30 @@ export const Dashboard = () => {
             {item.status?.toUpperCase()}
           </span>
         ),
+        // time: (
+        //   <div className="flex flex-col">
+        //     <span className="text-sm font-medium text-[#3F2A20]">
+        //       {`${date.getDate()} ${MONTH_NAMES[date.getMonth()]} ${date.getFullYear()}`}
+        //     </span>
+        //     <span className="text-xs text-[#7A5A2B]">
+        //       {date.toLocaleTimeString()}
+        //     </span>
+        //   </div>
+        // ),
         time: (
           <div className="flex flex-col">
             <span className="text-sm font-medium text-[#3F2A20]">
-              {`${date.getDate()} ${MONTH_NAMES[date.getMonth()]} ${date.getFullYear()}`}
+              {`${String(date.getDate()).padStart(2, "0")} ${
+                MONTH_NAMES[date.getMonth()]
+              } ${String(date.getFullYear()).slice(-2)}`}
             </span>
+
             <span className="text-xs text-[#7A5A2B]">
-              {date.toLocaleTimeString()}
+              {date.toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              })}
             </span>
           </div>
         ),
@@ -151,11 +170,11 @@ export const Dashboard = () => {
   const transactioncolumn = [
     { header: "SQ No.", accessor: "id" },
     // { header: "TXN Id", accessor: "txnid" },
-    { header: "Name", accessor: "name" },
+    { header: "Merchant", accessor: "merchant_details" },
     { header: "Type", accessor: "type" },
     { header: "Amount", accessor: "amount" },
-    { header: "Status", accessor: "status" },
     { header: "Date / Time", accessor: "time" },
+    { header: "Status", accessor: "status" },
   ];
 
   // ================= INITIAL SKELETON =================
@@ -180,6 +199,15 @@ export const Dashboard = () => {
     icon: "fa-wallet",
     total: cardData?.total_payout_amount ?? 0,
     today: cardData?.today_payout ?? 0,
+    changePercent: 3.2,
+    color: "#B38A3C",
+  };
+
+  const profitCard = {
+    title: "Pay-OUT Collection",
+    icon: "fa-wallet",
+    total: cardData?.total_profit ?? 0,
+    today: cardData?.total_profit ?? 0,
     changePercent: 3.2,
     color: "#B38A3C",
   };

@@ -147,8 +147,8 @@ const Payoutrequest = () => {
     }
   };
   const membercolumn = [
-    { header: "Sr No", accessor: "sqno" },
-    { header: "Beneficiary Id", accessor: "beneficiaryid" },
+    // { header: "Sr No", accessor: "sqno" },
+    { header: "Sr No", accessor: "beneficiaryid" },
     { header: "Bank Details", accessor: "bankdetails" },
     { header: "Beneficiary Details", accessor: "beneficiarydetails" },
     { header: "Action", accessor: "action" },
