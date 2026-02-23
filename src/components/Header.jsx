@@ -387,7 +387,7 @@ export const Header = ({
                   Cancel
                 </button>
 
-                {/* CONFIRM */}
+                {/* CO////NFIRM */}
                 <button
                   onClick={() => {
                     setShowLogoutModal(false);
