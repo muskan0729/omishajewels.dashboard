@@ -29,6 +29,11 @@ export const Header = ({
   const { data } = useAutoFetch("/collection-record");
   const { data: merchantData } = useGet("/show-merchant");
 
+  // ADMIN payout balance
+  const { data: payoutBalanceData } = useGet(
+    role === "admin" ? "/payoutbalance" : null,
+  );
+
   /* ===== STATE ===== */
   const [activeStat, setActiveStat] = useState(null);
 
@@ -36,7 +41,7 @@ export const Header = ({
   const showButton =
     email === "saad.sayyed@example.com" && currentPath === "/dashboard";
 
-  /* ===== HEADER STATS (UNCHANGED) ===== */
+  /* ===== HEADER STATS ===== */
   const userStats = [
     {
       id: 1,
@@ -83,9 +88,9 @@ export const Header = ({
 
   return (
     <>
-      {/* ================= HEADER (100% OLD LOOK) ================= */}
+      {/* ================= HEADER ================= */}
       <nav
-          className={`
+        className={`
             relative
             flex items-center justify-between w-full px-4 py-3
             bg-white/70
@@ -154,15 +159,38 @@ export const Header = ({
             </>
           )}
         </div>
+        <div className="flex items-center gap-4">
+          {/* ADMIN PAYOUT WALLET */}
+          {role === "admin" && (
+            <div
+              className="
+              hidden md:flex items-center gap-2 mr-4
+              px-2 py-1 rounded-xl
+              bg-red-50 border border-red-200
+              shadow-sm
+            "
+            >
+              <i className="fa-solid fa-wallet text-red-400" />
 
-        {/* PROFILE → SIDEBAR OPEN */}
-        <button onClick={() => setProfileOpen(true)}>
-          <img
-            className="w-10 h-10 rounded-full border cursor-pointer"
-            src={profile}
-            alt="profile"
-          />
-        </button>
+              <div className="text-sm leading-tight">
+                <div className="text-gray-600 text-xs">Payout Wallet</div>
+
+                <div className="font-semibold text-gray-900">
+                  ₹{Number(payoutBalanceData?.payout_balance ?? 0).toFixed(2)}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* PROFILE → SIDEBAR OPEN */}
+          <button onClick={() => setProfileOpen(true)}>
+            <img
+              className="w-10 h-10 rounded-full border cursor-pointer"
+              src={profile}
+              alt="profile"
+            />
+          </button>
+        </div>
       </nav>
 
       {/* ================= RIGHT SIDEBAR ================= */}
