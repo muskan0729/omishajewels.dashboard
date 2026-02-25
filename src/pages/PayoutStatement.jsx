@@ -201,10 +201,10 @@ const PayoutStatement = () => {
   // ─────────────────────────────────────
   const payoutColumns = [
     { header: "Order ID", accessor: "sqno" },
-    { header: "User Details", accessor: "merchant_details" },
     { header: "Bank Details", accessor: "txnid" },
     { header: "Reference Details", accessor: "reference_details" },
     { header: "Amount / Commission", accessor: "amount" },
+     { header: "User Details", accessor: "merchant_details" },
     { header: "Status", accessor: "showstatus" },
   ];
 

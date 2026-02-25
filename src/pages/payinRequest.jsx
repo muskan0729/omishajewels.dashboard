@@ -52,6 +52,12 @@ export const PayinRequest = () => {
     }
   }, [showSuccess, showFailed]);
 
+    useEffect(() => {
+  const uniqueOrderId = `DSB${Date.now()}${Math.floor(Math.random() * 1000)}`;
+  setPayerOrderId(uniqueOrderId);
+}, []);
+
+
   const handlePayinSubmit = async () => {
     let isValid = true;
 
@@ -88,7 +94,7 @@ export const PayinRequest = () => {
       };
 
       const data = await executePayin(payload);
-
+    // console.log("pay data",data);
       if (data.status === "success") {
         setQrUrl(
           `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(
