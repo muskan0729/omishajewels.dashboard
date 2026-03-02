@@ -204,7 +204,7 @@ const PayoutStatement = () => {
     { header: "Bank Details", accessor: "txnid" },
     { header: "Reference Details", accessor: "reference_details" },
     { header: "Amount / Commission", accessor: "amount" },
-     { header: "User Details", accessor: "merchant_details" },
+    { header: "User Details", accessor: "merchant_details" },
     { header: "Status", accessor: "showstatus" },
   ];
 
@@ -225,6 +225,7 @@ const PayoutStatement = () => {
           columns={payoutColumns}
           data={payoutData}
           rawData={rawData} // ✅ THIS IS REQUIRED
+          exportType="payout"
           showStatusFilter
           statusList={REPORT_STATUSES}
           showExport
