@@ -93,11 +93,12 @@ const PayinSettlement = () => {
       {/* Table */}
       {loading ? (
         <TableSkeleton />
-      ) : ( 
+      ) : (
         <Table
           columns={membercolumn}
           data={tableDataWithActions}
-          rawData={payinSettlementData}        // 👈 EXPORT ke liye
+          rawData={payinSettlementData} // 👈 EXPORT ke liye
+          exportType="payin_wallet" // ✅ ADD THIS
           showDeleteColumn={false}
           showDateFilter={false}
           showStatusFilter={false}
@@ -132,10 +133,7 @@ const PayinSettlement = () => {
             </div>
 
             {/* Modal Body */}
-            <form
-              className="p-6 space-y-4"
-              onSubmit={handleSubmit}
-            >
+            <form className="p-6 space-y-4" onSubmit={handleSubmit}>
               <div>
                 <label className="block mb-1 text-sm font-medium">Amount</label>
                 <input

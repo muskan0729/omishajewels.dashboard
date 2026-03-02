@@ -12,6 +12,7 @@ const Table = ({
   columns,
   data = [],
   rawData = [], // ✅ raw data for search/export
+  exportType = "upi", // ✅ ADD THIS
   showSearch = true,
   showPagination = true,
   showExport = true,
@@ -72,7 +73,8 @@ const Table = ({
   }, []);
 
   // ================= DELETE =================
-  const modifiedEndpoint = endPoint && recordId ? `${endPoint}/${recordId}` : null;
+  const modifiedEndpoint =
+    endPoint && recordId ? `${endPoint}/${recordId}` : null;
   const { execute: deleteRecord } = usePost(modifiedEndpoint || "");
 
   const handleDelete = async () => {
@@ -106,9 +108,9 @@ const Table = ({
               if (val == null) return false;
               if (typeof val === "object") return false; // skip JSX/objects
               return String(val).toLowerCase().includes(q);
-            })
+            }),
           )
-          .map((item) => item.id)
+          .map((item) => item.id),
       );
     }
 
@@ -125,13 +127,18 @@ const Table = ({
 
       // merchant
       if (selectedMerchant?.value) {
-        if (String(row.user_id) !== String(selectedMerchant.value)) return false;
+        if (String(row.user_id) !== String(selectedMerchant.value))
+          return false;
       }
 
       // date range (expects row.date OR row.created_at OR row.updated_at)
       if (startDate || endDate) {
         const raw =
-          row.date || row.created_at || row.updated_at || row.createdAt || row.updatedAt;
+          row.date ||
+          row.created_at ||
+          row.updated_at ||
+          row.createdAt ||
+          row.updatedAt;
 
         if (!raw) return false;
 
@@ -153,7 +160,15 @@ const Table = ({
 
       return true;
     });
-  }, [search, data, rawData, statusFilter, selectedMerchant, startDate, endDate]);
+  }, [
+    search,
+    data,
+    rawData,
+    statusFilter,
+    selectedMerchant,
+    startDate,
+    endDate,
+  ]);
 
   // Reset page on filter change
   useEffect(() => {
@@ -197,82 +212,376 @@ const Table = ({
     URL.revokeObjectURL(url);
   };
 
+  // const exportCSV = () => {
+  //   const headers = columns.map((c) => c.header).join(",");
+  //   const rows = rawData
+  //     .map((row) =>
+  //       columns
+  //         .map((c) => {
+  //           const val = row[c.accessor];
+  //           if (val === null || val === undefined) return "";
+  //           if (typeof val === "object" || typeof val === "function") return "";
+  //           return `"${String(val).replace(/"/g, '""')}"`;
+  //         })
+  //         .join(",")
+  //     )
+  //     .join("\n");
+  //   downloadFile(`${headers}\n${rows}`, "table.csv", "text/csv");
+  // };
   const exportCSV = () => {
-    const headers = columns.map((c) => c.header).join(",");
-    const rows = rawData
+    if (!rawData.length) return;
+
+    let formattedExport = [];
+
+    if (exportType === "upi") {
+      formattedExport = rawData.map((item) => {
+        const d = new Date(item.created_at);
+        return {
+          order_id: item.id,
+          date: d.toLocaleDateString("en-GB"),
+          time: d.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          }),
+          merchant_name: item.user?.name ?? "N/A",
+          merchant_id: item.user_id ?? "N/A",
+          payee_vpa: item.payee_vpa ?? "null",
+          ref_no: item.refno ?? "null",
+          payee_txnid: item.mytxnid ?? "null",
+          txn_id: item.txnid ?? "null",
+          amount: item.amount ?? 0,
+          charges: item.charge ?? 0,
+          gst: item.gst ?? 0,
+          payin_rolling_amount: item.payin_rolling_amount ?? 0,
+          status: item.status ?? "N/A",
+        };
+      });
+    }
+
+    if (exportType === "payout") {
+      formattedExport = rawData.map((item) => {
+        const d = new Date(item.created_at);
+        return {
+          order_id: item.id,
+          date: d.toLocaleDateString("en-GB"),
+          time: d.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          }),
+          user_name: item.user?.name ?? "N/A",
+          user_id: item.user_id ?? "N/A",
+
+          payout_mode: item.payout_mode ?? "N/A",
+          account_number: item.payer_acc_no ?? "N/A",
+          account_holder: item.payer_name ?? "N/A",
+          ifsc: item.payer_ifsc ?? "N/A",
+          upi: item.payer_upi ?? "N/A",
+          mobile: item.payer_mobile ?? "N/A",
+
+          ref_no: item.refno ?? "N/A",
+          order_reference: item.mytxnid ?? "N/A",
+          txn_id: item.txnid ?? "N/A",
+
+          opening_balance: item.payout_opening_balance ?? 0,
+          pay_amount: item.amount ?? 0,
+          charges: item.profit ?? 0,
+          total_debit: item.payout_amount ?? 0,
+          closing_balance: item.payout_closing_balance ?? 0,
+          note: item.description ?? "-",
+
+          status: item.status ?? "N/A",
+        };
+      });
+    }
+
+    if (exportType === "topup") {
+      formattedExport = rawData.map((item) => {
+        const d = new Date(item.created_at);
+
+        return {
+          id: item.id,
+          date: d.toLocaleDateString("en-GB"),
+          time: d.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          }),
+          merchant_name: item.user?.name ?? "N/A",
+          merchant_id: item.user_id ?? "N/A",
+          product_type: item.product ?? "N/A",
+          txn_id: item.txnid ?? "N/A",
+          amount: item.amount ?? 0,
+          opening_balance: item.payout_opening_balance ?? 0,
+          closing_balance: item.payout_closing_balance ?? 0,
+          status: item.status ?? "N/A",
+        };
+      });
+    }
+
+    if (exportType === "payin_settlement") {
+      formattedExport = rawData.map((item) => {
+        const d = new Date(item.created_at);
+
+        return {
+          id: item.id,
+          date: d.toLocaleDateString("en-GB"),
+          time: d.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          }),
+          merchant_name: item.user?.name ?? "N/A",
+          merchant_id: item.user_id ?? "N/A",
+          product_type: item.product ?? "N/A",
+          txn_id: item.txnid ?? "N/A",
+          amount: item.amount ?? 0,
+          opening_balance: item.payin_opening ?? 0,
+          closing_balance: item.payin_closing ?? 0,
+          status: item.status ?? "N/A",
+        };
+      });
+    }
+
+    if (exportType === "load_wallet") {
+      formattedExport = rawData.map((item) => {
+        return {
+          user_id: item.id,
+          name: item.name ?? "N/A",
+          payout_wallet: item.payout_wallet ?? 0,
+        };
+      });
+    }
+
+    if (exportType === "payin_wallet") {
+      formattedExport = rawData.map((item) => {
+        return {
+          user_id: item.id,
+          name: item.name ?? "N/A",
+          payin_wallet: item.payin_wallet ?? 0,
+        };
+      });
+    }
+
+    const headers = Object.keys(formattedExport[0]).join(",");
+
+    const rows = formattedExport
       .map((row) =>
-        columns
-          .map((c) => {
-            const val = row[c.accessor];
-            if (val === null || val === undefined) return "";
-            if (typeof val === "object" || typeof val === "function") return "";
-            return `"${String(val).replace(/"/g, '""')}"`;
-          })
-          .join(",")
+        Object.values(row)
+          .map((val) => `="${String(val).replace(/"/g, '""')}"`)
+          .join(","),
       )
       .join("\n");
-    downloadFile(`${headers}\n${rows}`, "table.csv", "text/csv");
+
+    downloadFile(
+      `${headers}\n${rows}`,
+      `${exportType}_statement.csv`,
+      "text/csv",
+    );
   };
+
+  // const exportJSON = () => {
+  //   const cleanData = rawData.map((row) => {
+  //     const obj = {};
+  //     columns.forEach((c) => {
+  //       const val = row[c.accessor];
+  //       if (typeof val !== "object" && typeof val !== "function") {
+  //         obj[c.accessor] = val;
+  //       }
+  //     });
+  //     return obj;
+  //   });
+  //   downloadFile(
+  //     JSON.stringify(cleanData, null, 2),
+  //     "table.json",
+  //     "application/json",
+  //   );
+  // };
 
   const exportJSON = () => {
-    const cleanData = rawData.map((row) => {
-      const obj = {};
-      columns.forEach((c) => {
-        const val = row[c.accessor];
-        if (typeof val !== "object" && typeof val !== "function") {
-          obj[c.accessor] = val;
-        }
+    if (!rawData.length) return;
+
+    let formattedExport = [];
+
+    if (exportType === "upi") {
+      formattedExport = rawData.map((item) => {
+        const d = new Date(item.created_at);
+        return {
+          order_id: item.id,
+          date: d.toLocaleDateString("en-GB"),
+          time: d.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          }),
+          merchant_name: item.user?.name ?? "N/A",
+          merchant_id: item.user_id ?? "N/A",
+          payee_vpa: item.payee_vpa ?? "null",
+          ref_no: item.refno ?? "null",
+          payee_txnid: item.mytxnid ?? "null",
+          txn_id: item.txnid ?? "null",
+          amount: item.amount ?? 0,
+          charges: item.charge ?? 0,
+          gst: item.gst ?? 0,
+          payin_rolling_amount: item.payin_rolling_amount ?? 0,
+          status: item.status ?? "N/A",
+        };
       });
-      return obj;
-    });
-    downloadFile(JSON.stringify(cleanData, null, 2), "table.json", "application/json");
+    }
+
+    if (exportType === "payout") {
+      formattedExport = rawData.map((item) => {
+        const d = new Date(item.created_at);
+        return {
+          order_id: item.id,
+          date: d.toLocaleDateString("en-GB"),
+          time: d.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          }),
+          user_name: item.user?.name ?? "N/A",
+          user_id: item.user_id ?? "N/A",
+          payout_mode: item.payout_mode ?? "N/A",
+          account_number: item.payer_acc_no ?? "N/A",
+          account_holder: item.payer_name ?? "N/A",
+          ifsc: item.payer_ifsc ?? "N/A",
+          upi: item.payer_upi ?? "N/A",
+          mobile: item.payer_mobile ?? "N/A",
+          ref_no: item.refno ?? "N/A",
+          order_reference: item.mytxnid ?? "N/A",
+          txn_id: item.txnid ?? "N/A",
+          opening_balance: item.payout_opening_balance ?? 0,
+          pay_amount: item.amount ?? 0,
+          charges: item.profit ?? 0,
+          total_debit: item.payout_amount ?? 0,
+          closing_balance: item.payout_closing_balance ?? 0,
+          note: item.description ?? "-",
+          status: item.status ?? "N/A",
+        };
+      });
+    }
+
+    if (exportType === "topup") {
+      formattedExport = rawData.map((item) => {
+        const d = new Date(item.created_at);
+        return {
+          id: item.id,
+          date: d.toLocaleDateString("en-GB"),
+          time: d.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          }),
+          merchant_name: item.user?.name ?? "N/A",
+          merchant_id: item.user_id ?? "N/A",
+          product_type: item.product ?? "N/A",
+          txn_id: item.txnid ?? "N/A",
+          amount: item.amount ?? 0,
+          opening_balance: item.payout_opening_balance ?? 0,
+          closing_balance: item.payout_closing_balance ?? 0,
+          status: item.status ?? "N/A",
+        };
+      });
+    }
+
+    if (exportType === "payin_settlement") {
+      formattedExport = rawData.map((item) => {
+        const d = new Date(item.created_at);
+        return {
+          id: item.id,
+          date: d.toLocaleDateString("en-GB"),
+          time: d.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          }),
+          merchant_name: item.user?.name ?? "N/A",
+          merchant_id: item.user_id ?? "N/A",
+          product_type: item.product ?? "N/A",
+          txn_id: item.txnid ?? "N/A",
+          amount: item.amount ?? 0,
+          opening_balance: item.payin_opening ?? 0,
+          closing_balance: item.payin_closing ?? 0,
+          status: item.status ?? "N/A",
+        };
+      });
+    }
+
+    if (exportType === "load_wallet") {
+      formattedExport = rawData.map((item) => ({
+        user_id: item.id,
+        name: item.name ?? "N/A",
+        payout_wallet: item.payout_wallet ?? 0,
+      }));
+    }
+
+    if (exportType === "payin_wallet") {
+      formattedExport = rawData.map((item) => ({
+        user_id: item.id,
+        name: item.name ?? "N/A",
+        payin_wallet: item.payin_wallet ?? 0,
+      }));
+    }
+
+    downloadFile(
+      JSON.stringify(formattedExport, null, 2),
+      `${exportType}_statement.json`,
+      "application/json",
+    );
   };
 
-  const exportTXT = () => {
-    const headers = columns.map((c) => c.header).join(" | ");
-    const rows = rawData
-      .map((row) =>
-        columns
-          .map((c) => {
-            const val = row[c.accessor];
-            if (val === null || val === undefined) return "";
-            if (typeof val === "object" || typeof val === "function") return "";
-            return String(val);
-          })
-          .join(" | ")
-      )
-      .join("\n");
-    downloadFile(`${headers}\n${rows}`, "table.txt", "text/plain");
-  };
+  // const exportTXT = () => {
+  //   const headers = columns.map((c) => c.header).join(" | ");
+  //   const rows = rawData
+  //     .map((row) =>
+  //       columns
+  //         .map((c) => {
+  //           const val = row[c.accessor];
+  //           if (val === null || val === undefined) return "";
+  //           if (typeof val === "object" || typeof val === "function") return "";
+  //           return String(val);
+  //         })
+  //         .join(" | "),
+  //     )
+  //     .join("\n");
+  //   downloadFile(`${headers}\n${rows}`, "table.txt", "text/plain");
+  // };
 
-  const exportSQL = () => {
-    const tableName = "export_table";
-    const sqlRows = rawData
-      .map((row) => {
-        const values = columns
-          .map((c) => {
-            const val = row[c.accessor];
-            if (val === null || val === undefined) return "NULL";
-            if (typeof val === "object" || typeof val === "function") return "NULL";
-            if (typeof val === "number") return val;
-            return `'${String(val).replace(/'/g, "''")}'`;
-          })
-          .join(", ");
+  // const exportSQL = () => {
+  //   const tableName = "export_table";
+  //   const sqlRows = rawData
+  //     .map((row) => {
+  //       const values = columns
+  //         .map((c) => {
+  //           const val = row[c.accessor];
+  //           if (val === null || val === undefined) return "NULL";
+  //           if (typeof val === "object" || typeof val === "function")
+  //             return "NULL";
+  //           if (typeof val === "number") return val;
+  //           return `'${String(val).replace(/'/g, "''")}'`;
+  //         })
+  //         .join(", ");
 
-        return `INSERT INTO ${tableName} (${columns
-          .map((c) => c.accessor)
-          .join(", ")}) VALUES (${values});`;
-      })
-      .join("\n");
+  //       return `INSERT INTO ${tableName} (${columns
+  //         .map((c) => c.accessor)
+  //         .join(", ")}) VALUES (${values});`;
+  //     })
+  //     .join("\n");
 
-    downloadFile(sqlRows, "table.sql", "text/sql");
-  };
+  //   downloadFile(sqlRows, "table.sql", "text/sql");
+  // };
 
   // ================= JSX =================
   return (
     <div className="w-full">
       {/* FILTER BAR */}
-      {(showSearch || showStatusFilter || showExport || showDateFilter || showSelectUserFilter) && (
+      {(showSearch ||
+        showStatusFilter ||
+        showExport ||
+        showDateFilter ||
+        showSelectUserFilter) && (
         <div className="w-full bg-gradient-to-br from-[#f1d9b7] via-[#f8e9d4] to-[#e6d5b8] border border-[#d7c4a8] rounded-2xl shadow-xl p-5 mb-8">
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
             {/* LEFT FILTERS */}
@@ -373,7 +682,7 @@ const Table = ({
                       >
                         JSON
                       </button>
-                      <button
+                      {/* <button
                         className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md cursor-pointer"
                         onClick={exportTXT}
                       >
@@ -384,7 +693,7 @@ const Table = ({
                         onClick={exportSQL}
                       >
                         SQL
-                      </button>
+                      </button> */}
                     </div>
                   )}
                 </div>
@@ -432,7 +741,9 @@ const Table = ({
                       {col.header}
                     </p>
                     <p className="text-[#4d443b] text-sm mt-1">
-                      {col.Cell ? col.Cell({ value: row[col.accessor], row }) : row[col.accessor]}
+                      {col.Cell
+                        ? col.Cell({ value: row[col.accessor], row })
+                        : row[col.accessor]}
                     </p>
                   </div>
                 ))}

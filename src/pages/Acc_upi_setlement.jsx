@@ -55,21 +55,21 @@ const Acc_upi_setlement = () => {
 
         numericAmount: parseFloat(item.amount) || 0,
 
-date: (
-  <div className="flex flex-col leading-tight">
-    <span>
-      {date.getDate()} {MONTH_NAMES[date.getMonth()]}{" "}
-      {String(date.getFullYear()).slice(-2)}
-    </span>
-    <span className="text-xs text-gray-500">
-      {date.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      })}
-    </span>
-  </div>
-),
+        date: (
+          <div className="flex flex-col leading-tight">
+            <span>
+              {date.getDate()} {MONTH_NAMES[date.getMonth()]}{" "}
+              {String(date.getFullYear()).slice(-2)}
+            </span>
+            <span className="text-xs text-gray-500">
+              {date.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              })}
+            </span>
+          </div>
+        ),
 
         status: item.status,
 
@@ -142,6 +142,8 @@ date: (
           <Table
             columns={payinSettlementColumn}
             data={payinSettlementData}
+            rawData={data?.data || []} // ✅ ADD THIS
+            exportType="payin_settlement" // ✅ ADD THIS
             showStatusFilter
             showExport
             showSearch={false}

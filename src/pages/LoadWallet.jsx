@@ -89,30 +89,31 @@ const LoadWallet = () => {
 
   const tableDataWithActions = walletData?.map((row) => ({
     ...row,
-   action: (
-  <div className="flex items-center justify-start gap-2">
-    <Button
-      onClick={() => {
-        setSelectedUser(row);
-        setModalType("load");
-        setShowModal(true);
-      }}
-      className="bg-[#615141] hover:bg-[#b58351] text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all cursor-pointer"
-    >
-      Load Wallet
-    </Button>
-    <Button
-      onClick={() => {
-        setSelectedUser(row);
-        setModalType("reverse");
-        setShowModal(true);
-      }}
-      className="bg-[#b58351] hover:bg-[#615141] text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all cursor-pointer"
-    >
-      Reverse Top-up
-    </Button>
-  </div>
-),}));
+    action: (
+      <div className="flex items-center justify-start gap-2">
+        <Button
+          onClick={() => {
+            setSelectedUser(row);
+            setModalType("load");
+            setShowModal(true);
+          }}
+          className="bg-[#615141] hover:bg-[#b58351] text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all cursor-pointer"
+        >
+          Load Wallet
+        </Button>
+        <Button
+          onClick={() => {
+            setSelectedUser(row);
+            setModalType("reverse");
+            setShowModal(true);
+          }}
+          className="bg-[#b58351] hover:bg-[#615141] text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all cursor-pointer"
+        >
+          Reverse Top-up
+        </Button>
+      </div>
+    ),
+  }));
 
   return (
     <div className="p-4 space-y-4">
@@ -128,7 +129,8 @@ const LoadWallet = () => {
         <Table
           columns={membercolumn}
           data={tableDataWithActions}
-          rawData={walletData}            // 👈 EXPORT ke liye (NO JSX)
+          rawData={walletData} // 👈 EXPORT ke liye (NO JSX)
+          exportType="load_wallet" // ✅ ADD THIS
           showStatusFilter={false}
           showDateFilter={false}
           showDeleteColumn={false}
@@ -171,9 +173,7 @@ const LoadWallet = () => {
               }
             >
               <div>
-                <label className="block mb-1 text-sm font-medium">
-                  Amount
-                </label>
+                <label className="block mb-1 text-sm font-medium">Amount</label>
                 <input
                   name="payout_wallet"
                   type="number"
