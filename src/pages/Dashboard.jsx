@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { DonutChart } from "../components/DonutChart";
-import { LineChart } from "../components/LineChart";
+import LineChart from "../components/LineChart";
 import Table from "../components/Table";
 import useAutoFetch from "../hooks/useAutoFetch";
 import { MONTH_NAMES } from "../constants/Constants";
