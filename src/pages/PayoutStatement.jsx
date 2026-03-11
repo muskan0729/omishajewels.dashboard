@@ -167,7 +167,10 @@ const PayoutStatement = () => {
               Pay Amount: <b>{item.amount ?? 0}</b>
             </div>
             <div>
-              Charges: <b>{item.profit ?? 0}</b>
+              Charges: <b>{item.charge ?? 0}</b>
+            </div>
+            <div>
+              GST: <b>{item.gst ?? 0}</b>
             </div>
             <div>
               Total Debit: <b>{item.payout_amount ?? 0}</b>

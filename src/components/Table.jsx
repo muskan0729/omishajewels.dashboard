@@ -286,7 +286,8 @@ const Table = ({
 
           opening_balance: item.payout_opening_balance ?? 0,
           pay_amount: item.amount ?? 0,
-          charges: item.profit ?? 0,
+          charges: item.charge ?? 0,
+          gst: item.gst ?? 0,
           total_debit: item.payout_amount ?? 0,
           closing_balance: item.payout_closing_balance ?? 0,
           note: item.description ?? "-",
